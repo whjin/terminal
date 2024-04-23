@@ -1,18 +1,23 @@
 <template>
   <neil-modal :show="isShow" @close="handleClose">
-    <view class="recognition-dialogs-container" :class="{ 'without-header': withoutHeader }">
+    <view class="recognition-container" :class="{ 'without-header': withoutHeader }">
       <!-- 顶部操作栏 -->
-      <template v-if="showHeader">
+      <div v-if="useFor === 'login' || useFor === 'shopping' || useFor === 'rotation'
+        ">
         <view class="modal-header">
-          <view class="modal-title">{{ regTitle }}</view>
+          <view class="modal-title">{{ modalTitle }}</view>
           <div class="modal-close" @click="handleClose">
             <image src="/static/images/common/close.png"></image>
           </div>
         </view>
         <view class="page-horizontal-divider"></view>
-      </template>
-      <view class="uni-flex uni-flex-item uni-column" style="justify-content: space-around; align-items: center">
-        <div v-if="regSuccess" class="call-modal-box">
+      </div>
+      <div class="uni-flex uni-flex-item uni-column" style="justify-content: space-around; align-items: center">
+        <div v-if="(useFor === 'call' ||
+          useFor === 'rotation' ||
+          useFor === 'shopping') &&
+          regConfig.isRecognitionSuccess
+          " class="call-modal-box">
           <div class="call-modal-content">
             <div class="modal-fingerInit modal-fingerSuccess">
               <common-icons iconType="icondengluwancheng" size="100" color="#fff" />
@@ -21,43 +26,51 @@
             </div>
           </div>
         </div>
-        <!-- 人脸认证 -->
-        <template v-else-if="isFaceRecognition">
-          <div class="face-recognition-bg">
-            <image class="loading-tips" src="/static/images/index/connect.png"></image>
+        <div v-else class="recognition-main">
+          <!-- 人脸识别 -->
+          <div v-show="isFacing">
+            <div class="face-main-body">
+              <div v-show="!showVideo" class="face-image">
+                <image class="loading-tips" src="/static/images/index/connect.png"></image>
+              </div>
+              <video v-show="showVideo" ref="videoRef" class="face-video" autoplay playsinline object-fit="fill"
+                :controls="false" codec="software" :enable-progress-gesture="false" :show-center-play-btn="false"></video>
+            </div>
+            <text v-if="useFor === 'call' ||
+              useFor === 'rotation' ||
+              useFor === 'shopping'
+              " class="face-scantips" style="color: #35fffa;">{{ regConfig.callName }}</text>
+            <text class="face-scantips">{{
+              faceConfig.scanTips
+            }}</text>
           </div>
-          <text v-if="faceRegConfig" style="font-size: 20.83upx; font-weight: 400; color: #35fffa">
-            {{ regConfig.regName }}</text>
-          <text style="font-size: 20.83upx; font-weight: 400">{{
-            faceConfig.scanTips
-          }}</text>
-        </template>
-        <!-- 指纹认证 -->
-        <template v-else>
-          <template v-if="useFor == 'login'">
-            <common-icons iconType="iconzhiwen" size="100" color="#fff" />
-            <text style="font-size: 20.83upx; font-weight: 400">验证指纹，进行登录...</text>
-          </template>
-          <div v-else class="call-modal-box">
-            <div class="call-modal-content">
-              <div class="modal-fingerInit modal-fingerSuccess">
-                <common-icons iconType="iconzhiwen" size="100" color="#fff" />
-                <text class="finger-name">{{ regConfig.regName }}</text>
-                <text v-if="useFor == 'shopping'" class="finger-tip">请进行验证</text>
-                <text v-else class="finger-tip">请进行签到</text>
+          <!-- 指纹识别 -->
+          <div v-show="!isFacing">
+            <template v-if="useFor === 'login'">
+              <common-icons iconType="iconzhiwen" size="100" color="#fff" />
+              <text style="font-size: 20.83upx; font-weight: 400">验证指纹，进行登录...</text>
+            </template>
+            <div v-else class="call-modal-box">
+              <div class="call-modal-content">
+                <div class="modal-fingerInit modal-fingerSuccess">
+                  <common-icons iconType="iconzhiwen" size="100" color="#fff" />
+                  <text class="finger-name">{{ regConfig.callName }}</text>
+                  <text v-if="useFor === 'shopping'" class="finger-tip">请进行验证</text>
+                  <text v-else class="finger-tip">请进行签到</text>
+                </div>
               </div>
             </div>
           </div>
-        </template>
-      </view>
+        </div>
+      </div>
       <!-- 切换按钮 -->
       <div class="switch-btn-wrapper" v-if="currentTab != 7 && debounceSwitch">
         <div class="check-btn" v-if="isConfirm">
-          <span @touchstart.stop="handleConfirm">{{ confirmText }}</span>
+          <span @click="handleConfirm">{{ confirmText }}</span>
         </div>
         <div type="default" class="switch-type-btn" v-if="useFor !== 'call' ||
-          (useFor == 'call' && !regConfig.isRecognitionSuccess)
-          " @touchstart.stop="debounceSwitch">
+          (useFor === 'call' && !regConfig.isRecognitionSuccess)
+          " @click="debounceSwitch">
           切换{{ isFaceRecognition ? "指纹" : "人脸" }}
         </div>
       </div>
@@ -66,8 +79,9 @@
 </template>
 
 <script>
-import Api from "@/common/api.js";
-import { debounce, dateFormat } from "@/common/utils/util.js";
+import Api from '@/common/api.js';
+import { debounce, dateFormat, currentPages } from "@/common/utils/util.js";
+import { startFaceVideo, stopFaceVideo } from "@/static/js/webrtc.js";
 import { mapState } from "vuex";
 
 export default {
@@ -118,17 +132,17 @@ export default {
       // 正在人脸识别
       isFacing: false,
       temperatureTimer: null,
-      // 指纹开启状态
-      isOpen: false,
+      // 视频预览状态
+      showVideo: false,
+      // 人脸定时器
       faceTimer: null,
+      faceVideo: null
     };
   },
   computed: {
     ...mapState({
       // 当前页面
       currentTab: (state) => state.app.currentTab,
-      // 来邦服务状态
-      IPCState: (state) => state.app.IPCState,
     }),
     // 0人脸验证，1指纹验证
     isFaceRecognition() {
@@ -137,7 +151,7 @@ export default {
     withoutHeader() {
       return !["login", "shopping", "rotation"].includes(this.useFor);
     },
-    regTitle() {
+    modalTitle() {
       return this.currentTab == 7
         ? "人脸认证"
         : this.isFaceRecognition
@@ -146,81 +160,37 @@ export default {
     },
     // 1:1人脸验证 or 1：N人脸验证
     useFace11() {
-      return [
-        "call",
-        "shopping",
-        "conversation",
-        "evaluation",
-        "outroom",
-      ].includes(this.useFor);
-    },
-    showHeader() {
-      return [
-        "login",
-        "shopping",
-        "rotation",
-        "conversation",
-        "evaluation",
-        "outroom",
-      ].includes(this.useFor);
-    },
-    regSuccess() {
-      return (
-        ["call", "rotation", "shopping"].includes(this.useFor) &&
-        this.regConfig.isRecognitionSuccess
-      );
-    },
-    faceRegConfig() {
-      return ["call", "rotation", "shopping", "outroom"].includes(this.useFor);
-    },
-    // 预览画面位置top
-    topPos() {
-      if (["rotation", "shopping"].includes(this.useFor)) {
-        return 223;
-      } else if (this.useFor == "call") {
-        return 243;
-      } else if (this.currentTab == 7) {
-        return 248;
-      } else {
-        return 232;
-      }
+      return ["call", "shopping"].includes(this.useFor);
     },
   },
   watch: {
     isShow(state) {
       if (!state) {
         this.isFacing = false;
-        this.stopFacePreview();
-        this.closeFingerPrint();
         this.stopTemperature();
-        this.closeCardModule();
+        this.stopFaceRecognition();
+        // this.closeFingerPrint();
       } else {
         this.defaultLoginType = uni.getStorageSync("defaultLoginType");
         this.debounceSwitch = debounce(this.switchRecognitionMode, 1500);
       }
     },
   },
-  beforeDestroy() {
-    this.stopTemperature();
-    this.stopFacePreview();
-    this.closeFingerPrint();
+  destroyed() {
+    this.stopFaceRecognition();
+    // this.closeFingerPrint();
   },
   methods: {
     // 开始识别
     startRecognition() {
-      if (this.IPCState) {
-        if (this.useFor == "call") {
-          this.startTemperature();
-        }
-        if (this.isFaceRecognition) {
-          this.faceVoice("开始人脸识别，请站好正视屏幕");
-          this.isFacing = true;
-          this.handleFaceRecognition(true);
-        } else {
-          this.verifyFingerPrint();
-        }
+      if (this.useFor == "call") {
+        this.startTemperature();
+      }
+      if (this.isFaceRecognition) {
+        this.faceVoice('开始人脸识别，请站好正视屏幕');
+        this.startFaceRecognition();
       } else {
-        this.voiceBroadcast("服务已离线");
+        this.startFingerPrint();
       }
     },
     // 切换登录方式
@@ -231,24 +201,34 @@ export default {
       this.defaultLoginType = this.defaultLoginType == 0 ? 1 : 0;
       this.$emit("switchRecognitionMode", this.isFaceRecognition);
       if (this.isFaceRecognition) {
-        this.faceVoice("开始人脸识别，请站好正视屏幕");
-        this.isFacing = true;
-        this.handleFaceRecognition(true);
-        this.closeFingerPrint();
+        this.faceVoice('开始人脸识别，请站好正视屏幕');
+        this.startFaceRecognition();
       } else {
-        this.verifyFingerPrint();
+        this.startFingerPrint();
       }
     },
     // 人脸拍照
-    handleFaceRecognition(state = true) {
-      if (this.isShow && this.isFacing) {
-        if (state) {
-          this.startFacePreview();
-        }
-        this.faceTimer = setTimeout(() => {
-          this.snapshotPreview();
-        }, 3000);
+    startFaceRecognition() {
+      this.isFacing = true;
+      if (this.isShow) {
+        this.showVideo = true;
+        this.faceVideo = this.$refs.videoRef.$refs.video;
+        startFaceVideo(this.faceVideo, false).then(video => {
+          this.faceTimer = setTimeout(() => {
+            this.getFaceBase64Img(video);
+          }, 2000);
+        });
       }
+    },
+    // 获取人脸照片base64
+    getFaceBase64Img(video) {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, 200, 150);
+      let image = canvas.toDataURL("image/jpg");
+      let base64 = image.substr(image.indexOf(",") + 1);
+      let base64Str = base64.replace(/[\r\n]/g, "");
+      this.faceRecognition(base64Str);
     },
     // 人脸识别
     async faceRecognition(base64Str = "") {
@@ -284,6 +264,7 @@ export default {
         ) {
           if (["login", "conversation", "evaluation"].includes(this.useFor)) {
             this.faceVoice("人脸识别成功");
+            console.log("人脸识别成功");
           }
           this.$emit(
             "faceRecognitionSuccess",
@@ -301,123 +282,112 @@ export default {
       } else {
         let text = res.state.msg || "未检测到有效人脸，请站好正视屏幕";
         this.faceVoice(text);
-        this.handleFaceRecognition(false);
-      }
-      if (this.$parent.screenSaverSwitch) {
-        this.$parent.screenSaverSwitch =
-          uni.getStorageSync("screenSaverSwitch") || 30;
+        console.log("未检测到有效人脸");
+        this.startFaceRecognition();
       }
     },
-    // 开始人脸视频预览
-    startFacePreview() {
-      getApp().globalData.FloatUniModule.initFrame();
-      getApp().globalData.FloatUniModule.setLocalVideoViewPosition(
-        420,
-        this.topPos,
-        440,
-        268
-      );
-      getApp().globalData.FloatUniModule.hideLocalPreView(false);
-      getApp().globalData.FloatUniModule.setViewWidthHeight(440, 268);
-      getApp().globalData.FloatUniModule.startTakeFrame();
-      getApp().globalData.FloatUniModule.takePictureCallBack((res) => {
-        let base64Str = res.bytes.replace(/[\r\n]/g, "");
-        this.faceRecognition(base64Str);
-      });
-    },
-    // 人脸认证快照
-    snapshotPreview() {
-      getApp().globalData.FloatUniModule.takePicture();
-    },
-    // 停止人脸视频预览
-    stopFacePreview() {
-      clearTimeout(this.faceTimer);
+    // 停止人脸识别
+    stopFaceRecognition() {
+      clearInterval(this.faceTimer);
+      console.log("停止人脸识别");
       this.isFacing = false;
-      getApp().globalData.FloatUniModule.stopTakeFrame();
-      getApp().globalData.FloatUniModule.hideLocalPreView(true);
+      stopFaceVideo();
     },
-    // 关闭人脸识别弹窗
+    // 开始指纹识别
+    startFingerPrint() {
+      this.stopFaceRecognition();
+      // 打开指纹设备
+      // fingerreader.connected(() => {
+      //   fingerreader.initFingerPrintRecognize((e) => {
+      //     if (e == 0) {
+      //       console.log("指纹设备已打开");
+      //       this.isFacing = false;
+      //       setTimeout(() => {
+      //         this.verifyFingerPrint();
+      //       }, 1500);
+      //     } else {
+      //       console.log("指纹设备未打开");
+      //     }
+      //   });
+      // });
+      this.verifyFingerPrint();
+    },
+    verifyFingerPrint() {
+      this.voiceBroadcast("请按压要识别的指纹");
+      // fingerreader.enableCheckPress((res) => {
+      //   if (res == 0) {
+      //     fingerreader.fingerPrintRecognize((code, mKey, alias) => {
+      //       switch (code) {
+      //         case 0:
+      //           let params = {
+      //             mKey,
+      //             temperature: this.temperature,
+      //           };
+      //           currentPages().fingerRecognitionSuccess(params);
+      //           break;
+      //         case 307:
+      //           console.log("当前指纹不存在");
+      //           break;
+      //         case 318:
+      //           console.log("指纹库为空");
+      //           break;
+      //         case 319:
+      //           console.log("指纹库识别失败");
+      //           break;
+      //         case 504:
+      //           console.log("数据为空");
+      //           break;
+      //       }
+      //     });
+      //   }
+      // });
+      setTimeout(() => {
+        let params = {
+          mKey: 1,
+          temperature: "36.3",
+        };
+        currentPages().handleFingerRecognition(params);
+      }, 6000);
+    },
+    // 关闭指纹连接
+    closeFingerPrint() {
+      // getApp().globalData.FloatUniModule.syncStopFinger((e) => {
+      //   if (e.code == 0) {
+      //     console.log("关闭指纹");
+      //     getApp().globalData.FloatUniModule.fingerModuleStop();
+      //   }
+      // });
+    },
+    // 关闭识别弹窗
     handleClose() {
-      this.stopFacePreview();
-      this.$emit("close");
+      this.$emit('close');
+    },
+    // 开始测量体温
+    startTemperature() {
+      if (!this.isShow) return;
+      // getApp().globalData.FloatUniModule.syncStartTemperature((res) => {
+      //   if (res.code == 0) {
+      //     console.log("开启测温");
+      //   }
+      // });
     },
     // 人脸语音播报
     faceVoice(text) {
       this.faceConfig.scanTips = text;
       this.voiceBroadcast(text);
     },
-    // 人工核对确认
-    handleConfirm() {
-      this.handleClose();
-      this.$emit("confirm");
-    },
-    // 开始指纹识别
-    verifyFingerPrint() {
-      if (this.IPCState) {
-        this.isFacing = false;
-        this.stopFacePreview();
-        if (!this.isOpen) {
-          // 打开指纹设备
-          this.isOpen = true;
-          getApp().globalData.FloatUniModule.fingerModuleStop();
-          getApp().globalData.FloatUniModule.syncStartFinger((e) => {
-            if (e.code == 0) {
-              this.voiceBroadcast("请按压要识别的指纹");
-              getApp().globalData.FloatUniModule.fingerprintRecognition();
-              if (this.$parent.screenSaverSwitch) {
-                this.$parent.screenSaverSwitch =
-                  uni.getStorageSync("screenSaverSwitch") || 30;
-              }
-            } else {
-              this.voiceBroadcast("指纹设备未打开");
-            }
-          });
-        }
-      } else {
-        this.voiceBroadcast("服务已离线");
-      }
-    },
-    // 关闭指纹连接
-    closeFingerPrint() {
-      this.isOpen = false;
-      getApp().globalData.FloatUniModule.syncStopFinger((e) => {
-        if (e.code == 0) {
-          getApp().globalData.FloatUniModule.fingerModuleStop();
-          console.log("关闭指纹");
-        }
-      });
-    },
-    // 开始测温
-    startTemperature() {
+    // 开始测量体温
+    startTemperatureMeasurement() {
       if (!this.isShow) return;
-      getApp().globalData.FloatUniModule.syncStartTemperature((res) => {
-        if (res.code == 0) {
-          console.log("开启测温");
-        }
-      });
+      getApp().globalData.thermometryModule.open();
     },
-    // 停止测温
     stopTemperature() {
-      if (this.useFor == "call") {
-        getApp().globalData.FloatUniModule.syncStopTemperature((res) => {
-          if (res.code == 0) {
-            console.log("关闭测温");
-          }
-        });
+      if (this.useFor === 'call') {
+        // getApp().globalData.thermometryModule.close();
       }
     },
     setTemperature(tem) {
       this.temperature = tem;
-    },
-    // 关闭刷卡模块
-    closeCardModule() {
-      if (this.currentTab == 3) {
-        getApp().globalData.FloatUniModule.syncStopCard((res) => {
-          if (res.code == 0) {
-            console.log("刷卡已关闭");
-          }
-        });
-      }
     },
     // 语音播放
     voiceBroadcast(voiceText) {
@@ -427,18 +397,20 @@ export default {
       let interval = messagePlayTime.split(",");
       let now = dateFormat("hh:mm", new Date());
       if (now >= interval[0] && now <= interval[1]) {
-        let options = {
-          content: voiceText,
-        };
-        getApp().globalData.Base.speech(options);
+        if ("speechSynthesis" in window) {
+          const utterance = new SpeechSynthesisUtterance(voiceText);
+          speechSynthesis.speak(utterance);
+        } else {
+          console.error("浏览器不支持语音引擎");
+        }
       }
     },
-  },
+  }
 };
 </script>
 
-<style lang="less" scoped>
-.recognition-dialogs-container {
+<style lang="less">
+.recognition-container {
   width: 555.55upx;
   min-height: 520upx;
   box-sizing: border-box;
@@ -463,11 +435,6 @@ export default {
       font-size: 22.22upx;
       font-weight: 500;
       color: #35fffa;
-      border: 0.69upx solid;
-      border-image: 1 linear-gradient(to right,
-          rgba(0, 198, 255, 0),
-          rgba(0, 198, 255, 1),
-          rgba(0, 198, 255, 0));
     }
 
     .modal-close {
@@ -484,74 +451,53 @@ export default {
     }
   }
 
-  .face-recognition-bg {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 13.88upx;
-    width: 446upx;
-    height: 272upx;
-    background-color: #000;
+  .recognition-main {
+    text-align: center;
 
-    .loading-tips {
-      width: 50upx;
-      height: 50upx;
-      animation: tipsRotate 3s ease 0s infinite;
+    .face-main-body {
+      width: 446upx;
+      height: 272upx;
 
-      @keyframes tipsRotate {
-        0% {
-          transform: rotate(0);
-        }
+      .face-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
 
-        50% {
-          transform: rotate(180deg);
-        }
+        .loading-tips {
+          width: 60upx;
+          height: 60upx;
+          animation: tipsRotate 3s ease 0s infinite;
 
-        100% {
-          transform: rotate(360deg);
+          @keyframes tipsRotate {
+            0% {
+              transform: rotate(0);
+            }
+
+            50% {
+              transform: rotate(180deg);
+            }
+
+            100% {
+              transform: rotate(360deg);
+            }
+          }
         }
       }
-    }
-  }
 
-  .switch-btn-wrapper {
-    margin-bottom: 30upx;
-    width: 555.55upx;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-
-    .check-btn {
-      display: flex;
-      flex: 1;
-      justify-content: flex-start;
-      margin-left: 35upx;
-
-      span {
-        display: inline-block;
-        width: fit-content;
-        height: 43upx;
-        border-radius: 4px;
-        line-height: 43upx;
-        background-color: #ff9900;
-        color: #fff;
-        font-size: 20.83upx;
-        text-align: center;
-        padding: 0 13.88upx;
+      .face-video {
+        width: 100%;
+        height: 100%;
       }
     }
 
-    .switch-type-btn {
-      margin-right: 35upx;
-      width: 125upx;
-      height: 43upx;
-      border-radius: 4px;
-      line-height: 43upx;
-      background-color: #007aff;
-      color: #fff;
+    .face-scantips {
+      display: inline-block;
       font-size: 20.83upx;
-      text-align: center;
-      margin-right: 35upx;
+      font-weight: 400;
+      margin: 13.88upx 0;
     }
   }
 
@@ -585,6 +531,46 @@ export default {
       .finger-tip {
         color: #fff;
       }
+    }
+  }
+
+  .switch-btn-wrapper {
+    margin-bottom: 30upx;
+    width: 555.55upx;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    .check-btn {
+      display: flex;
+      flex: 1;
+      justify-content: flex-start;
+      margin-left: 35upx;
+
+      span {
+        display: inline-block;
+        width: fit-content;
+        height: 43upx;
+        border-radius: 4px;
+        line-height: 43upx;
+        background-color: #ff9900;
+        color: #fff;
+        font-size: 20.83upx;
+        text-align: center;
+        padding: 0 13.88upx;
+      }
+    }
+
+    .switch-type-btn {
+      margin-right: 35upx;
+      width: 125upx;
+      height: 43upx;
+      border-radius: 4px;
+      line-height: 43upx;
+      background-color: #007aff;
+      color: #fff;
+      font-size: 20.83upx;
+      text-align: center;
     }
   }
 }

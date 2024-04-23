@@ -1,3 +1,8 @@
+/**
+ * @description 清除空格
+ * @param {str} 要处理的字符串
+ */
+
 export const clear = (str) => {
   str = str.replace(/,/g, "");
   return str;
@@ -5,10 +10,13 @@ export const clear = (str) => {
 
 export const isEmpty = (obj) => {
   if (obj == null) return true;
+
   if (obj.length > 0) return false;
   if (obj.length == 0) return true;
+
   if (typeof obj !== "object") return true;
-  for (var key in obj) {
+
+  for (let key in obj) {
     if (hasOwnProperty.call(obj, key)) return false;
   }
 
@@ -24,21 +32,9 @@ export const isNullStr = (str) => {
   if (str == null) return true;
   if (str == undefined) return true;
   if (str == {}) return true;
-  var regu = "^[ ]+$";
-  var re = new RegExp(regu);
+  let regu = "^[ ]+$";
+  let re = new RegExp(regu);
   return re.test(str);
-};
-
-/**
- * @description 判断一个对象是否存在key，如果传入第二个参数key，则是判断这个obj对象是否存在key这个属性
- * @param 如果没有传入key这个参数，则判断obj对象是否有键值对
- */
-export const hasKey = (obj, key) => {
-  if (key) return key in obj;
-  else {
-    let keysArr = Object.keys(obj);
-    return keysArr.length;
-  }
 };
 
 // 格式化日期类型,fmt格式可选择
@@ -86,20 +82,6 @@ export const timeFormat = (sec) => {
   }
 };
 
-// 时钟倒计时
-export const countDown = (sec) => {
-  let hour = Math.floor((parseInt(sec) / 3600) % 24)
-    .toString()
-    .padStart(2, "0");
-  let minute = Math.floor((parseInt(sec) / 60) % 60)
-    .toString()
-    .padStart(2, "0");
-  let second = Math.floor(parseInt(sec) % 60)
-    .toString()
-    .padStart(2, "0");
-  return `${hour}:${minute}:${second}`;
-};
-
 // 获取本周所有日期
 export const getWeekDate = () => {
   let weekDateList = [];
@@ -138,6 +120,11 @@ export const timing = () => {
   let minute = dateFormat("mm", new Date());
   let second = dateFormat("ss", new Date());
   return `${hour}:${minute}:${second}`;
+};
+
+export const currentPages = () => {
+  const pages = getCurrentPages();
+  return pages[pages.length - 1];
 };
 
 export const getDate = (timeStamp, startType) => {
@@ -273,6 +260,8 @@ export const removePrivateDoc = () => {
           console.log(`删除应用私有文档目录失败，${JSON.stringify(e)}`);
         }
       );
+    },
+    (e) => {
     }
   );
   // #endif

@@ -1,32 +1,28 @@
 <script>
 import Api from "@/common/api.js";
 
-// 基础模块
-const Base = uni.requireNativePlugin("GK-Base");
 // 升级APP
-const UpdateApp = uni.requireNativePlugin("GK-UpdateApp");
+// const UpdateApp = uni.requireNativePlugin("GK-UpdateApp");
 // 看门狗
-const CrashHandle = uni.requireNativePlugin("CrashHandle");
+// const CrashHandle = uni.requireNativePlugin("CrashHandle");
 // 来邦对讲模块
-const FloatUniModule = uni.requireNativePlugin("FloatUniModule");
+// const FloatUniModule = uni.requireNativePlugin("FloatUniModule");
 
 export default {
   onLaunch: function () {
     // #ifdef APP-PLUS
     if (process.env.NODE_ENV == "production") {
-      FloatUniModule.openGuard(1);
+      // FloatUniModule.openGuard(1);
     }
     // 设置媒体音量+
-    FloatUniModule.setStreamVolumeTypeMusic(
-      Number(uni.getStorageSync("mediaDefaultVolume"))
-    );
+    // FloatUniModule.setStreamVolumeTypeMusic(
+    //   Number(uni.getStorageSync("mediaDefaultVolume"))
+    // );
     // 设置通话音量
-    FloatUniModule.setStreamVolumeTypeVoiceCall(
-      Number(uni.getStorageSync("mediaDefaultVolume"))
-    );
-    CrashHandle.startGather(0); //开启日志，参数无效，默认保存着
-    // 设置全屏
-    plus.navigator.setFullscreen(true);
+    // FloatUniModule.setStreamVolumeTypeVoiceCall(
+    //   Number(uni.getStorageSync("mediaDefaultVolume"))
+    // );
+    // CrashHandle.startGather(0); //开启日志，参数无效，默认保存着
     // 添加week自定义字体规则
     let domModule = weex.requireModule("dom");
     domModule.addRule("fontFace", {
@@ -34,14 +30,24 @@ export default {
       src: "url('./static/uni.ttf')",
     });
     if (!!uni.getStorageSync("baseUrl")) {
-      // 初始化语音播报
-      Base.speechInit();
+      // 开启防拆监听
+      // SystemModule.listen(69);
       // 修改分机信息
       this.setTerminalInfo();
     }
     // #endif
+    // this.createElementScript();
   },
   methods: {
+    createElementScript() {
+      const URL = ["/static/js/qwebchannel.js", "/static/js/kydevmonit.js"];
+      for (let i = 0; i < URL.length; i++) {
+        const script = document.createElement('script');
+        script.setAttribute("charset", "utf-8");
+        script.src = URL[i];
+        document.head.appendChild(script);
+      }
+    },
     // 修改分机信息
     async setTerminalInfo() {
       const { terminalId: id, terminalCode: code } =
@@ -56,9 +62,8 @@ export default {
     },
   },
   globalData: {
-    Base,
-    UpdateApp,
-    FloatUniModule,
+    // UpdateApp,
+    // FloatUniModule,
     webSocketConnected: false,
   },
 };

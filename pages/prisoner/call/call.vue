@@ -55,7 +55,7 @@
 <script>
 import neilModal from "@/components/neil-modal/neil-modal.vue";
 import Api from "@/common/api.js";
-import { dateFormat } from "@/common/utils/util.js";
+import { dateFormat, currentPages } from "@/common/utils/util.js";
 import { mapState, mapMutations } from "vuex";
 import callColumns from "@/static/mock/callColumns.json";
 import recognitionDialogs from "@/components/recognition-dialogs/recognition-dialogs.vue";
@@ -113,10 +113,10 @@ export default {
   created() {
     if (!this.isCalling) {
       // 停止屏保
-      this.$parent.stopScreenSaver();
+      currentPages().stopScreenSaver();
       this.setIsCalling(true);
       // 开始点名
-      this.$parent.receiveTask("rollCall", "start");
+      currentPages().receiveTask("rollCall", "start");
       // 获取在线点名人员列表
       this.getRollCallInfo();
     }
@@ -124,7 +124,7 @@ export default {
   beforeDestroy() {
     this.discontinueCall(false);
     // 开启屏保
-    this.$parent.openScreenSaver();
+    currentPages().openScreenSaver();
   },
   methods: {
     ...mapMutations({
@@ -199,7 +199,7 @@ export default {
     },
     rollCallHandler() {
       this.showRecognitionDialogs = false;
-      this.voiceBroadcast(
+      currentPages().voiceBroadcast(
         `请${this.unSignCallList[this.curIndex].name}进行签到`
       );
       this.callIndex = this.unSignCallList[this.curIndex].index;
@@ -254,7 +254,7 @@ export default {
       this.rollCallList[this.callIndex].round = round + 1 > 1 ? 2 : 1;
       this.updateRollCall(this.rollCallList[this.callIndex]);
       this.regConfig.isRecognitionSuccess = true;
-      this.voiceBroadcast(`${this.rollCallList[this.callIndex].name}签到成功`);
+      currentPages().voiceBroadcast(`${this.rollCallList[this.callIndex].name}签到成功`);
       let params = {
         rybh: this.rollCallList[this.callIndex].rybh,
         temperature,
@@ -305,7 +305,7 @@ export default {
         params
       );
       if (res.state.code == 200) {
-        this.$parent.handleShowToast("签到信息保存成功");
+        currentPages().handleShowToast("签到信息保存成功");
       }
     },
     // 点名结束
@@ -313,9 +313,9 @@ export default {
       this.showRecognitionDialogs = false;
       clearInterval(this.rollCallTimer);
       this.setIsCalling(false);
-      this.$parent.receiveTask("rollCall", "stop");
+      currentPages().receiveTask("rollCall", "stop");
       setTimeout(() => {
-        this.voiceBroadcast("点名结束");
+        currentPages().voiceBroadcast("点名结束");
       }, 0);
       setTimeout(() => {
         this.setCurrentTab(1);
@@ -327,7 +327,7 @@ export default {
       this.showRecognitionDialogs = false;
       this.setIsCalling(false);
       if (state) {
-        this.$parent.receiveTask("rollCall", "0");
+        currentPages().receiveTask("rollCall", "0");
       }
       setTimeout(() => {
         this.setCurrentTab(1);
@@ -346,7 +346,7 @@ export default {
       if (this.rollCallList[this.callIndex].mKeys.includes(String(res.mKey))) {
         this.signSuccess(res.temperature);
       } else {
-        this.voiceBroadcast(
+        currentPages().voiceBroadcast(
           `识别失败，请${this.rollCallList[this.callIndex].name}进行签到`
         );
       }
@@ -363,20 +363,6 @@ export default {
     setTemperature(temperature) {
       this.$refs.recognitionDialogs &&
         this.$refs.recognitionDialogs.setTemperature(temperature);
-    },
-    // 语音播放
-    voiceBroadcast(voiceText) {
-      // 语音播放时段
-      let messagePlayTime =
-        uni.getStorageSync("messagePlayTime") || "05:00,22:00";
-      let interval = messagePlayTime.split(",");
-      let now = dateFormat("hh:mm", new Date());
-      if (now >= interval[0] && now <= interval[1]) {
-        let options = {
-          content: voiceText,
-        };
-        getApp().globalData.Base.speech(options);
-      }
     },
   },
 };

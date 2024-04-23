@@ -320,7 +320,8 @@
       </neil-modal>
       <recognition-dialogs ref="recognitionDialogs" useFor="shopping" :regConfig="regConfig"
         :isShow="showRecognitionDialogs" @fingerRecognitionSuccess="fingerRecognitionSuccess"
-        @faceRecognitionSuccess="faceRecognitionSuccess" @close="closeRecognitionDialogs"></recognition-dialogs>
+        @faceRecognitionSuccess="faceRecognitionSuccess" @recognitionFail="recognitionFail"
+        @close="closeRecognitionDialogs"></recognition-dialogs>
     </div>
   </div>
 </template>
@@ -333,6 +334,7 @@ import {
   unique,
   formatFloat,
   dateFormat,
+  currentPages
 } from "@/common/utils/util.js";
 import neilModal from "@/components/neil-modal/neil-modal.vue";
 import bottomBar from "@/components/bottom-bar/bottom-bar.vue";
@@ -457,13 +459,13 @@ export default {
     // 购物跨月审批提示
     this.openCrossMonthModal();
     // 获取商品列表
-    this.getPrisonInfo(this.personInfo.rybh);
+    this.getPrisonInfo(this.personInfo.dabh);
   },
   mounted() {
-    // 开启倒计时
-    this.$parent.countTimer();
     // 获取备注类型列表
     this.getConfirmTypeList();
+    // 开启倒计时
+    currentPages().countTimer();
   },
   destroyed() {
     // 暂存购物车列表
@@ -682,7 +684,7 @@ export default {
     // 清空购物车
     handleClearCart() {
       if (!this.cartGoodsList.length) {
-        this.$parent.handleShowToast("购物车为空", "center");
+        currentPages().handleShowToast("购物车为空", "center");
         return;
       }
       // 初始化商品信息
@@ -804,7 +806,7 @@ export default {
           this.isRepeatState = false;
         }, 3000);
         if (!this.cartGoodsList.length) {
-          this.$parent.handleShowToast("购物车为空", "center");
+          currentPages().handleShowToast("购物车为空", "center");
           return;
         }
         if (this.prisonerInfo.rybh == "0999") {
@@ -880,7 +882,7 @@ export default {
     handleRecorListScrolltolower() {
       // 已获取所有数据
       if (this.orderRecordList.length >= this.orderRecordTotal) {
-        return this.$parent.handleShowToast("暂无更多数据", "center");
+        return currentPages().handleShowToast("暂无更多数据", "center");
       }
       this.orderPageParams.pageIndex += 1;
       this.getOrderHistoryInfo();
@@ -895,7 +897,7 @@ export default {
     async getOrderHistoryInfo() {
       let selectDateList = [this.startDate, this.endDate];
       if (selectDateList.includes("")) {
-        this.$parent.handleShowToast("请选择订单日期", "center");
+        currentPages().handleShowToast("请选择订单日期", "center");
         return;
       }
       let params = {
@@ -970,7 +972,7 @@ export default {
         }
         this.orderRecordTotal = (res.page && res.page.total) || 0;
         if (!res.data.length) {
-          this.$parent.handleShowToast("暂无数据", "center");
+          currentPages().handleShowToast("暂无数据", "center");
         }
       }
     },
@@ -993,7 +995,7 @@ export default {
         this.recordDetailsList = res.data.data;
         this.showRecordDetails = true;
       } else {
-        this.$parent.handleShowToast("获取消费详情失败", "center");
+        currentPages().handleShowToast("获取消费详情失败", "center");
       }
     },
     // 关闭消费记录详情
@@ -1043,9 +1045,9 @@ export default {
           }
         });
         this.$forceUpdate();
-        this.$parent.handleShowToast("确认成功", "center");
+        currentPages().handleShowToast("确认成功", "center");
       } else {
-        this.$parent.handleShowToast("确认失败", "center");
+        currentPages().handleShowToast("确认失败", "center");
       }
     },
     // 设置消费记录分页参数
@@ -1057,11 +1059,12 @@ export default {
     },
     // 指纹验证成功回调
     fingerRecognitionSuccess(res) {
-      if (this.prisonerInfo.mkeys.includes(String(res.mKey))) {
-        this.verifySuccess();
-      } else {
-        this.voiceBroadcast("识别失败，没有录入该指纹");
-      }
+      // if (this.prisonerInfo.mkeys.includes(String(res.mKey))) {
+      //   this.verifySuccess();
+      // } else {
+      //   currentPages().voiceBroadcast("识别失败，没有录入该指纹");
+      // }
+      this.verifySuccess();
     },
     // 人脸验证成功回调
     faceRecognitionSuccess(res) {
@@ -1069,9 +1072,13 @@ export default {
     },
     // 验证成功
     verifySuccess() {
-      this.voiceBroadcast("验证通过");
+      currentPages().voiceBroadcast("验证通过");
       this.closeModal("RecognitionDialogs");
       this.saveCartOrderInfo();
+    },
+    // 验证失败回调
+    recognitionFail() {
+      this.closeRecognitionDialogs();
     },
     // 登录弹框关闭回调
     closeRecognitionDialogs() {
@@ -1082,20 +1089,6 @@ export default {
       this.errTips = tips;
       this.showSuccess = isSuccess;
       this.openModal("OrderInit");
-    },
-    // 语音播放
-    voiceBroadcast(voiceText) {
-      // 语音播放时段
-      let messagePlayTime =
-        uni.getStorageSync("messagePlayTime") || "05:00,22:00";
-      let interval = messagePlayTime.split(",");
-      let now = dateFormat("hh:mm", new Date());
-      if (now >= interval[0] && now <= interval[1]) {
-        let options = {
-          content: voiceText,
-        };
-        getApp().globalData.Base.speech(options);
-      }
     },
     openModal(type) {
       this[`show${type}`] = true;

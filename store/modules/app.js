@@ -1,6 +1,6 @@
 const state = {
   // 当前页面
-  currentTab: 25,
+  currentTab: 1,
   // 点名信息
   rollInfo: {},
   // 人脸|指纹认证人员信息
@@ -29,6 +29,8 @@ const state = {
   isEvaluation: false,
   // 来邦服务状态
   IPCState: false,
+  // rtcVideo对讲组件ref
+  rtcVideoRef: null,
 };
 
 const mutations = {
@@ -91,6 +93,10 @@ const mutations = {
   // 来邦服务状态
   SET_IPCSTATE(state, bool) {
     state.IPCState = bool;
+  },
+  // 设置rtcVideo对讲组件Ref
+  SET_RTCVIDEOREF(state, ref) {
+    state.rtcVideoRef = ref;
   },
 };
 

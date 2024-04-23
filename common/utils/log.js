@@ -65,59 +65,59 @@ function getLogFileName() {
  */
 function writeLog(params, encryption) {
   let text = JSON.stringify(params);
-  plus.io.requestFileSystem(
-    plus.io.PUBLIC_DOCUMENTS,
-    function (fs) {
-      // 可通过fs操作PUBLIC_DOCUMENTS文件系统
-      // 创建日志文件夹
-      fs.root.getDirectory(
-        "app-log",
-        {
-          create: true,
-          exclusive: false,
-        },
-        function (dir) {
-          // 创建或写入文件
-          // console.log(
-          //   "日志写入地址：" + dir.fullPath + getLogFileName().fileName
-          // );
-          dir.getFile(
-            getLogFileName().fileName,
-            {
-              create: true,
-            },
-            function (fileEntry) {
-              // 找到文件准备写入操作
-              fileEntry.file(function (file) {
-                fileEntry.createWriter(
-                  function (writer) {
-                    writer.seek(file.size - 1);
-                    // 换行插入日志文件
-                    if (encryption) {
-                      writer.write(
-                        getLogFileName().newLine + " " + Base64.encode(text)
-                      );
-                    } else {
-                      writer.write(getLogFileName().newLine + text);
-                    }
-                  },
-                  function (e) {
-                    console.error("日志写入错误", error);
-                  }
-                );
-              });
-            }
-          );
-        },
-        function (err) {
-          console.error("文件夹创建失败", err);
-        }
-      );
-    },
-    function (error) {
-      console.error("文件系统进入错误", error);
-    }
-  );
+  // plus.io.requestFileSystem(
+  //   plus.io.PUBLIC_DOCUMENTS,
+  //   function (fs) {
+  //     // 可通过fs操作PUBLIC_DOCUMENTS文件系统
+  //     // 创建日志文件夹
+  //     fs.root.getDirectory(
+  //       "app-log",
+  //       {
+  //         create: true,
+  //         exclusive: false,
+  //       },
+  //       function (dir) {
+  //         // 创建或写入文件
+  //         // console.log(
+  //         //   "日志写入地址：" + dir.fullPath + getLogFileName().fileName
+  //         // );
+  //         dir.getFile(
+  //           getLogFileName().fileName,
+  //           {
+  //             create: true,
+  //           },
+  //           function (fileEntry) {
+  //             // 找到文件准备写入操作
+  //             fileEntry.file(function (file) {
+  //               fileEntry.createWriter(
+  //                 function (writer) {
+  //                   writer.seek(file.size - 1);
+  //                   // 换行插入日志文件
+  //                   if (encryption) {
+  //                     writer.write(
+  //                       getLogFileName().newLine + " " + Base64.encode(text)
+  //                     );
+  //                   } else {
+  //                     writer.write(getLogFileName().newLine + text);
+  //                   }
+  //                 },
+  //                 function (e) {
+  //                   console.error("日志写入错误", error);
+  //                 }
+  //               );
+  //             });
+  //           }
+  //         );
+  //       },
+  //       function (err) {
+  //         console.error("文件夹创建失败", err);
+  //       }
+  //     );
+  //   },
+  //   function (error) {
+  //     console.error("文件系统进入错误", error);
+  //   }
+  // );
 }
 
 /**

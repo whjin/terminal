@@ -24,10 +24,9 @@
 						<div class="content-item" v-show="currentIndex == idx">
 							<div class="list-title">
 								{{
-                  `${idx + 1}、${list.title}（${
-                    list.isCheckbox == 0 ? "单选题" : "多选题"
-                  }）`
-                }}
+									`${idx + 1}、${list.title}（${list.isCheckbox == 0 ? "单选题" : "多选题"
+										}）`
+								}}
 							</div>
 							<radio-group v-if="list.isCheckbox == 0" @change="onSelectChange">
 								<label class="list-option" v-for="(item, index) in list.option" :key="index">
@@ -58,13 +57,13 @@
 
 <script>
 import Api from "@/common/api.js";
-import { countDown } from "@/common/utils/util.js";
+import { countDown, currentPages } from "@/common/utils/util.js";
 import { mapState, mapMutations } from "vuex";
 
 export default {
 	name: "question",
 	components: {},
-	data () {
+	data() {
 		return {
 			// 开始时间
 			startTime: "00:00",
@@ -98,10 +97,10 @@ export default {
 			personInfo: (state) => state.app.personInfo,
 		}),
 	},
-	created () {
+	created() {
 		this.getSubjectList(this.taskId);
 	},
-	beforeDestroy () {
+	beforeDestroy() {
 		clearInterval(this.countdownTimer);
 	},
 	methods: {
@@ -110,7 +109,7 @@ export default {
 			setCurrentTab: "app/SET_CURRENTTAB",
 		}),
 		// 获取题目
-		async getSubjectList (id) {
+		async getSubjectList(id) {
 			let res = await Api.apiCall("get", Api.index.getAnswerDetails + id, null);
 			if (res.state.code == 200) {
 				this.subjectList = res.data.questionnaire;
@@ -121,7 +120,7 @@ export default {
 			}
 		},
 		// 剩余时间倒计时
-		countDownTimer (sec) {
+		countDownTimer(sec) {
 			this.countdownTimer = setInterval(() => {
 				if (sec <= 0) {
 					clearInterval(this.countdownTimer);
@@ -133,7 +132,7 @@ export default {
 			}, 1000);
 		},
 		// 单选题
-		onSelectChange (e) {
+		onSelectChange(e) {
 			let { id, option, grade } = e.detail.value;
 			if (this.answerIds.includes(id)) {
 				let index = this.answerIds.findIndex((index) => index == id);
@@ -146,7 +145,7 @@ export default {
 			}
 		},
 		// 多选题
-		onCheckChange (e) {
+		onCheckChange(e) {
 			let result = e.detail.value;
 			let id = "";
 			let options = "";
@@ -183,26 +182,26 @@ export default {
 			}
 		},
 		// 上一题
-		prevSubject () {
+		prevSubject() {
 			this.currentIndex--;
 			if (this.currentIndex < 0) {
 				this.currentIndex = 0;
-				this.$parent.handleShowToast("当前已是第一题", "center");
+				currentPages().handleShowToast("当前已是第一题", "center");
 				return;
 			}
 		},
 		// 下一题
-		nextSubject () {
+		nextSubject() {
 			let lastIndex = this.subjectList.length - 1;
 			this.currentIndex++;
 			if (this.currentIndex > lastIndex) {
 				this.currentIndex = lastIndex;
-				this.$parent.handleShowToast("当前已是最后一题", "center");
+				currentPages().handleShowToast("当前已是最后一题", "center");
 				return;
 			}
 		},
 		// 提交
-		async submitConfirm () {
+		async submitConfirm() {
 			if (!this.isRepeatState) {
 				this.isRepeatState = true;
 				setTimeout(() => {
@@ -221,7 +220,7 @@ export default {
 				let params = { type, libraryIds, answerOptions, answerStatus, questionId, ryName, rybh, score };
 				let res = await Api.apiCall("post", Api.index.saveAnswerInfo, params);
 				if (res.state.code == 200) {
-					this.$parent.handleShowToast("保存成功");
+					currentPages().handleShowToast("保存成功");
 					this.setCurrentTab(21);
 				}
 			}

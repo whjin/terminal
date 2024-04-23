@@ -7,43 +7,23 @@
         </div>
         <div class="message-box">
           <div class="message-menu-list">
-            <div
-              class="message-menu-item"
-              :class="currentPage == 1 ? 'message-menu-active' : ''"
-              @click="switchPage(1)"
-            >
+            <div class="message-menu-item" :class="currentPage == 1 ? 'message-menu-active' : ''" @click="switchPage(1)">
               <common-icons iconType="iconmessage" size="40" color="#fff" />
               <text>即时消息</text>
             </div>
-            <div
-              class="message-menu-item"
-              :class="currentPage == 2 ? 'message-menu-active' : ''"
-              @click="switchPage(2)"
-            >
+            <div class="message-menu-item" :class="currentPage == 2 ? 'message-menu-active' : ''" @click="switchPage(2)">
               <common-icons iconType="iconclock" size="43" color="#fff" />
               <text>提讯会见预告</text>
             </div>
-            <div
-              class="message-menu-item"
-              :class="currentPage == 3 ? 'message-menu-active' : ''"
-              @click="switchPage(3)"
-            >
+            <div class="message-menu-item" :class="currentPage == 3 ? 'message-menu-active' : ''" @click="switchPage(3)">
               <common-icons iconType="iconwarning" size="40" color="#fff" />
               <text>违规通报</text>
             </div>
           </div>
           <div class="message-vertical-divider"></div>
           <div v-if="currentPage == page" class="message-list-box">
-            <scroll-view
-              scroll-y="true"
-              class="message-list-scroll"
-              @scrolltolower="scrollToLower"
-            >
-              <div
-                class="message-list"
-                v-for="(item, index) in messageList"
-                :key="index"
-              >
+            <scroll-view scroll-y="true" class="message-list-scroll" @scrolltolower="scrollToLower">
+              <div class="message-list" v-for="(item, index) in messageList" :key="index">
                 <div class="list-left">
                   <div class="list-title">{{ `【${item.fieldName}】` }}</div>
                   <div class="list-content">{{ item.msgContent }}</div>
@@ -60,7 +40,7 @@
 
 <script>
 import Api from "@/common/api.js";
-import { dateFormat } from "@/common/utils/util.js";
+import { dateFormat, currentPages } from "@/common/utils/util.js";
 
 export default {
   name: "message",
@@ -78,7 +58,7 @@ export default {
   },
   created() {
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
     // 获取即时消息
     this.getNotificationInfo(1, this.pageIndex);
   },

@@ -311,7 +311,7 @@ export default {
           newVal: value,
           oldVal: this.selectText,
           index: index,
-          originItem: this.list[index],
+          orignItem: this.list[index],
           rowIndex: this.rowIndex
         });
 

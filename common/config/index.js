@@ -1,10 +1,17 @@
 export default {
   // pro
-  // baseUrl: "http://192.168.20.214:8100/",
+  // baseUrl: "http://192.168.1.214:8100/",
   // dev
   baseUrl: "http://192.168.20.214:8100/",
 
-  terminalIP: "192.168.20.107",
+  terminalIP: "192.168.20.47",
+
+  // pro
+  // socketUrl: "http://192.168.20.214:3000/",
+  // dev
+  socketUrl: "http://192.168.20.222:3000/",
+  // dev
+  // socketUrl: "http://localhost:3000/",
 
   controlType: {
     HEARTBEAT: "000",

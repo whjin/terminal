@@ -54,14 +54,16 @@
         "index": 18
     },
     {
-        "name": "",
-        "image": "",
-        "url": ""
+        "name": "智能谈话",
+        "image": "/static/images/index/prisoner/zxdm.png",
+        "url": "selfTalk",
+        "isModal": false
     },
     {
-        "name": "",
-        "image": "",
-        "url": ""
+        "name": "心理测评",
+        "image": "/static/images/index/prisoner/zxdm.png",
+        "url": "evaluation",
+        "isModal": false
     },
     {
         "name": "",

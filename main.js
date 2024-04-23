@@ -2,6 +2,8 @@ import Vue from "vue";
 import App from "./App";
 import config from "@/common/config";
 import store from './store/store';
+import "@/static/js/adapter.js";
+import "@/static/js/stomp.js";
 
 Vue.config.productionTip = false;
 

@@ -63,6 +63,7 @@
 import Api from "@/common/api.js";
 import { mapState, mapMutations } from "vuex";
 import recognitionDialogs from "@/components/recognition-dialogs/recognition-dialogs.vue";
+import { currentPages } from "@/common/utils/util.js";
 
 export default {
   name: "conversation",
@@ -129,7 +130,7 @@ export default {
         this.talkList = res.data.answerRyList;
         if (!this.talkList.length) {
           setTimeout(() => {
-            this.$parent.onClickHome();
+            currentPages().onClickHome();
           }, 3000);
         }
       }
@@ -138,7 +139,7 @@ export default {
     selectTalk(item) {
       if (item.answer_status == "1") {
         this.regConfig.rybh = "";
-        this.$parent.handleShowToast("该人员已答题", "center");
+        currentPages().handleShowToast("该人员已答题", "center");
         return;
       }
       this.regConfig.rybh = item.rybh;
@@ -146,7 +147,7 @@ export default {
     // 开始认证
     recognitionHandle() {
       if (!this.regConfig.rybh) {
-        this.$parent.handleShowToast("请先选择谈话人员", "center");
+        currentPages().handleShowToast("请先选择谈话人员", "center");
         return;
       }
       this.showRecognitionDialogs = true;
@@ -163,7 +164,7 @@ export default {
     // 人脸认证成功回调
     faceRecognitionSuccess(res) {
       this.showRecognitionDialogs = false;
-      this.$parent.recognitionHanlder(res);
+      currentPages().recognitionHanlder(res);
     },
     // 获取认证登录人员信息
     async getLoginPersonInfo(mKey) {
@@ -181,11 +182,11 @@ export default {
       if (res.state.code == 200) {
         if (Object.keys(res.data).length) {
           if (res.data.rybh == this.regConfig.rybh) {
-            this.$parent.voiceBroadcast("指纹识别成功");
-            this.$parent.recognitionHanlder(res.data);
+            currentPages().voiceBroadcast("指纹识别成功");
+            currentPages().recognitionHanlder(res.data);
           } else {
-            this.$parent.voiceBroadcast("人员不匹配");
-            this.$parent.handleShowToast("人员不匹配", "center");
+            currentPages().voiceBroadcast("人员不匹配");
+            currentPages().handleShowToast("人员不匹配", "center");
           }
         }
       }

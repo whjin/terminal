@@ -8,7 +8,12 @@
               <div class="communication-item" :class="selectId == item.id ? 'media-select-img' : 'media-img'"
                 v-for="(item) in fileList" :key="item.id" @click="selectMediaChange(item)">
                 <text>{{ item.xm }}</text>
-                <text>{{ item.type == "1" ? "家属视频" : item.type == "2" ? "语音留言" : "电子信件" }}</text>
+                <text>{{
+                  item.type == "1"
+                  ? "家属视频"
+                  : item.type == "2"
+                    ? "语音留言"
+                    : "电子信件" }}</text>
                 <text>{{ item.name }}</text>
               </div>
             </div>
@@ -56,6 +61,7 @@
 <script>
 import Api from "@/common/api.js";
 import { mapState } from "vuex";
+import { currentPages } from "@/common/utils/util.js";
 
 export default {
   name: "communication",
@@ -93,7 +99,7 @@ export default {
   },
   created() {
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
     this.getCommucationInfo(this.personInfo.rybh);
   },
   methods: {
@@ -119,11 +125,11 @@ export default {
     // 播放视频
     playMediaHanlder(e) {
       if (!this.fileList.length) {
-        this.$parent.handleShowToast("当前文件为空", "center");
+        currentPages().handleShowToast("当前文件为空", "center");
         return;
       }
       if (!Object.keys(this.mediaInfo).length) {
-        this.$parent.handleShowToast("请先选择文件", "center");
+        currentPages().handleShowToast("请先选择文件", "center");
         return;
       }
       this.isPlay = !this.isPlay;

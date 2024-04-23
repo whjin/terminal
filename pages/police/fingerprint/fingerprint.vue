@@ -14,10 +14,10 @@
           <div class="fingerprint-item" :class="{ disabledClick: !!item.mKey && !!item.mKey2 }"
             @click="handleCheckChange(item)">
             <checkbox class="checkbox" :checked="!!item.mKey && !!item.mKey2
+              ? true
+              : item.policeNumber == checkedId
                 ? true
-                : item.policeNumber == checkedId
-                  ? true
-                  : false
+                : false
               " :disabled="!!item.mKey && !!item.mKey2" :class="{ disabledCheck: !!item.mKey && !!item.mKey2 }">
               <text>{{ item.policeName }}</text>
               <text :class="{ mark: !!item.mKey || !!item.mKey2 }">{{
@@ -59,6 +59,7 @@
 <script>
 import Api from "@/common/api.js";
 import neilModal from "@/components/neil-modal/neil-modal.vue";
+import { currentPages } from "@/common/utils/util.js";
 
 export default {
   components: {
@@ -79,13 +80,14 @@ export default {
       // 指纹开启状态
       isOpen: false,
       isFingerRepeat: false,
+      timer: null
     };
   },
   created() {
     // 获取民警指纹信息
     this.getPoliceFingerInfo();
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
     // 指纹录入监听
     this.setFingerCallBack();
   },
@@ -98,43 +100,48 @@ export default {
     handleFingerprint(res) {
       if (res.code == "0") {
         this.closeModal("Finger");
-        this.$parent.voiceBroadcast("当前指纹已存在");
+        currentPages().voiceBroadcast("当前指纹已存在");
       } else {
-        getApp().globalData.FloatUniModule.fingerprintCollect(this.paramInt);
+        // getApp().globalData.FloatUniModule.fingerprintCollect(this.paramInt);
       }
     },
     // 指纹录入监听
     setFingerCallBack() {
       // 指纹采集
-      getApp().globalData.FloatUniModule.setFingerprintFeatureLeftNumCallBack(
-        (e) => {
-          if (e.code == "0") {
-            console.log("指纹采集成功");
-          }
-        }
-      );
+      // getApp().globalData.FloatUniModule.setFingerprintFeatureLeftNumCallBack(
+      //   (e) => {
+      //     if (e.code == "0") {
+      //       console.log("指纹采集成功");
+      //     }
+      //   }
+      // );
       // 指纹入库
-      getApp().globalData.FloatUniModule.setFingerprintFeatureCallBack((e) => {
-        if (e.code == "0") {
-          if (!this.isFingerRepeat) {
-            this.isFingerRepeat = true;
-            setTimeout(() => {
-              this.isFingerRepeat = false;
-            }, 1500);
-            if (!!e.feature) {
-              this.savePoliceFingerInfo(e.id, e.feature);
-              getApp().globalData.FloatUniModule.fingerprintFeatureInput(
-                e.id,
-                e.feature
-              );
-              this.$parent.voiceBroadcast("指纹录入成功");
-            } else {
-              this.$parent.voiceBroadcast("指纹录入失败，当前特征值为空");
-            }
-            this.closeModal("Finger");
-          }
-        }
-      });
+      // getApp().globalData.FloatUniModule.setFingerprintFeatureCallBack((e) => {
+      //   if (e.code == "0") {
+      //     if (!this.isFingerRepeat) {
+      //       this.isFingerRepeat = true;
+      //       setTimeout(() => {
+      //         this.isFingerRepeat = false;
+      //       }, 1500);
+      //       if (!!e.feature) {
+      //         this.savePoliceFingerInfo(e.id, e.feature);
+      //         getApp().globalData.FloatUniModule.fingerprintFeatureInput(
+      //           e.id,
+      //           e.feature
+      //         );
+      //         currentPages().voiceBroadcast("指纹录入成功");
+      //       } else {
+      //         currentPages().voiceBroadcast("指纹录入失败，当前特征值为空");
+      //       }
+      //       this.closeModal("Finger");
+      //     }
+      //   }
+      // });
+
+      this.timer = setTimeout(() => {
+        currentPages().voiceBroadcast("指纹录入成功");
+        this.closeModal("Finger");
+      }, 5000);
     },
     // 民警指纹录入信息
     async getPoliceFingerInfo() {
@@ -169,26 +176,32 @@ export default {
           }
         }
       } else {
-        this.$parent.handleShowToast("请先选择人员列表", "center");
+        currentPages().handleShowToast("请先选择人员列表", "center");
         return;
       }
       if (!this.isOpen) {
         // 打开指纹设备
-        getApp().globalData.FloatUniModule.fingerModuleStop();
-        getApp().globalData.FloatUniModule.syncStartFinger((e) => {
-          if (e.code == 0) {
-            this.isOpen = true;
-            this.openModal("Finger");
-            console.log("打开指纹");
-            // 获取建档ID
-            this.getFingerKey();
-          } else {
-            this.$parent.voiceBroadcast("指纹设备未打开");
-            console.log("指纹设备未打开");
-            // 关闭指纹连接
-            this.closeFingerPrint();
-          }
-        });
+        // getApp().globalData.FloatUniModule.fingerModuleStop();
+        // getApp().globalData.FloatUniModule.syncStartFinger((e) => {
+        //   if (e.code == 0) {
+        //     this.isOpen = true;
+        //     this.openModal("Finger");
+        //     console.log("打开指纹");
+        //     // 获取建档ID
+        //     this.getFingerKey();
+        //   } else {
+        //     currentPages().voiceBroadcast("指纹设备未打开");
+        //     console.log("指纹设备未打开");
+        //     // 关闭指纹连接
+        //     this.closeFingerPrint();
+        //   }
+        // });
+
+        this.isOpen = true;
+        this.openModal("Finger");
+        console.log("打开指纹");
+        // 获取建档ID
+        this.getFingerKey();
       }
     },
     // 获取建档ID
@@ -205,8 +218,8 @@ export default {
         } else {
           this.paramInt = res.data[1];
         }
-        this.$parent.voiceBroadcast("建档成功，请按压指纹");
-        getApp().globalData.FloatUniModule.fingerprintRecognition();
+        currentPages().voiceBroadcast("建档成功，请按压指纹");
+        // getApp().globalData.FloatUniModule.fingerprintRecognition();
       }
     },
     // 录入成功后保存指纹信息
@@ -229,18 +242,19 @@ export default {
             this.fingerList.splice(index, 1, item);
           }
         });
-        this.$parent.handleShowToast("指纹保存成功");
+        currentPages().handleShowToast("指纹保存成功");
       }
     },
     // 关闭指纹连接
     closeFingerPrint() {
       this.isOpen = false;
-      getApp().globalData.FloatUniModule.syncStopFinger((e) => {
-        if (e.code == 0) {
-          console.log("关闭指纹");
-          getApp().globalData.FloatUniModule.fingerModuleStop();
-        }
-      });
+      clearTimeout(this.timer);
+      // getApp().globalData.FloatUniModule.syncStopFinger((e) => {
+      //   if (e.code == 0) {
+      //     console.log("关闭指纹");
+      //     getApp().globalData.FloatUniModule.fingerModuleStop();
+      //   }
+      // });
     },
     openModal(type) {
       this[`show${type}`] = true;

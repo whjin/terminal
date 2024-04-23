@@ -13,10 +13,10 @@
         <div class="fingerprint-list" v-for="(item, index) in fingerList" :key="index">
           <div class="fingerprint-item" :class="{ disabledClick: item.fingerNum >= 6 }" @click="handleCheckChange(item)">
             <checkbox class="checkbox" :checked="item.fingerNum >= 6
+              ? true
+              : item.rybh == checkedId
                 ? true
-                : item.rybh == checkedId
-                  ? true
-                  : false
+                : false
               " :disabled="item.fingerNum >= 6" :class="{ disabledCheck: item.fingerNum >= 6 }">
               <text>{{ item.name }}</text>
               <text :class="{ mark: item.fingerNum > 0 && item.fingerNum <= 6 }">{{ item.fingerNum > 0 ? item.fingerNum :
@@ -53,6 +53,7 @@
 <script>
 import Api from "@/common/api.js";
 import neilModal from "@/components/neil-modal/neil-modal.vue";
+import { currentPages } from "@/common/utils/util.js";
 
 export default {
   components: {
@@ -73,13 +74,14 @@ export default {
       // 指纹开启状态
       isOpen: false,
       isFingerRepeat: false,
+      timer: null
     };
   },
   mounted() {
     // 获取人员指纹信息
     this.getPersonFingerInfo();
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
     // 指纹录入监听
     this.setFingerCallBack();
   },
@@ -92,43 +94,48 @@ export default {
     handleFingerprint(res) {
       if (res.code == "0") {
         this.closeModal("Finger");
-        this.$parent.voiceBroadcast("当前指纹已存在");
+        currentPages().voiceBroadcast("当前指纹已存在");
       } else {
-        getApp().globalData.FloatUniModule.fingerprintCollect(this.paramInt);
+        // getApp().globalData.FloatUniModule.fingerprintCollect(this.paramInt);
       }
     },
     // 指纹录入监听
     setFingerCallBack() {
       // 指纹采集
-      getApp().globalData.FloatUniModule.setFingerprintFeatureLeftNumCallBack(
-        (e) => {
-          if (e.code == "0") {
-            console.log("指纹采集成功");
-          }
-        }
-      );
+      // getApp().globalData.FloatUniModule.setFingerprintFeatureLeftNumCallBack(
+      //   (e) => {
+      //     if (e.code == "0") {
+      //       console.log("指纹采集成功");
+      //     }
+      //   }
+      // );
       // 指纹入库
-      getApp().globalData.FloatUniModule.setFingerprintFeatureCallBack((e) => {
-        if (e.code == "0") {
-          if (!this.isFingerRepeat) {
-            this.isFingerRepeat = true;
-            setTimeout(() => {
-              this.isFingerRepeat = false;
-            }, 1500);
-            if (!!e.feature) {
-              this.savePersonFingerInfo(e.id, e.feature);
-              getApp().globalData.FloatUniModule.fingerprintFeatureInput(
-                e.id,
-                e.feature
-              );
-              this.$parent.voiceBroadcast("指纹录入成功");
-            } else {
-              this.$parent.voiceBroadcast("指纹录入失败，当前特征值为空");
-            }
-            this.closeModal("Finger");
-          }
-        }
-      });
+      // getApp().globalData.FloatUniModule.setFingerprintFeatureCallBack((e) => {
+      //   if (e.code == "0") {
+      //     if (!this.isFingerRepeat) {
+      //       this.isFingerRepeat = true;
+      //       setTimeout(() => {
+      //         this.isFingerRepeat = false;
+      //       }, 1500);
+      //       if (!!e.feature) {
+      //         this.savePersonFingerInfo(e.id, e.feature);
+      //         getApp().globalData.FloatUniModule.fingerprintFeatureInput(
+      //           e.id,
+      //           e.feature
+      //         );
+      //         currentPages().voiceBroadcast("指纹录入成功");
+      //       } else {
+      //         currentPages().voiceBroadcast("指纹录入失败，当前特征值为空");
+      //       }
+      //       this.closeModal("Finger");
+      //     }
+      //   }
+      // });
+
+      this.timer = setTimeout(() => {
+        currentPages().voiceBroadcast("指纹录入成功");
+        this.closeModal("Finger");
+      }, 5000);
     },
     // 在押人员指纹录入信息
     async getPersonFingerInfo() {
@@ -157,7 +164,7 @@ export default {
     // 在押人员指纹录入
     fingerprintInit() {
       if (!Object.keys(this.checkedInfo).length) {
-        this.$parent.handleShowToast("请先选择人员列表", "center");
+        currentPages().handleShowToast("请先选择人员列表", "center");
         return;
       } else {
         for (let value of this.fingerList.values()) {
@@ -168,21 +175,27 @@ export default {
       }
       if (!this.isOpen) {
         // 打开指纹设备
-        getApp().globalData.FloatUniModule.fingerModuleStop();
-        getApp().globalData.FloatUniModule.syncStartFinger((e) => {
-          if (e.code == 0) {
-            this.isOpen = true;
-            this.openModal("Finger");
-            console.log("打开指纹");
-            // 获取建档ID
-            this.getFingerKey();
-          } else {
-            this.$parent.voiceBroadcast("指纹设备未打开");
-            console.log("指纹设备未打开");
-            // 关闭指纹连接
-            this.closeFingerPrint();
-          }
-        });
+        // getApp().globalData.FloatUniModule.fingerModuleStop();
+        // getApp().globalData.FloatUniModule.syncStartFinger((e) => {
+        //   if (e.code == 0) {
+        //     this.isOpen = true;
+        //     this.openModal("Finger");
+        //     console.log("打开指纹");
+        //     // 获取建档ID
+        //     this.getFingerKey();
+        //   } else {
+        //     currentPages().voiceBroadcast("指纹设备未打开");
+        //     console.log("指纹设备未打开");
+        //     // 关闭指纹连接
+        //     this.closeFingerPrint();
+        //   }
+        // });
+
+        this.isOpen = true;
+        this.openModal("Finger");
+        console.log("打开指纹");
+        // 获取建档ID
+        this.getFingerKey();
       }
     },
     // 获取建档ID
@@ -194,8 +207,8 @@ export default {
       if (res.state.code == 200) {
         if (res.data.mKey != -1) {
           this.paramInt = res.data.mKey;
-          this.$parent.voiceBroadcast("建档成功，请按压指纹");
-          getApp().globalData.FloatUniModule.fingerprintRecognition();
+          currentPages().voiceBroadcast("建档成功，请按压指纹");
+          // getApp().globalData.FloatUniModule.fingerprintRecognition();
         }
       }
     },
@@ -214,18 +227,19 @@ export default {
       if (res.state.code == 200) {
         // 更新人员指纹信息
         this.getPersonFingerInfo();
-        this.$parent.handleShowToast("指纹保存成功");
+        currentPages().handleShowToast("指纹保存成功");
       }
     },
     // 关闭指纹连接
     closeFingerPrint() {
       this.isOpen = false;
-      getApp().globalData.FloatUniModule.syncStopFinger((e) => {
-        if (e.code == 0) {
-          console.log("关闭指纹");
-          getApp().globalData.FloatUniModule.fingerModuleStop();
-        }
-      });
+      clearTimeout(this.timer);
+      // getApp().globalData.FloatUniModule.syncStopFinger((e) => {
+      //   if (e.code == 0) {
+      //     console.log("关闭指纹");
+      //     getApp().globalData.FloatUniModule.fingerModuleStop();
+      //   }
+      // });
     },
     openModal(type) {
       this[`show${type}`] = true;

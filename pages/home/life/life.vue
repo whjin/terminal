@@ -7,32 +7,45 @@
       <scroll-view scroll-y="true" class="life-scroll">
         <div v-for="(item, index) in lifeList" :key="index" class="life-box">
           <div class="life-list">
-            <image :src="getCurrentStauts(item.startTime, item.endTime, index, 'icon')
-              "></image>
+            <image
+              :src="
+                getCurrentStauts(item.startTime, item.endTime, index, 'icon')
+              "
+            ></image>
             <div class="life-date">
-              <div class="content timeline" :style="{
+              <div
+                class="content timeline"
+                :style="{
+                  color: getCurrentStauts(
+                    item.startTime,
+                    item.endTime,
+                    '',
+                    'font'
+                  ),
+                }"
+              >
+                {{ item.startTime }}—{{ item.endTime }}
+              </div>
+            </div>
+            <div
+              class="content detail"
+              :style="{
                 color: getCurrentStauts(
                   item.startTime,
                   item.endTime,
                   '',
                   'font'
                 ),
-              }">
-                {{ item.startTime }}—{{ item.endTime }}
-              </div>
-            </div>
-            <div class="content detail" :style="{
-              color: getCurrentStauts(
-                item.startTime,
-                item.endTime,
-                '',
-                'font'
-              ),
-            }">
+              }"
+            >
               {{ item.livingContent }}
             </div>
           </div>
-          <image :src="rectangle" v-show="index != lifeList.length - 1" class="life-progress"></image>
+          <image
+            :src="rectangle"
+            v-show="index != lifeList.length - 1"
+            class="life-progress"
+          ></image>
         </div>
       </scroll-view>
     </div>
@@ -41,6 +54,7 @@
 
 <script>
 import Api from "@/common/api.js";
+import { currentPages } from "@/common/utils/util.js";
 
 export default {
   data() {
@@ -59,7 +73,7 @@ export default {
   created() {
     this.getLifeList();
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
   },
   methods: {
     getCurrentStauts(beginTime, endTime, index, type) {

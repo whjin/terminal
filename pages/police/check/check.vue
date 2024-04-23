@@ -7,15 +7,13 @@
 			<view class="uni-flex uni-column page-menu-area">
 				<view class="uni-flex uni-column page-menu" :class="currentPage == 1 ? 'page-menu-activate' : ''"
 					@click="switchPage(1)">
-					<image src="/static/images/room/record.png"
-						style="width: 35.41upx; height: 42.36upx; margin-top: 9.72upx">
+					<image src="/static/images/room/record.png" style="width: 35.41upx; height: 42.36upx; margin-top: 9.72upx">
 					</image>
 					<text style="line-height: 20.83upx; margin-top: 13.19upx">安全检查\n录入</text>
 				</view>
 				<view class="uni-flex uni-column page-menu" :class="currentPage == 2 ? 'page-menu-activate' : ''"
 					@click="switchPage(2)">
-					<image src="/static/images/room/record.png"
-						style="width: 35.41upx; height: 42.36upx; margin-top: 9.72upx">
+					<image src="/static/images/room/record.png" style="width: 35.41upx; height: 42.36upx; margin-top: 9.72upx">
 					</image>
 					<text style="line-height: 20.83upx; margin-top: 13.19upx">安全检查\n记录</text>
 				</view>
@@ -28,26 +26,23 @@
 							<e-picker v-if="item.inputType == 'date-picker'" mode="dateTime" @change="setStartTime">
 								<div class="value had-border date">{{ saveCheckParams[item.value] }}</div>
 							</e-picker>
-							<xfl-select v-else-if="item.inputType == 'picker'" ref="xflSelect" :clearable="false"
-								:list="checkTypeList" @change="setCheckType" :placeholder="'请选择检查类型'"
-								class="xfl-select"></xfl-select>
+							<xfl-select v-else-if="item.inputType == 'picker'" ref="xflSelect" :clearable="false" :list="checkTypeList"
+								@change="setCheckType" :placeholder="'请选择检查类型'" class="xfl-select"></xfl-select>
 							<input v-else class="value" :class="{ 'had-border': item.inputType == 'input' }"
-								:type="item.value == 'participantsNum' ? 'number' : 'text'"
-								v-model="saveCheckParams[item.value]" :disabled="item.inputType == 'text'"
-								@input="handleInputChange" />
+								:type="item.value == 'participantsNum' ? 'number' : 'text'" v-model="saveCheckParams[item.value]"
+								:disabled="item.inputType == 'text'" @input="handleInputChange" />
 						</view>
 					</view>
 					<view class="primary-content">
 						<text class="title">检查内容：</text>
-						<ld-select ref="ldSelect" :multiple="true" :list="checkContentList" label-key="value"
-							value-key="code" :placeholder="checkContentList.length ? '请选择检查内容' : '请先选择检查类型'"
-							:widthStyle="721" clearable v-model="checkContentValue"
-							:disabled="checkContentList.length ? false : true" @change="setCheckContent"></ld-select>
+						<ld-select ref="ldSelect" :multiple="true" :list="checkContentList" label-key="value" value-key="code"
+							:placeholder="checkContentList.length ? '请选择检查内容' : '请先选择检查类型'" :widthStyle="721" clearable
+							v-model="checkContentValue" :disabled="checkContentList.length ? false : true"
+							@change="setCheckContent"></ld-select>
 					</view>
 					<view class="primary-content">
 						<text class="title">检查违禁物品：</text>
-						<input class="value" v-model="saveCheckParams.checkContraband" type='text'
-							@input="handleInputChange" />
+						<input class="value" v-model="saveCheckParams.checkContraband" type='text' @input="handleInputChange" />
 					</view>
 					<view class="primary-content violate-goods">
 						<text class="title">违禁品现场截图：</text>
@@ -59,12 +54,11 @@
 							<view class="image-list">
 								<view class="goods" v-for="(item, index) in addImgList" :key="item.uri">
 									<image class="goods-img" :src="item.uri" @click.stop="previewImg(item.uri)"></image>
-									<common-icons iconType="icondelete" size="35" color="#FFFFFF" @click="deleteImg(index)"
-										:iconStyle="{
-											'position': 'absolute',
-											'top': '5px',
-											'right': '5px'
-										}" />
+									<common-icons iconType="icondelete" size="35" color="#FFFFFF" @click="deleteImg(index)" :iconStyle="{
+										'position': 'absolute',
+										'top': '5px',
+										'right': '5px'
+									}" />
 								</view>
 							</view>
 						</view>
@@ -92,8 +86,8 @@
 						</view>
 						<view class="search-params-item">
 							<view class="params-title">检查类型：</view>
-							<xfl-select :clearable="true" :list="checkTypeList" @change="setSearchType"
-								:placeholder="'请选择检查类型'" class="xfl-select"></xfl-select>
+							<xfl-select :clearable="true" :list="checkTypeList" @change="setSearchType" :placeholder="'请选择检查类型'"
+								class="xfl-select"></xfl-select>
 						</view>
 						<view class="search-params-item">
 							<view class="params-title">检查时间：</view>
@@ -117,16 +111,14 @@
 				<view class="uni-flex table-td-divider" v-if="!checkRecordList.length">
 					<view class="uni-flex-item table-td" style="text-align: center;">暂无记录</view>
 				</view>
-				<scroll-view v-else scroll-y="true" style="height: 347upx; width: 100%"
-					@scrolltolower="handleSearchDataToLower">
+				<scroll-view v-else scroll-y="true" style="height: 347upx; width: 100%" @scrolltolower="handleSearchDataToLower">
 					<view class="uni-flex table-td-divider" v-for="(item, index) in checkRecordList" :key="index">
 						<view class="uni-flex-item table-td">{{ saveCheckParams.roomName }}</view>
 						<view class="uni-flex-item table-td">{{ item.checkType }}</view>
 						<view class="uni-flex-item table-td">{{ item.checkStartTime }}</view>
 						<view class="uni-flex-item table-td">{{ item.checkContentValue }}</view>
 						<view class="uni-flex-item table-td">{{ item.checkContraband }}</view>
-						<view class="uni-flex-item table-td"><a class="check-btn" @click.stop="checkDetail(item)">查看</a>
-						</view>
+						<view class="uni-flex-item table-td"><a class="check-btn" @click.stop="checkDetail(item)">查看</a></view>
 					</view>
 				</scroll-view>
 			</view>
@@ -144,8 +136,8 @@
 					<view class="basic-content">
 						<view class="basic-content-item" v-for="item in detailConfig" :key="item.value">
 							<text class="title">{{ item.title }}：</text>
-							<input v-if="item.value == 'roomName' || item.value == 'registerPolice'"
-								class="value had-border" v-model="saveCheckParams[item.value]" disabled />
+							<input v-if="item.value == 'roomName' || item.value == 'registerPolice'" class="value had-border"
+								v-model="saveCheckParams[item.value]" disabled />
 							<input v-else class="value had-border" v-model="selectRecord[item.value]" disabled />
 						</view>
 					</view>
@@ -217,6 +209,7 @@ import commonIcons from "@/components/common-icons/common-icons.vue";
 import { getDate } from '@/common/utils/util.js';
 import uniTooltip from "@/components/uni/uni-tooltip/uni-tooltip.vue";
 import { base64ToPath } from "@/common/utils/imageTools.js";
+import { currentPages } from "@/common/utils/util.js";
 
 export default {
 	components: {
@@ -229,7 +222,7 @@ export default {
 		hTimePicker,
 		uniTooltip
 	},
-	data() {
+	data () {
 		return {
 			// 提交记录基础内容展示配置
 			basicConfig: [
@@ -330,7 +323,7 @@ export default {
 				startTime: '',
 			},
 			// 查询分页参数
-			pageParam: {
+			pageParams: {
 				pageIndex: 1,
 				pageSize: 10
 			},
@@ -354,7 +347,7 @@ export default {
 			personInfo: (state) => state.app.personInfo
 		}),
 		// 检查内容列表
-		checkContentList() {
+		checkContentList () {
 			let curContentList = (this.checkTypeList && this.checkTypeList.find(item => item.code == this.saveCheckParams.inspectionType)) || null;
 			if (curContentList) {
 				return curContentList.content;
@@ -363,7 +356,7 @@ export default {
 			}
 		}
 	},
-	created() {
+	created () {
 		this.saveCheckParams.accountName = this.personInfo.code;
 		this.saveCheckParams.registerPolice = this.personInfo.name;
 		this.searchParams.accountName = this.personInfo.code;
@@ -371,9 +364,9 @@ export default {
 		// 获取检查类型、内容
 		this.getCheckTypeAndContent();
 		// 开启倒计时
-		this.$parent.countTimer();
+		currentPages().countTimer();
 	},
-	beforeDestroy() {
+	beforeDestroy () {
 		this.stopFacePreview();
 	},
 	methods: {
@@ -382,24 +375,24 @@ export default {
 			setBottomBar: "app/SET_BOTTOMBAR",
 		}),
 		// 点击页面,重置倒计时
-		handleCloseLdSelect() {
+		handleCloseLdSelect () {
 			this.$refs.ldSelect && this.$refs.ldSelect.hideModal();
 		},
 		// 监听键盘事件
-		handleInputChange(e) {
-			this.$parent.initCountTimeout();
+		handleInputChange (e) {
+			currentPages().initCountTimeout();
 		},
 		// 时间戳转换
-		getDate(timestamp, type) {
+		getDate (timestamp, type) {
 			return getDate(timestamp, type);
 		},
 		// 照片预览
-		previewImg(url) {
+		previewImg (url) {
 			this.previewImgUrl = url;
 			this.isShowPreviewModal = true;
 		},
 		// 获取检查类型、内容
-		async getCheckTypeAndContent() {
+		async getCheckTypeAndContent () {
 			let res = await Api.apiCall('get', Api.police.getCheckTypeAndContent, null, true);
 			if (res.state.code == 200) {
 				let data = res.data;
@@ -419,66 +412,66 @@ export default {
 			}
 		},
 		// 保存检查类型
-		setCheckType(params) {
+		setCheckType (params) {
 			this.checkContentValue = [];
-			this.saveCheckParams.inspectionType = params.originItem.code;
+			this.saveCheckParams.inspectionType = params.orignItem.code;
 		},
 		// 保存检查内容
-		setCheckContent(params) {
+		setCheckContent (params) {
 			if (!params.length) {
 				this.checkContentValue = [];
 			}
 			this.saveCheckParams.checkContent = params.join(',');
 		},
 		// 保存检查时间
-		setStartTime(time) {
+		setStartTime (time) {
 			this.saveCheckParams.startTime = time;
 		},
 		// 拍照
-		handleTakePicture() {
+		handleTakePicture () {
 			if (!this.isRepeatState) {
 				this.isRepeatState = true;
 				setTimeout(() => {
 					this.isRepeatState = false;
 				}, 1500);
-				getApp().globalData.FloatUniModule.takePicture();
+				// getApp().globalData.FloatUniModule.takePicture();
 			}
 		},
 		// 开始拍照
-		startTakePicture() {
+		startTakePicture () {
 			this.showTakePicture = true;
 			this.$nextTick(() => {
-				getApp().globalData.FloatUniModule.initFrame();
-				getApp().globalData.FloatUniModule.setLocalVideoViewPosition(420, 210, 440, 268);
-				getApp().globalData.FloatUniModule.hideLocalPreView(false);
-				getApp().globalData.FloatUniModule.setViewWidthHeight(440, 268);
-				getApp().globalData.FloatUniModule.startTakeFrame();
-				getApp().globalData.FloatUniModule.takePictureCallBack((res) => {
-					let base64Str = res.bytes.replace(/[\r\n]/g, "");
-					base64ToPath(`data:image/jpeg;base64,${base64Str}`).then(uri => {
-						this.stopFacePreview();
-						if (this.addImgList.length < 4) {
-							this.addImgList.push({ uri });
-						} else {
-							this.$parent.handleShowToast("最多上传4张照片", "center");
-						}
-					});
-				});
+				// getApp().globalData.FloatUniModule.initFrame();
+				// getApp().globalData.FloatUniModule.setLocalVideoViewPosition(420, 210, 440, 268);
+				// getApp().globalData.FloatUniModule.hideLocalPreView(false);
+				// getApp().globalData.FloatUniModule.setViewWidthHeight(440, 268);
+				// getApp().globalData.FloatUniModule.startTakeFrame();
+				// getApp().globalData.FloatUniModule.takePictureCallBack((res) => {
+				// 	let base64Str = res.bytes.replace(/[\r\n]/g, "");
+				// 	base64ToPath(`data:image/jpeg;base64,${base64Str}`).then(uri => {
+				// 		this.stopFacePreview();
+				// 		if (this.addImgList.length < 4) {
+				// 			this.addImgList.push({ uri });
+				// 		} else {
+				// 			currentPages().handleShowToast("最多上传4张照片", "center");
+				// 		}
+				// 	});
+				// });
 			});
 		},
 		// 关闭相机
-		stopFacePreview() {
+		stopFacePreview () {
 			this.showTakePicture = false;
-			getApp().globalData.FloatUniModule.stopTakeFrame();
-			getApp().globalData.FloatUniModule.hideLocalPreView(true);
+			// getApp().globalData.FloatUniModule.hideLocalPreView(true);
+			// getApp().globalData.FloatUniModule.stopTakeFrame();
 		},
 		// 删除照片
-		deleteImg(index) {
+		deleteImg (index) {
 			this.addImgList.splice(index, 1);
 		},
 		// 上传图片
-		uploadImg() {
-			this.$parent.handleShowToast("提交保存登记中...", "center");
+		uploadImg () {
+			currentPages().handleShowToast("提交保存登记中...", "center");
 			if (!this.addImgList.length) {
 				this.saveCheckParams.imgUrl = '';
 				this.saveCheck();
@@ -508,34 +501,34 @@ export default {
 			});
 		},
 		// 点击保存登记
-		save() {
+		save () {
 			if (!this.saveCheckParams.startTime) {
-				return this.$parent.handleShowToast("请选择开始检查时间！", "center");
+				return currentPages().handleShowToast("请选择开始检查时间！", "center");
 			}
 			if (!this.saveCheckParams.inspectionType) {
-				return this.$parent.handleShowToast("请选择检查类型！", "center");
+				return currentPages().handleShowToast("请选择检查类型！", "center");
 			}
 			if (!this.saveCheckParams.participantsNum) {
-				return this.$parent.handleShowToast("参加人数请输入数字！", "center");
+				return currentPages().handleShowToast("参加人数请输入数字！", "center");
 			}
 			if (!this.saveCheckParams.checkContent.length) {
-				return this.$parent.handleShowToast("请添加检查内容！", "center");
+				return currentPages().handleShowToast("请添加检查内容！", "center");
 			}
 			this.uploadImg();
 		},
 		// 保存登记
-		async saveCheck() {
+		async saveCheck () {
 			let res = await Api.apiCall('post', Api.police.saveCheck, this.saveCheckParams, true);
 			if (res.state.code == 200) {
-				this.$parent.handleShowToast(res.data, "center");
+				currentPages().handleShowToast(res.data, "center");
 				this.resetSaveCheckParams();
 			}
 		},
-		cancel() {
-			this.$parent.onClickBack();
+		cancel () {
+			currentPages().onClickBack();
 		},
 		// 重置提交参数
-		resetSaveCheckParams() {
+		resetSaveCheckParams () {
 			this.addImgList = [];
 			this.checkContentValue = [];
 			this.saveCheckParams = Object.assign({}, this.saveCheckParams, {
@@ -554,7 +547,7 @@ export default {
 			});
 		},
 		// 切换页面
-		switchPage(page) {
+		switchPage (page) {
 			if (page == 1) {
 				this.saveCheckParams.inspectionType = '';
 				this.checkContentValue = [];
@@ -565,30 +558,30 @@ export default {
 			this.currentPage = page;
 		},
 		// 查询检查类型
-		setSearchType(params) {
-			this.searchParams.inspectionType = params.originItem.code;
+		setSearchType (params) {
+			this.searchParams.inspectionType = params.orignItem.code;
 		},
 		// 查询检查时间
-		setSearchTime(time) {
+		setSearchTime (time) {
 			this.searchParams.startTime = time;
 		},
 		// 查询记录
-		searchByParams() {
-			this.pageParam.pageIndex = 1;
+		searchByParams () {
+			this.pageParams.pageIndex = 1;
 			this.getCheckRecord();
 		},
 		// 查询
-		async getCheckRecord() {
+		async getCheckRecord () {
 			let params = Object.assign({}, {
 				data: this.searchParams
 			}, {
-				pageParam: this.pageParam
+				pageParam: this.pageParams
 			});
 			let res = await Api.apiCall('post', Api.police.getCheckRecord, params, true);
 			if (res.state.code == 200) {
 				let data = res.data || [];
 				let total = (res.page && res.page.total) || 0;
-				if (this.pageParam.pageIndex == 1) {
+				if (this.pageParams.pageIndex == 1) {
 					this.checkRecordList = data;
 				} else {
 					this.checkRecordList = this.checkRecordList.concat(data);
@@ -606,19 +599,19 @@ export default {
 			}
 		},
 		// 查看详情
-		checkDetail(item) {
+		checkDetail (item) {
 			this.selectRecord = item;
 			this.isShowCheckDetail = true;
 		},
-		handleSearchDataToLower() {
+		handleSearchDataToLower () {
 			if (this.checkRecordList.length >= this.searchDataTotal) {
-				return this.$parent.handleShowToast("暂无更多数据", "center");
+				return currentPages().handleShowToast("暂无更多数据", "center");
 			}
-			this.pageParam.pageIndex += 1;
+			this.pageParams.pageIndex += 1;
 			this.getCheckRecord();
 		},
 		// 重置查询信息
-		resetSearchData() {
+		resetSearchData () {
 			const { roomNo } = uni.getStorageSync("terminalInfo");
 			this.searchParams = {
 				roomNo,
@@ -626,21 +619,21 @@ export default {
 				inspectionType: '',
 				startTime: '',
 			};
-			this.pageParam = {
+			this.pageParams = {
 				pageIndex: 1,
 				pageSize: 10
 			};
 			this.checkRecordList = [];
 		},
 		// 关闭详情弹框
-		handleCloseCheckDetail() {
+		handleCloseCheckDetail () {
 			this.isShowCheckDetail = false;
 		},
 		// 关闭照片预览弹框
-		handleClosePreviewModal() {
+		handleClosePreviewModal () {
 			this.isShowPreviewModal = false;
 		},
-		isNumber(val) {
+		isNumber (val) {
 			let regPos = /^\d+(\.\d+)?$/; // 非负浮点数
 			let regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/; // 负浮点数
 			if (regPos.test(val) && regNeg.test(val)) {
@@ -767,7 +760,6 @@ export default {
 		background: rgba(42, 66, 115, 0.3);
 		border: #1b92ef 1px solid;
 		border-radius: 1px;
-
 		.add-img {
 			display: flex;
 			justify-content: center;
@@ -776,14 +768,12 @@ export default {
 			width: 89upx;
 			height: 76.39upx;
 			border: 1px dashed #fff;
-
 			.text {
 				margin-top: 5upx;
 				color: #fff;
 				font-size: 18.06upx;
 			}
 		}
-
 		.image-list {
 			height: 100%;
 			box-sizing: border-box;
@@ -791,7 +781,6 @@ export default {
 			flex: 1;
 			flex-wrap: wrap;
 			overflow: auto;
-
 			.goods {
 				position: relative;
 				margin: 0 0 10.88upx 10.88upx;
@@ -800,7 +789,6 @@ export default {
 				box-sizing: border-box;
 				border: 1px solid #2a4273;
 				border-radius: 3.88upx;
-
 				.goods-img {
 					width: 100%;
 					height: 100%;
@@ -915,7 +903,7 @@ export default {
 	width: 902.8upx;
 	height: 577.3upx;
 }
-
 .picture-modal-container {
 	height: 500upx;
-}</style>
+}
+</style>

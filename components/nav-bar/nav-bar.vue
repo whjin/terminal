@@ -4,10 +4,10 @@
 			<text @click="onClickInit">{{ title }}</text>
 		</div>
 		<div class="nav-bar-home">
-			<div v-if="homeState" class="operating" @touchstart.stop="onClickHome">
+			<div v-if="homeState" class="operating" @click="onClickHome">
 				<common-icons iconType="iconhome" size="45" color="#fff" />
 			</div>
-			<div v-if="backState" class="operating" @touchstart.stop="onClickBack">
+			<div v-if="backState" class="operating" @click="onClickBack">
 				<common-icons iconType="iconback" size="38" color="#fff" />
 			</div>
 		</div>
@@ -20,7 +20,7 @@ export default {
 	props: {
 		title: {
 			type: String,
-			default: "监室智能交互终端",
+			default: "监室智能交互终端系统",
 		},
 		homeState: {
 			type: Boolean,

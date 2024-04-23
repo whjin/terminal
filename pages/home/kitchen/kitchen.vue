@@ -7,27 +7,15 @@
         </div>
         <div class="kitchen-box">
           <div class="kitchen-menu-list">
-            <div
-              class="kitchen-menu-item"
-              :class="currentPage == 1 ? 'kitchen-menu-active' : ''"
-              @click="switchPage(1)"
-            >
+            <div class="kitchen-menu-item" :class="currentPage == 1 ? 'kitchen-menu-active' : ''" @click="switchPage(1)">
               <common-icons iconType="iconmenu" size="38" color="#fff" />
               <text>普通餐</text>
             </div>
-            <div
-              class="kitchen-menu-item"
-              :class="currentPage == 2 ? 'kitchen-menu-active' : ''"
-              @click="switchPage(2)"
-            >
+            <div class="kitchen-menu-item" :class="currentPage == 2 ? 'kitchen-menu-active' : ''" @click="switchPage(2)">
               <common-icons iconType="iconmenu" size="38" color="#fff" />
               <text>病号餐</text>
             </div>
-            <div
-              class="kitchen-menu-item"
-              :class="currentPage == 3 ? 'kitchen-menu-active' : ''"
-              @click="switchPage(3)"
-            >
+            <div class="kitchen-menu-item" :class="currentPage == 3 ? 'kitchen-menu-active' : ''" @click="switchPage(3)">
               <common-icons iconType="iconmenu" size="38" color="#fff" />
               <text>回族餐</text>
             </div>
@@ -36,46 +24,30 @@
           <div class="kitchen-table-container">
             <div class="table-box">
               <div class="table-head">
-                <div
-                  class="weekmenu-head-item"
-                  v-for="(item, index) in weekDateColumns"
-                  :key="index"
-                  :class="{ 'current-date': item == currentDate }"
-                >
+                <div class="weekmenu-head-item" v-for="(item, index) in weekDateColumns" :key="index"
+                  :class="{ 'current-date': item == currentDate }">
                   {{ item }}
                 </div>
               </div>
               <scroll-view scroll-y="true" class="kitchen-table-scroll">
                 <div class="weekmenu-table-content">
                   <div class="weekmenu-table-item">上午</div>
-                  <div
-                    class="weekmenu-table-item kitchen-img"
-                    v-for="(item, index) in morningMenuList"
-                    :key="index"
-                    :class="{ 'current-date': item.weekDate == currentDate }"
-                  >
+                  <div class="weekmenu-table-item kitchen-img" v-for="(item, index) in morningMenuList" :key="index"
+                    :class="{ 'current-date': item.weekDate == currentDate }">
                     <span class="item-text">{{ item.breakfast }}</span>
                   </div>
                 </div>
                 <div class="weekmenu-table-content">
                   <div class="weekmenu-table-item">中午</div>
-                  <div
-                    class="weekmenu-table-item kitchen-img"
-                    v-for="(item, index) in noonMenuList"
-                    :key="index"
-                    :class="{ 'current-date': item.weekDate == currentDate }"
-                  >
+                  <div class="weekmenu-table-item kitchen-img" v-for="(item, index) in noonMenuList" :key="index"
+                    :class="{ 'current-date': item.weekDate == currentDate }">
                     <span class="item-text">{{ item.lunch }}</span>
                   </div>
                 </div>
                 <div class="weekmenu-table-content">
                   <div class="weekmenu-table-item">晚上</div>
-                  <div
-                    class="weekmenu-table-item kitchen-img"
-                    v-for="(item, index) in nightMenuList"
-                    :key="index"
-                    :class="{ 'current-date': item.weekDate == currentDate }"
-                  >
+                  <div class="weekmenu-table-item kitchen-img" v-for="(item, index) in nightMenuList" :key="index"
+                    :class="{ 'current-date': item.weekDate == currentDate }">
                     <span class="item-text">{{ item.dinner }}</span>
                   </div>
                 </div>
@@ -93,7 +65,7 @@
 
 <script>
 import Api from "@/common/api.js";
-import { dateFormat, formatFloat } from "@/common/utils/util.js";
+import { dateFormat, formatFloat, currentPages } from "@/common/utils/util.js";
 
 export default {
   data() {
@@ -186,7 +158,7 @@ export default {
     // 获取伙食供应标准
     // this.getFoodStandardInfo();
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
   },
   methods: {
     // 切换菜单

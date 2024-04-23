@@ -7,7 +7,7 @@
       <view class="content">
         <view class="left-box inner-glow-box">
           <view class="title">体温监测实时视频</view>
-          <view class="video-box"></view>
+          <view class="video-box"> </view>
         </view>
         <view class="right-box">
           <view class="temperature-tips inner-glow-box">
@@ -26,7 +26,7 @@
             <view class="parting-line"></view>
             <!-- 温度读取 -->
             <view class="cur-temperature">
-              <view class="title cur-title">温度读取</view>
+              <view class="title">温度读取</view>
               <view class="details">
                 <view class="details-item sprite-sheet">
                   实时额头温度<text class="temperature-text">{{
@@ -76,7 +76,7 @@
 <script>
 import { mapState } from "vuex";
 import Api from "@/common/api.js";
-import { debounce } from "@/common/utils/util.js";
+import { debounce, currentPages } from "@/common/utils/util.js";
 export default {
   components: {},
   data() {
@@ -121,7 +121,7 @@ export default {
   },
   mounted() {
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
     if (!this.debounceMeasure) {
       this.debounceMeasure = debounce(this.handleMeasure);
     }
@@ -129,13 +129,13 @@ export default {
       this.debounceApply = debounce(this.handleApply);
     }
     this.showNodePlayer();
-    this.$parent.openThermometryModule();
+    currentPages().openThermometryModule();
   },
   beforeDestroy() {
-    getApp().globalData.FloatUniModule.hideLocalPreView(true);
+    // getApp().globalData.FloatUniModule.hideLocalPreView(true);
     this.hideNodePlayer();
     // 停止测温
-    this.$parent.closeThermometryModule();
+    currentPages().closeThermometryModule();
   },
   methods: {
     // 测温控件初始化
@@ -147,7 +147,7 @@ export default {
     },
     // 点击测温
     handleMeasure() {
-      this.$parent.closeThermometryModule();
+      currentPages().closeThermometryModule();
       // 显示最后一次有效值
       let len = this.foreheadTemperatureList.length;
       if (len) {
@@ -183,10 +183,10 @@ export default {
       );
       if (res.state.code == 200) {
         this.savedTemperature = true;
-        this.$parent.handleShowToast("体温提交成功");
+        currentPages().handleShowToast("体温提交成功");
       } else {
-        this.$parent.handleShowToast("体温提交失败");
-        this.$parent.openThermometryModule();
+        currentPages().handleShowToast("体温提交失败");
+        currentPages().openThermometryModule();
       }
     },
     // 保存体温超出预警值的人员
@@ -218,7 +218,7 @@ export default {
       this.haveAFever = false;
       this.handleShowIllnessInit();
       setTimeout(() => {
-        this.$parent.onClickBack();
+        currentPages().onClickBack();
       }, 5000);
     },
     // 报病申请结果弹框
@@ -238,23 +238,23 @@ export default {
     },
     // 显示视频流预览
     showNodePlayer() {
-      getApp().globalData.FloatUniModule.initFrame();
-      getApp().globalData.FloatUniModule.setLocalVideoViewPosition(
-        68,
-        230,
-        572,
-        382
-      );
-      getApp().globalData.FloatUniModule.hideLocalPreView(false);
+      // getApp().globalData.FloatUniModule.initFrame();
+      // getApp().globalData.FloatUniModule.setLocalVideoViewPosition(
+      //   68,
+      //   232,
+      //   572,
+      //   380
+      // );
+      // getApp().globalData.FloatUniModule.hideLocalPreView(false);
       uni.getSubNVueById("coverImage").show();
       uni.getSubNVueById("coverImage").setStyle({
-        top: "342px",
+        top: "348px",
         left: "280px",
       });
     },
     // 关闭视频流预览
     hideNodePlayer() {
-      getApp().globalData.FloatUniModule.hideLocalPreView(true);
+      // getApp().globalData.FloatUniModule.hideLocalPreView(true);
       uni.getSubNVueById("coverImage").hide();
     },
   },
@@ -277,7 +277,7 @@ export default {
 
 .temperature-monitor {
   .sprite-sheet {
-    background-image: url("/static/images/temperatureMonitor/temperature_monitor.png");
+    background-image: url("../../../static/images/temperatureMonitor/temperature_monitor.png");
     background-repeat: no-repeat;
   }
 
@@ -317,47 +317,44 @@ export default {
     }
 
     .right-box {
-      width: 568upx;
+      width: 583.33upx;
 
       .temperature-tips {
         margin-bottom: 15.83upx;
-        padding: 15.83upx 0;
+        padding: 15.83upx;
         box-sizing: border-box;
 
         .measur-steps {
           .details {
-            padding: 0 13.88upx 6.88upx;
+            padding: 0 20.83upx 10.83upx;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
 
             .details-item {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              text-align: center;
-
               .img {
-                width: 136upx;
-                height: 158upx;
+                margin-bottom: 13.89upx;
+                width: 111.22upx;
+                height: 125upx;
               }
 
               .steps-one {
-                background-position: 0 -4upx;
+                background-position: -6.95upx -6.95upx;
               }
 
               .steps-two {
-                background-position: -199upx -4upx;
+                background-position: -187.5upx -6.95upx;
               }
 
               .steps-three {
-                background-position: -398upx -4upx;
+                background-position: -368.06upx -6.95upx;
               }
 
               .tips {
-                width: 106upx;
-                font-size: 16upx;
-                line-height: 24upx;
+                width: 111.11upx;
+                font-size: 16.67upx;
+                line-height: 25upx;
+                text-align: center;
               }
             }
 
@@ -365,25 +362,25 @@ export default {
               position: relative;
 
               &::after {
+                position: absolute;
+                bottom: 11.806upx;
+                right: -62.5upx;
                 content: " ";
                 display: inline-block;
-                width: 42upx;
+                width: 36.806upx;
                 height: 25upx;
-                background-image: url("/static/images/temperatureMonitor/temperature_monitor.png");
+                background-image: url("../../../static/images/temperatureMonitor/temperature_monitor.png");
                 background-repeat: no-repeat;
-                background-position: -8upx -172upx;
-                position: absolute;
-                bottom: 12upx;
-                left: 152upx;
+                background-position: -6.95upx -152.8upx;
               }
             }
           }
         }
 
         .parting-line {
-          margin: 6.88upx 0;
+          margin-bottom: 10.83upx;
           width: 100%;
-          height: 1upx;
+          height: 2px;
           background: linear-gradient(90deg,
               rgba(0, 198, 255, 0),
               #00c6ff,
@@ -391,28 +388,26 @@ export default {
         }
 
         .cur-temperature {
-          .cur-title {
-            margin: 13.88upx 0;
-          }
-
           .details {
             display: flex;
             justify-content: center;
+            align-items: flex-start;
 
             .details-item {
               display: flex;
               justify-content: center;
               align-items: center;
-              width: 288upx;
-              height: 84upx;
-              font-size: 18upx;
-              background-position: -8upx -230upx;
+              width: 259.73upx;
+              height: 76.39upx;
+              background-position: -6.95upx -206.25upx;
+              font-size: 16.67upx;
+              padding-top: 24upx;
 
               .temperature-text {
-                font-size: 32upx;
+                margin-left: 13.89upx;
+                font-size: 33.33upx;
                 font-weight: 400;
                 color: #35fffa;
-                padding-left: 10.88upx;
               }
             }
           }
@@ -425,11 +420,11 @@ export default {
         align-items: flex-start;
 
         .btn {
-          margin-left: 14upx;
+          margin-left: 13.89upx;
           padding: 10upx 0;
-          width: 108upx;
+          width: 108.12upx;
           text-align: center;
-          font-size: 18upx;
+          font-size: 18.06upx;
           background: #007aff;
           border-radius: 4px;
 
@@ -441,5 +436,4 @@ export default {
       }
     }
   }
-}
-</style>
+}</style>

@@ -10,52 +10,33 @@
       <main class="evaluation-content">
         <div class="content-title">
           <section>
-            测评人数：<span>{{ talkList.length }}</span
-            >人
+            测评人数：<span>{{ talkList.length }}</span>人
           </section>
           <section>
-            已测评数：<span>{{ talkedNum }}</span
-            >人
+            已测评数：<span>{{ talkedNum }}</span>人
           </section>
           <section>
-            未测评数：<span>{{ unTalkNum }}</span
-            >人
+            未测评数：<span>{{ unTalkNum }}</span>人
           </section>
         </div>
         <div class="content-box">
-          <div
-            class="content-item"
-            :class="{
-              'content-item-select': regConfig.rybh == item.rybh,
-              'content-item-done': item.answer_status == '1',
-            }"
-            v-for="(item, index) in talkList"
-            :key="index"
-            @click="selectTalk(item)"
-          >
+          <div class="content-item" :class="{
+            'content-item-select': regConfig.rybh == item.rybh,
+            'content-item-done': item.answer_status == '1',
+          }" v-for="(item, index) in talkList" :key="index" @click="selectTalk(item)">
             <span>{{ item.ry_name }}</span>
             <span>{{ item.rybh }}</span>
             <span>{{ item.answer_status == "0" ? "未测评" : "已测评" }}</span>
           </div>
         </div>
-        <div
-          class="content-button"
-          :class="!regConfig.rybh ? 'button-disabled' : ''"
-          @click="recognitionHandle"
-        >
+        <div class="content-button" :class="!regConfig.rybh ? 'button-disabled' : ''" @click="recognitionHandle">
           验证身份，开始测评
         </div>
       </main>
     </div>
-    <recognition-dialogs
-      ref="recognitionDialogs"
-      useFor="evaluation"
-      :regConfig="regConfig"
-      :isShow="showRecognitionDialogs"
-      @fingerRecognitionSuccess="fingerRecognitionSuccess"
-      @faceRecognitionSuccess="faceRecognitionSuccess"
-      @close="closeRecognitionDialogs"
-    ></recognition-dialogs>
+    <recognition-dialogs ref="recognitionDialogs" useFor="evaluation" :regConfig="regConfig"
+      :isShow="showRecognitionDialogs" @fingerRecognitionSuccess="fingerRecognitionSuccess"
+      @faceRecognitionSuccess="faceRecognitionSuccess" @close="closeRecognitionDialogs"></recognition-dialogs>
   </div>
 </template>
 
@@ -63,6 +44,7 @@
 import Api from "@/common/api.js";
 import { mapState, mapMutations } from "vuex";
 import recognitionDialogs from "@/components/recognition-dialogs/recognition-dialogs.vue";
+import { currentPages } from "@/common/utils/util.js";
 
 export default {
   name: "evaluation",
@@ -129,7 +111,7 @@ export default {
         this.talkList = res.data.answerRyList;
         if (!this.talkList.length) {
           setTimeout(() => {
-            this.$parent.onClickHome();
+            currentPages().onClickHome();
           }, 3000);
         }
       }
@@ -138,7 +120,7 @@ export default {
     selectTalk(item) {
       if (item.answer_status == "1") {
         this.regConfig.rybh = "";
-        this.$parent.handleShowToast("该人员已答题", "center");
+        currentPages().handleShowToast("该人员已答题", "center");
         return;
       }
       this.regConfig.rybh = item.rybh;
@@ -146,7 +128,7 @@ export default {
     // 开始认证
     recognitionHandle() {
       if (!this.regConfig.rybh) {
-        this.$parent.handleShowToast("请先选择测评人员", "center");
+        currentPages().handleShowToast("请先选择测评人员", "center");
         return;
       }
       this.showRecognitionDialogs = true;
@@ -163,7 +145,7 @@ export default {
     // 人脸认证成功回调
     faceRecognitionSuccess(res) {
       this.showRecognitionDialogs = false;
-      this.$parent.recognitionHanlder(res);
+      currentPages().recognitionHanlder(res);
     },
     // 获取认证登录人员信息
     async getLoginPersonInfo(mKey) {
@@ -181,11 +163,11 @@ export default {
       if (res.state.code == 200) {
         if (Object.keys(res.data).length) {
           if (res.data.rybh == this.regConfig.rybh) {
-            this.$parent.voiceBroadcast("指纹识别成功");
-            this.$parent.recognitionHanlder(res.data);
+            currentPages().voiceBroadcast("指纹识别成功");
+            currentPages().recognitionHanlder(res.data);
           } else {
-            this.$parent.voiceBroadcast("人员不匹配");
-            this.$parent.handleShowToast("人员不匹配", "center");
+            currentPages().voiceBroadcast("人员不匹配");
+            currentPages().handleShowToast("人员不匹配", "center");
           }
         }
       }

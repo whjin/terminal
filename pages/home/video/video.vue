@@ -3,37 +3,18 @@
     <div class="video-wrapper">
       <div class="video-content">
         <div class="video-left">
-          <scroll-view
-            scroll-y="true"
-            class="video-left-scroll"
-            @scrolltolower="scrollToLower"
-          >
+          <scroll-view scroll-y="true" class="video-left-scroll" @scrolltolower="scrollToLower">
             <div class="video-list">
-              <div
-                class="video-item"
-                :class="
-                  videoId == item.videoId ? 'media-select-img' : 'media-img'
-                "
-                v-for="(item, index) in videoList"
-                :key="index"
-                @click="selectVideoChange(item)"
-              >
+              <div class="video-item" :class="videoId == item.videoId ? 'media-select-img' : 'media-img'
+                " v-for="(item, index) in videoList" :key="index" @click="selectVideoChange(item)">
                 <image :src="item.imgUrl" lazy-load></image>
                 <text>{{ item.name }}</text>
               </div>
             </div>
           </scroll-view>
           <div v-if="isPlay" class="video-control">
-            <video
-              id="myVideo"
-              class="my-video"
-              :src="videoUrl"
-              codec="software"
-              object-fit="fill"
-              autoplay
-              @ended="videoPlayEnded"
-              @error="videoPlayError"
-            ></video>
+            <video id="myVideo" class="my-video" :src="videoUrl" codec="software" object-fit="fill" autoplay
+              @ended="videoPlayEnded" @error="videoPlayError"></video>
           </div>
         </div>
         <div class="video-vertical-divider"></div>
@@ -54,37 +35,21 @@
                 <text>类型：{{ videoInfo.type }}</text>
               </div>
               <div class="info-item">
-                <common-icons
-                  iconType="iconduration"
-                  size="25"
-                  color="#00C6FF"
-                />
+                <common-icons iconType="iconduration" size="25" color="#00C6FF" />
                 <text>时长：{{ videoInfo.duration }}</text>
               </div>
               <div class="info-item">
-                <common-icons
-                  iconType="iconduration"
-                  size="25"
-                  color="#00C6FF"
-                />
+                <common-icons iconType="iconduration" size="25" color="#00C6FF" />
                 <text>可播放开始时间：{{ videoInfo.startTime }}</text>
               </div>
               <div class="info-item">
-                <common-icons
-                  iconType="iconduration"
-                  size="25"
-                  color="#00C6FF"
-                />
+                <common-icons iconType="iconduration" size="25" color="#00C6FF" />
                 <text>可播放结束时间：{{ videoInfo.endTime }}</text>
               </div>
             </div>
           </scroll-view>
           <div class="video-right-btn" v-show="!videoInfo.status">
-            <div
-              class="video-btn"
-              :class="isPlay ? 'btn-active-img' : 'btn-img'"
-              @click="handlePlayVideo"
-            >
+            <div class="video-btn" :class="isPlay ? 'btn-active-img' : 'btn-img'" @click="handlePlayVideo">
               <text>{{ isPlay ? "关闭" : "播放" }}</text>
             </div>
           </div>
@@ -96,7 +61,7 @@
 
 <script>
 import Api from "@/common/api.js";
-import { dateFormat, timeFormat } from "@/common/utils/util.js";
+import { dateFormat, timeFormat, currentPages } from "@/common/utils/util.js";
 
 export default {
   name: "terminal-video",
@@ -115,7 +80,7 @@ export default {
       // 页面索引
       pageIndex: 1,
       // 页面总数
-      totalPage: 1,
+      totalPage: 0,
       // 视频播放定时器
       playTimer: null,
       // 视频可播放时长
@@ -124,7 +89,7 @@ export default {
   },
   created() {
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
     // 获取视频信息
     this.getVideoInfo(this.pageIndex);
   },
@@ -150,7 +115,7 @@ export default {
       };
       let res = await Api.apiCall("post", Api.index.getVideoList, params);
       if (res.state.code == 200) {
-        this.totalPage = res.page.totalPage;
+        this.totalPage = res.page && res.page.totalPage || 0;
         let result = res.data;
         if (result.length) {
           result.map((item) => {
@@ -195,9 +160,9 @@ export default {
         JSON.stringify(params)
       );
       if (res.state.code == 200) {
-        this.$parent.handleShowToast("保存视频点播动态成功！");
+        currentPages().handleShowToast("保存视频点播动态成功！");
       } else {
-        this.$parent.handleShowToast("请求错误！");
+        currentPages().handleShowToast("请求错误！");
       }
     },
     // 选择视频
@@ -208,7 +173,7 @@ export default {
     // 播放视频
     handlePlayVideo(e) {
       if (!Object.keys(this.videoInfo).length) {
-        this.$parent.handleShowToast("请先选择视频！", "center");
+        currentPages().handleShowToast("请先选择视频！", "center");
         return;
       }
       this.isPlay = !this.isPlay;
@@ -234,7 +199,7 @@ export default {
       if (res.state.code == 200) {
         if (Object.keys(res.data).length) {
           // 停止倒计时
-          clearInterval(this.$parent.timer);
+          clearInterval(currentPages().timer);
           // 开启视频播放定时器
           this.videoPlayTimer(res.data.playTime);
           this.setDynamicInfo("开始");
@@ -261,8 +226,8 @@ export default {
       this.videoUrl = "";
       clearInterval(this.playTimer);
       if (state) {
-        clearInterval(this.$parent.timer);
-        this.$parent.countTimer();
+        clearInterval(currentPages().timer);
+        currentPages().countTimer();
       }
     },
     // 视频播放结束
@@ -273,7 +238,7 @@ export default {
     // 视频播放出错
     videoPlayError(e) {
       this.stopPlayVideo(true);
-      this.$parent.handleShowToast(
+      currentPages().handleShowToast(
         "视频播放错误，请联系管教！",
         "bottom",
         10000

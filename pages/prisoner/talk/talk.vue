@@ -7,19 +7,11 @@
         </div>
         <div class="talk-box">
           <div class="talk-menu-list">
-            <div
-              class="talk-menu-item"
-              :class="currentPage == 1 ? 'talk-menu-active' : ''"
-              @click="switchPage(1)"
-            >
+            <div class="talk-menu-item" :class="currentPage == 1 ? 'talk-menu-active' : ''" @click="switchPage(1)">
               <common-icons iconType="icondispose" size="38" color="#fff" />
               <text>预约登记</text>
             </div>
-            <div
-              class="talk-menu-item"
-              :class="currentPage == 2 ? 'talk-menu-active' : ''"
-              @click="switchPage(2)"
-            >
+            <div class="talk-menu-item" :class="currentPage == 2 ? 'talk-menu-active' : ''" @click="switchPage(2)">
               <common-icons iconType="iconrecord" size="46" color="#fff" />
               <text>预约记录</text>
             </div>
@@ -42,26 +34,15 @@
             </div>
             <div class="register-select register-item">
               <label>预约类型：</label>
-              <xfl-select
-                :list="appointmentTypeList"
-                :clearable="false"
-                :placeholder="'请选择预约类型'"
-                @change="selectAppointmentType"
-              ></xfl-select>
+              <xfl-select :list="appointmentTypeList" :clearable="false" :placeholder="'请选择预约类型'"
+                @change="selectAppointmentType"></xfl-select>
             </div>
             <div class="register-mood register-item">
               <label>今日心情：</label>
-              <div
-                class="today-mood"
-                v-for="(item, index) in todayMoodList"
-                :key="index"
-              >
+              <div class="today-mood" v-for="(item, index) in todayMoodList" :key="index">
                 <div class="today-mood-item">
-                  <div
-                    class="mood-image mood-img"
-                    :class="{ 'mood-select-img': item.code == moodCode }"
-                    @click="selectTodayMood(item)"
-                  >
+                  <div class="mood-image mood-img" :class="{ 'mood-select-img': item.code == moodCode }"
+                    @click="selectTodayMood(item)">
                     <image :src="moodImgList[index]"></image>
                   </div>
                   <text>{{ item.value }}</text>
@@ -76,21 +57,11 @@
             <div class="record-form-box">
               <div class="record-select">
                 <label>预约时间：</label>
-                <e-picker
-                  mode="date"
-                  class="picker-img"
-                  :showValue="startDate"
-                  @change="selectStartDate"
-                >
+                <e-picker mode="date" class="picker-img" :showValue="startDate" @change="selectStartDate">
                   <div class="talk-date">{{ startDate }}</div>
                 </e-picker>
                 <div class="divider-line">-</div>
-                <e-picker
-                  mode="date"
-                  class="picker-img"
-                  :showValue="endDate"
-                  @change="selectEndDate"
-                >
+                <e-picker mode="date" class="picker-img" :showValue="endDate" @change="selectEndDate">
                   <div class="talk-date">{{ endDate }}</div>
                 </e-picker>
               </div>
@@ -100,25 +71,13 @@
             </div>
             <div class="record-table-box">
               <div class="table-head">
-                <div
-                  class="table-head-item"
-                  v-for="(item, index) in talkColumns"
-                  :key="index"
-                  :style="{ flex: item.flex }"
-                >
+                <div class="table-head-item" v-for="(item, index) in talkColumns" :key="index"
+                  :style="{ flex: item.flex }">
                   {{ item.title }}
                 </div>
               </div>
-              <scroll-view
-                scroll-y="true"
-                class="record-table-scroll"
-                @scrolltolower="handleRecorListScrolltolower"
-              >
-                <div
-                  class="table-content"
-                  v-for="(item, index) in talkRecordList"
-                  :key="index"
-                >
+              <scroll-view scroll-y="true" class="record-table-scroll" @scrolltolower="handleRecorListScrolltolower">
+                <div class="table-content" v-for="(item, index) in talkRecordList" :key="index">
                   <div class="record-table-item" style="flex: 1">
                     {{ item.name }}
                   </div>
@@ -140,15 +99,11 @@
                   <div class="record-table-item" style="flex: 2">
                     {{ item.talkTime }}
                   </div>
-                  <div
-                    class="record-table-item"
-                    style="flex: 1"
-                    :class="{
-                      'verify-status': item.statusCode == '01',
-                      'success-status': item.statusCode == '02',
-                      'refuse-status': item.statusCode == '03',
-                    }"
-                  >
+                  <div class="record-table-item" style="flex: 1" :class="{
+                    'verify-status': item.statusCode == '01',
+                    'success-status': item.statusCode == '02',
+                    'refuse-status': item.statusCode == '03',
+                  }">
                     {{ item.status }}
                   </div>
                 </div>
@@ -188,7 +143,7 @@
 import neilModal from "@/components/neil-modal/neil-modal.vue";
 import ePicker from "@/components/e-picker/e-picker.vue";
 import xflSelect from "@/components/xfl-select/xfl-select.vue";
-import { dateFormat } from "@/common/utils/util.js";
+import { dateFormat, currentPages } from "@/common/utils/util.js";
 import Api from "@/common/api";
 import { mapState } from "vuex";
 import moodImgList from "@/static/mock/moodImgList.json";
@@ -254,7 +209,7 @@ export default {
     // 获取今日心情
     this.getTodayMoodInfo();
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
   },
   methods: {
     // 菜单切换
@@ -306,7 +261,7 @@ export default {
     },
     // 选择预约类型
     selectAppointmentType(e) {
-      this.appointmentType = e.originItem.code;
+      this.appointmentType = e.orignItem.code;
     },
     // 选择今日心情
     selectTodayMood(item) {
@@ -316,7 +271,7 @@ export default {
     handleRegSubmit() {
       let talkRegList = [this.regDate, this.moodCode, this.appointmentType];
       if (talkRegList.includes("")) {
-        this.$parent.handleShowToast("选择内容不完整", "center");
+        currentPages().handleShowToast("选择内容不完整", "center");
         return;
       }
       let params = {
@@ -350,7 +305,7 @@ export default {
     handleRecordQuery() {
       let selectDateList = [this.startDate, this.endDate];
       if (selectDateList.includes("")) {
-        this.$parent.handleShowToast("请选择预约时间", "center");
+        currentPages().handleShowToast("请选择预约时间", "center");
         return;
       }
       this.setTalkRecordPageParam(1, 10);
@@ -360,7 +315,7 @@ export default {
     handleRecorListScrolltolower() {
       // 已获取所有数据
       if (this.talkRecordList.length >= this.talkRecordTotal) {
-        return this.$parent.handleShowToast("暂无更多数据", "center");
+        return currentPages().handleShowToast("暂无更多数据", "center");
       }
       this.talkRecordPageParam.pageIndex += 1;
       this.getTalkRecordInfo();
@@ -378,7 +333,7 @@ export default {
       let res = await Api.apiCall("post", Api.index.getTalkRecordInfo, params);
       if (res.state.code == 200) {
         if (this.talkRecordPageParam.pageIndex == 1 && !res.data.length) {
-          this.$parent.handleShowToast("暂无数据", "center");
+          currentPages().handleShowToast("暂无数据", "center");
         }
         if (this.talkRecordPageParam.pageIndex == 1) {
           this.talkRecordList = res.data;

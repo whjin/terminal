@@ -92,6 +92,7 @@ import Api from '@/common/api.js';
 import { mapState } from "vuex";
 import { getDate } from '@/common/utils/util.js';
 import neilModal from "@/components/neil-modal/neil-modal.vue";
+import { currentPages } from "@/common/utils/util.js";
 
 export default {
   components: {
@@ -285,7 +286,7 @@ export default {
     } catch (error) {
     }
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
   },
   destroyed() {
   }

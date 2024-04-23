@@ -3,7 +3,7 @@
 		{
 			"path": "pages/home/index/index",
 			"style": {
-				"navigationBarTitleText": "主页",
+				"navigationBarTitleText": "仓内屏",
 				"app-plus": {
 					"bounce": "none",
 					"background": "#000",
@@ -37,7 +37,7 @@
 	"globalStyle": {
 		"navigationStyle": "custom",
 		"pageOrientation": "landscape",
-		"rpxCalcBaseDeviceWidth": 980
+		"rpxCalcBaseDeviceWidth": 1060
 	},
 	"condition": {
 		"current": 0,

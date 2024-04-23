@@ -211,7 +211,7 @@
 import neilModal from "@/components/neil-modal/neil-modal.vue";
 import ePicker from "@/components/e-picker/e-picker.vue";
 import xflSelect from "@/components/xfl-select/xfl-select.vue";
-import { dateFormat, isNullStr } from "@/common/utils/util.js";
+import { dateFormat, isNullStr, currentPages } from "@/common/utils/util.js";
 import Api from "@/common/api";
 import { mapMutations } from "vuex";
 import faceColumns from "@/static/mock/faceColumns.json";
@@ -277,7 +277,7 @@ export default {
     // 获取面对面类型
     this.getFaceType();
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
   },
   beforeDestroy() {
     this.stopFacePreview();
@@ -315,8 +315,8 @@ export default {
     },
     // 选择面对面民警
     selectPolice(item) {
-      this.policeInfo.code = item.originItem.code;
-      this.policeInfo.value = item.originItem.value;
+      this.policeInfo.code = item.orignItem.code;
+      this.policeInfo.value = item.orignItem.value;
     },
     // 清空面对面民警
     clearSelectPolice() {
@@ -324,8 +324,8 @@ export default {
     },
     // 选择面对面类型
     selectFaceType(item) {
-      this.faceType = item.originItem.code;
-      this.faceRemark = item.originItem.value;
+      this.faceType = item.orignItem.code;
+      this.faceRemark = item.orignItem.value;
     },
     // 清空面对面类型
     clearFaceType() {
@@ -371,7 +371,7 @@ export default {
             if (this.imageList.length < 4) {
               this.imageList.push({ uri });
             } else {
-              this.$parent.handleShowToast("最多上传4张照片", "center");
+              currentPages().handleShowToast("最多上传4张照片", "center");
             }
           });
         });
@@ -395,14 +395,14 @@ export default {
     // 保存登记
     handleSaveReg() {
       if (!Object.keys(this.policeInfo).length) {
-        this.$parent.handleShowToast("请选择面对面民警", "center");
+        currentPages().handleShowToast("请选择面对面民警", "center");
         return;
       }
       if (!this.faceType) {
-        this.$parent.handleShowToast("请选择面对面类型", "center");
+        currentPages().handleShowToast("请选择面对面类型", "center");
         return;
       }
-      let startTime = this.$parent.readCardTime;
+      let startTime = currentPages().readCardTime;
       let params = {
         startTime,
         roomNo: this.roomInfo.roomNo,
@@ -445,12 +445,12 @@ export default {
     async saveFaceRegister(params) {
       let res = await Api.apiCall("post", Api.police.saveFaceRegister, params);
       if (res.state.code == 200) {
-        this.$parent.handleShowToast("提交面对面记录成功！");
+        currentPages().handleShowToast("提交面对面记录成功！");
       }
     },
     // 取消登记
     cancelFaceReg() {
-      this.$parent.onClickBack();
+      currentPages().onClickBack();
     },
     // 选择查询日期
     selectRecordDate(e) {
@@ -485,7 +485,7 @@ export default {
             );
           });
         } else {
-          this.$parent.handleShowToast("暂无数据", "center");
+          currentPages().handleShowToast("暂无数据", "center");
         }
       }
     },

@@ -43,7 +43,7 @@
                       {{ item.time }}
                     </div>
                     <div class="content-item" style="flex: 1">
-                      {{ item.status == 1 ? '已服药' : item.status == 3 ? '服药退签' : '未服药' }}
+                      {{ item.status == 1 ? '已服药' : '未服药' }}
                     </div>
                     <div class="content-item" style="flex: 2">
                       <div class="button" @click="openSignModal(item)">服药签名</div>
@@ -78,7 +78,7 @@
                       {{ item.time }}
                     </div>
                     <div class="content-item" style="flex: 1">
-                      {{ item.status == 1 ? '已服药' : item.status == 3 ? '服药退签' : '未服药' }}
+                      {{ item.status == 1 ? '已服药' : '未服药' }}
                     </div>
                   </div>
                 </div>
@@ -100,25 +100,9 @@
           </div>
           <view class="modal-horizontal-divider"></view>
           <div class="common-modal-content">
-            <htz-signature v-if="showSignModal" @submit="signSuccess" @fail="signFail" cid="signId"
-              btnText="指纹确认"></htz-signature>
+            <htz-signature v-if="showSignModal" @submit="signSuccess" @fail="signFail" cid="signId"></htz-signature>
           </div>
         </div>
-      </neil-modal>
-      <neil-modal :show="showFingerModal">
-        <view class="finger-modal-container">
-          <view class="modal-header">
-            <view class="modal-title">指纹确认</view>
-            <div class="modal-close" @click="closeModal('FingerModal')">
-              <image src="/static/images/common/close.png"></image>
-            </div>
-          </view>
-          <view class="page-horizontal-divider"></view>
-          <view class="modal-content">
-            <common-icons iconType="iconzhiwen" size="100" color="#fff" />
-            <text>请按压指纹...</text>
-          </view>
-        </view>
       </neil-modal>
     </div>
   </div>
@@ -131,7 +115,7 @@ import ePicker from "@/components/e-picker/e-picker.vue";
 import xflSelect from "@/components/xfl-select/xfl-select.vue";
 import htzSignature from "@/components/htz-signature/htz-signature.vue";
 import { pathToBase64 } from "@/common/utils/imageTools.js";
-import { dateFormat } from "@/common/utils/util.js";
+import { dateFormat, currentPages } from "@/common/utils/util.js";
 import { mapState } from "vuex";
 import medicationColumns from "@/static/mock/medicationColumns.json";
 
@@ -156,18 +140,8 @@ export default {
       recordList: [],
       // 服药签名弹框
       showSignModal: false,
-      // 服药签名
-      signature: "",
-      // 指纹图像弹框
-      showFingerModal: false,
-      // 设备连接状态
-      isOpen: false,
-      // 按压指纹定时器
-      fingerTimer: null,
-      // 指纹图像
-      fingerImage: "",
       // 分页参数
-      pageParam: {
+      pageParams: {
         pageIndex: 1,
         pageSize: 10,
       },
@@ -185,11 +159,7 @@ export default {
     // 获取服药确认列表
     this.getPlanInfo();
     // 开启倒计时
-    this.$parent.countTimer();
-  },
-  beforeDestroy() {
-    // 关闭指纹
-    this.closeFingerPrint();
+    currentPages().countTimer();
   },
   methods: {
     // 菜单切换
@@ -200,7 +170,7 @@ export default {
         this.getPlanInfo();
       } else {
         this.recordList = [];
-        this.pageParam = {
+        this.pageParams = {
           pageIndex: 1,
           pageSize: 10,
         };
@@ -223,72 +193,16 @@ export default {
     // 获取签名成功
     signSuccess(res) {
       this.handlePathToBase64(res.tempFilePath).then(base64Str => {
-        this.closeModal("SignModal");
-        this.signature = base64Str;
-        // 采集指纹
-        this.startFingerprint();
+        // 保存服药记录
+        this.saveMedicineInfo(base64Str);
       });
     },
     // 获取签名失败
     signFail(err) {
-      this.$parent.handleShowToast("获取签名失败", "center", 5000);
-    },
-    // 开始指纹采集
-    startFingerprint() {
-      this.showFingerModal = true;
-      this.initFingerPrint();
-      setTimeout(() => {
-        this.getFingerImage();
-      }, 1500);
-    },
-    // 获取指纹图像
-    getFingerImage() {
-      this.$parent.voiceBroadcast("请按压指纹");
-      clearInterval(this.fingerTimer);
-      this.fingerTimer = setInterval(() => {
-        if (getApp().globalData.Fingerprint.isPressFinger() == 0) {
-          let res = getApp().globalData.Fingerprint.getRawImage();
-          if (res.code == 0) {
-            this.closeModal("FingerModal");
-            this.fingerImage = res.image.replace(/[\r\n]/g, "");
-            // 保存服药记录
-            this.saveMedicineInfo();
-            // 关闭指纹
-            this.closeFingerPrint();
-          } else {
-            this.$parent.voiceBroadcast("采集失败，请重新按压指纹");
-          }
-        }
-      }, 1000);
-    },
-    // 设备连接
-    initFingerPrint() {
-      if (!this.isOpen) {
-        getApp().globalData.Fingerprint.init((result) => {
-          if (result == 0) {
-            this.isOpen = true;
-            console.log("设备已连接");
-          } else {
-            console.log("设备连接失败");
-          }
-        });
-      }
-    },
-    // 关闭指纹连接
-    closeFingerPrint() {
-      clearInterval(this.fingerTimer);
-      if (this.isOpen) {
-        let res = getApp().globalData.Fingerprint.close();
-        if (res == 0) {
-          this.isOpen = false;
-          console.log("关闭设备");
-        } else {
-          console.log("关闭设备失败");
-        }
-      }
+      currentPages().handleShowToast("获取签名失败", "center", 5000);
     },
     // 保存服药记录
-    async saveMedicineInfo() {
+    async saveMedicineInfo(signature) {
       const {
         doctors: doctorName,
         diagnosis: doctorProof,
@@ -303,17 +217,14 @@ export default {
           url: "",
           status: 1,
           rybh: this.personInfo.rybh,
-          operatePrisoner: this.personInfo.operate,
           drugDispenseId,
-          signature: this.signature,
-          fingerImage: this.fingerImage,
+          signature,
         }
       };
       let res = await Api.apiCall("post", Api.prisoner.medication.saveMedicineRecord, params);
       if (res.state.code == 200) {
         this.closeModal("SignModal");
-        this.closeModal("FingerModal");
-        this.$parent.handleShowToast("保存服药签名信息成功");
+        currentPages().handleShowToast("保存服药签名信息成功");
         // 获取服药确认列表
         this.getPlanInfo();
       }
@@ -324,7 +235,7 @@ export default {
         data: {
           rybh: this.personInfo.rybh,
         },
-        pageParam: this.pageParam,
+        pageParams: this.pageParams,
       };
       let res = await Api.apiCall("post", Api.prisoner.medication.getMedicineRecords, params);
       if (res.state.code == 200) {
@@ -340,9 +251,9 @@ export default {
     handleScrolltolower() {
       // 已获取所有数据
       if (this.recordList.length >= this.recordTotal) {
-        return this.$parent.handleShowToast("暂无更多数据");
+        return currentPages().handleShowToast("暂无更多数据");
       }
-      this.pageParam.pageIndex++;
+      this.pageParams.pageIndex++;
       this.getRecordInfo();
     },
     // 图片路径转Base64

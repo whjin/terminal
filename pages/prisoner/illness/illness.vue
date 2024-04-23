@@ -7,19 +7,11 @@
         </div>
         <div class="illness-box">
           <div class="illness-menu-list">
-            <div
-              class="illness-menu-item"
-              :class="currentPage == 1 ? 'illness-menu-active' : ''"
-              @click="switchPage(1)"
-            >
+            <div class="illness-menu-item" :class="currentPage == 1 ? 'illness-menu-active' : ''" @click="switchPage(1)">
               <common-icons iconType="iconyuyuejiuyi" size="38" color="#fff" />
               <text>预约就医</text>
             </div>
-            <div
-              class="illness-menu-item"
-              :class="currentPage == 2 ? 'illness-menu-active' : ''"
-              @click="switchPage(2)"
-            >
+            <div class="illness-menu-item" :class="currentPage == 2 ? 'illness-menu-active' : ''" @click="switchPage(2)">
               <common-icons iconType="iconrecord" size="46" color="#fff" />
               <text>预约记录</text>
             </div>
@@ -27,25 +19,15 @@
           <div class="illness-vertical-divider"></div>
           <div v-if="currentPage == 1" class="illness-reserve-container">
             <scroll-view scroll-y="true" class="illness-reserve-scroll">
-              <div
-                class="illness-symptom"
-                v-for="(list, index) in symptomList"
-                :key="index"
-              >
+              <div class="illness-symptom" v-for="(list, index) in symptomList" :key="index">
                 <div class="title">{{ list.name }}</div>
                 <div class="illness-symptom-list">
-                  <div
-                    class="symptom-item mood-img"
-                    :class="{
-                      'mood-select-img':
-                        item.value == commonSymptom ||
-                        item.value == emergencyDisease ||
-                        item.value == otherSymptom,
-                    }"
-                    v-for="(item, index) in list.data"
-                    :key="index"
-                    @click="selectSymptom(item, list.typeCode)"
-                  >
+                  <div class="symptom-item mood-img" :class="{
+                    'mood-select-img':
+                      item.value == commonSymptom ||
+                      item.value == emergencyDisease ||
+                      item.value == otherSymptom,
+                  }" v-for="(item, index) in list.data" :key="index" @click="selectSymptom(item, list.typeCode)">
                     <text>{{ item.name }}</text>
                   </div>
                 </div>
@@ -64,11 +46,7 @@
               <div class="illness-symptom">
                 <div class="title">
                   开始时间：
-                  <e-picker
-                    mode="date"
-                    class="picker-img"
-                    @change="selectSymptomTime"
-                  >
+                  <e-picker mode="date" class="picker-img" @change="selectSymptomTime">
                     <div class="illness-date">{{ symptomTime }}</div>
                   </e-picker>
                 </div>
@@ -77,11 +55,7 @@
                 <div class="title">备注：</div>
                 <div class="illness-bottom">
                   <div class="illness-remark">
-                    <textarea
-                      v-model="remark"
-                      maxlength="-1"
-                      @input="handleInputChange"
-                    ></textarea>
+                    <textarea v-model="remark" maxlength="-1" @input="handleInputChange"></textarea>
                   </div>
                   <div class="btn-submit" @click="reserveSubmit">提交</div>
                 </div>
@@ -92,21 +66,11 @@
             <div class="record-form-box">
               <div class="record-select">
                 <label>上报时间：</label>
-                <e-picker
-                  mode="date"
-                  class="picker-img"
-                  :showValue="startDate"
-                  @change="selectStartDate"
-                >
+                <e-picker mode="date" class="picker-img" :showValue="startDate" @change="selectStartDate">
                   <div class="illness-date">{{ startDate }}</div>
                 </e-picker>
                 <div class="divider-line">-</div>
-                <e-picker
-                  mode="date"
-                  class="picker-img"
-                  :showValue="endDate"
-                  @change="selectEndDate"
-                >
+                <e-picker mode="date" class="picker-img" :showValue="endDate" @change="selectEndDate">
                   <div class="illness-date">{{ endDate }}</div>
                 </e-picker>
               </div>
@@ -116,25 +80,13 @@
             </div>
             <div class="record-table-box">
               <div class="table-head">
-                <div
-                  class="table-head-item"
-                  v-for="(item, index) in illnessColumns"
-                  :key="index"
-                  :style="{ flex: item.flex }"
-                >
+                <div class="table-head-item" v-for="(item, index) in illnessColumns" :key="index"
+                  :style="{ flex: item.flex }">
                   {{ item.title }}
                 </div>
               </div>
-              <scroll-view
-                scroll-y="true"
-                class="record-table-scroll"
-                @scrolltolower="scrollToLower"
-              >
-                <div
-                  class="table-content"
-                  v-for="(item, index) in recordList"
-                  :key="index"
-                >
+              <scroll-view scroll-y="true" class="record-table-scroll" @scrolltolower="scrollToLower">
+                <div class="table-content" v-for="(item, index) in recordList" :key="index">
                   <div class="record-table-item" style="flex: 1">
                     {{ item.date | dateFormatFilter }}
                   </div>
@@ -145,16 +97,12 @@
                     {{ item.status }}
                   </div>
                   <div class="record-table-item" style="flex: 1">
-                    <div
-                      class="btn-query"
-                      :class="{
-                        disabled: !(
-                          nowTimestamp > item.date + 3600000 &&
-                          item.statusCode == 1
-                        ),
-                      }"
-                      @click="handleIllnessUrge(item)"
-                    >
+                    <div class="btn-query" :class="{
+                      disabled: !(
+                        nowTimestamp > item.date + 3600000 &&
+                        item.statusCode == 1
+                      ),
+                    }" @click="handleIllnessUrge(item)">
                       催办
                     </div>
                   </div>
@@ -193,7 +141,7 @@
 
 <script>
 import neilModal from "@/components/neil-modal/neil-modal.vue";
-import { dateFormat, uniqueArr } from "@/common/utils/util.js";
+import { dateFormat, uniqueArr, currentPages } from "@/common/utils/util.js";
 import Api from "@/common/api.js";
 import { mapState } from "vuex";
 import ePicker from "@/components/e-picker/e-picker.vue";
@@ -261,14 +209,14 @@ export default {
   },
   mounted() {
     // 开启倒计时
-    this.$parent.countTimer();
-    this.$parent.voiceBroadcast("请将手掌移至屏幕正上方测温仪进行测温");
+    currentPages().countTimer();
+    currentPages().voiceBroadcast("请将手掌移至屏幕正上方测温仪进行测温");
     // 预约就医类型
     this.getIllnessTypeInfo();
   },
   destroyed() {
     // 停止测温
-    this.$parent.closeThermometryModule();
+    currentPages().closeThermometryModule();
   },
   methods: {
     // 菜单切换
@@ -282,12 +230,12 @@ export default {
         let lastMonthDate = date.setMonth(date.getMonth() - 1);
         this.startDate = dateFormat("YYYY-MM-DD", new Date(lastMonthDate));
         this.getIllnessRecordInfo(this.pageIndex);
-        this.$parent.closeThermometryModule();
+        currentPages().closeThermometryModule();
       }
     },
     // 预约就医类型
     async getIllnessTypeInfo() {
-      this.$parent.openThermometryModule();
+      currentPages().openThermometryModule();
       let res = await Api.apiCall("get", Api.index.getIllnessTypeInfo, null);
       if (res.state.code == 200) {
         this.nowTimestamp = res.date || new Date().getTime();
@@ -319,11 +267,11 @@ export default {
         this.emergencyDisease == "" &&
         this.otherSymptom == ""
       ) {
-        this.$parent.handleShowToast("请选择就医类型", "center");
+        currentPages().handleShowToast("请选择就医类型", "center");
         return;
       }
       if (this.foreheadTemperature < this.lowTemperature) {
-        this.$parent.handleShowToast("请先进行测温", "center");
+        currentPages().handleShowToast("请先进行测温", "center");
         return;
       }
       let params = {
@@ -351,7 +299,7 @@ export default {
     },
     // 重测
     reMeasureTemperature() {
-      this.$parent.openThermometryModule();
+      currentPages().openThermometryModule();
     },
     // 催办
     async handleIllnessUrge(item) {
@@ -367,7 +315,7 @@ export default {
         };
         let res = await Api.apiCall("post", Api.index.illnessUrge, params);
         if (res.state.code == 200) {
-          this.$parent.handleShowToast("催办成功", "center");
+          currentPages().handleShowToast("催办成功", "center");
         }
       }
     },
@@ -389,13 +337,13 @@ export default {
     },
     // 监听键盘事件
     handleInputChange(e) {
-      this.$parent.initCountTimeout();
+      currentPages().initCountTimeout();
     },
     // 查询预约记录
     handleRecordQuery() {
       let selectDateList = [this.startDate, this.endDate];
       if (selectDateList.includes("")) {
-        this.$parent.handleShowToast("请选择上报时间", "center");
+        currentPages().handleShowToast("请选择上报时间", "center");
         return;
       }
       this.pageIndex = 1;
@@ -420,7 +368,7 @@ export default {
         this.totalPage = res.page.totalPage;
         this.recordList = uniqueArr(this.recordList.concat(res.data), "id");
         if (!res.data.length) {
-          this.$parent.handleShowToast("暂无数据", "center");
+          currentPages().handleShowToast("暂无数据", "center");
         }
       }
     },
@@ -440,7 +388,7 @@ export default {
       // 当存在两个有效值，关闭实时测温，取第二个做完当前体温
       let len = this.foreheadTemperatureList.length;
       if (len == 2) {
-        this.$parent.closeThermometryModule();
+        currentPages().closeThermometryModule();
         this.foreheadTemperature = this.foreheadTemperatureList[len - 1];
       }
     },

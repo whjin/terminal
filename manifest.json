@@ -1,9 +1,9 @@
 {
     "name" : "终端分机",
     "appid" : "__UNI__E9B1944",
-    "description" : "终端分机系统（仓内屏-来邦）",
-    "versionName" : "4.4.0",
-    "versionCode" : 440,
+    "description" : "终端分机系统（分机-来邦）",
+    "versionName" : "1.1.2",
+    "versionCode" : 112,
     "transformPx" : false,
     "networkTimeout" : {
         "request" : 20000,
@@ -157,16 +157,22 @@
     "h5" : {
         "title" : "智能终端",
         "router" : {
-            "base" : "",
-            "mode" : "history"
+            "base" : "./",
+            "mode" : "hash"
         },
         "permissions" : {
             "File" : {
                 "description" : "文件系统"
             }
         },
+        "template" : "",
         "devServer" : {
-            "https" : true
+            "public" : "0.0.0.0"
+        },
+        "optimization" : {
+            "treeShaking" : {
+                "enable" : true
+            }
         }
     }
 }

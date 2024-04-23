@@ -1344,3 +1344,7 @@ loadmore .uni-loadmore {
 .uni-picker-view-indicator:before {
   background: #00c6ff;
 }
+
+::-webkit-scrollbar {
+  display: none;
+}

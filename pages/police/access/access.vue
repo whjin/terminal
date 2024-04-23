@@ -6,17 +6,10 @@
     <view class="uni-flex uni-flex-item" style="height: 85%">
       <!-- 页面Tab -->
       <view class="uni-flex uni-column page-menu-area">
-        <view
-          v-for="tab in tabConfig"
-          :key="tab.key"
-          class="uni-flex uni-column page-menu"
-          :class="{ 'page-menu-activate': currentPage == tab.page }"
-          @click="switchPage(tab.page)"
-        >
-          <image
-            :src="`/static/images/room/${tab.key}.png`"
-            style="width: 35.41upx; height: 42.36upx; margin-top: 9.72upx"
-          ></image>
+        <view v-for="tab in tabConfig" :key="tab.key" class="uni-flex uni-column page-menu"
+          :class="{ 'page-menu-activate': currentPage == tab.page }" @click="switchPage(tab.page)">
+          <image :src="`/static/images/room/${tab.key}.png`"
+            style="width: 35.41upx; height: 42.36upx; margin-top: 9.72upx"></image>
           <text style="line-height: 20.83upx; margin-top: 13.19upx">{{
             tab.title
           }}</text>
@@ -26,105 +19,53 @@
       <view v-if="currentPage == 3" class="out-room-record uni-flex-item">
         <view class="search-param-toolbar">
           <view class="param-list">
-            <view
-              v-for="params in searchParamConfig"
-              :key="params.param"
-              class="param-item"
-            >
+            <view v-for="params in searchParamConfig" :key="params.param" class="param-item">
               <text class="param-title">{{ params.title }}：</text>
               <!-- 在押人员 -->
-              <input
-                v-if="params.param == 'name'"
-                type="text"
-                class="param-name"
-                :placeholder="params.placeholder"
-                @input="handlePrisonerNameInput"
-              />
+              <input v-if="params.param == 'name'" type="text" class="param-name" :placeholder="params.placeholder"
+                @input="handlePrisonerNameInput" />
               <!-- 时间选择器 外出 -->
-              <e-picker
-                v-else-if="params.param == 'outTime'"
-                mode="dateTime"
-                @change="pickeOutTime"
-              >
+              <e-picker v-else-if="params.param == 'outTime'" mode="dateTime" @change="pickeOutTime">
                 <div class="value had-border date">
                   {{ searchParams.data[params.param] }}
                 </div>
               </e-picker>
               <!-- 时间选择器 返回 -->
-              <e-picker
-                v-else-if="params.param == 'backTime'"
-                mode="dateTime"
-                @change="pickeBackTime"
-              >
+              <e-picker v-else-if="params.param == 'backTime'" mode="dateTime" @change="pickeBackTime">
                 <div class="value had-border date">
                   {{ searchParams.data[params.param] }}
                 </div>
               </e-picker>
               <!-- 下拉选择 外出原因 -->
-              <xfl-select
-                v-else-if="params.param == 'outType'"
-                :list="searchParamList[params.list]"
-                :clearable="false"
-                :placeholder="params.placeholder"
-                @change="selectOutType"
-              ></xfl-select>
+              <xfl-select v-else-if="params.param == 'outType'" :list="searchParamList[params.list]" :clearable="false"
+                :placeholder="params.placeholder" @change="selectOutType"></xfl-select>
               <!-- 下拉选择 负责民警 -->
-              <xfl-select
-                v-else
-                :list="searchParamList[params.list]"
-                :clearable="false"
-                :placeholder="params.placeholder"
-                @change="selectDutyPolice"
-              ></xfl-select>
+              <xfl-select v-else :list="searchParamList[params.list]" :clearable="false" :placeholder="params.placeholder"
+                @change="selectDutyPolice"></xfl-select>
             </view>
           </view>
           <view class="search-btn-box">
-            <view class="search-btn" @touchstart.stop="handleSearchRecord"
-              >查询</view
-            >
+            <view class="search-btn" @click="handleSearchRecord">查询</view>
           </view>
         </view>
         <view class="record-list">
           <view class="uni-flex">
-            <view
-              v-for="item in recordListTitleConfig"
-              :key="item.code"
-              class="uni-flex-item table-th"
-              :class="{ 'table-th-radius-tl': item.code == 'index' }"
-              :style="
-                item.code == 'outTime' || item.code == 'backTime'
-                  ? 'flex: 2;'
-                  : ''
-              "
-              >{{ item.title }}</view
-            >
+            <view v-for="item in recordListTitleConfig" :key="item.code" class="uni-flex-item table-th"
+              :class="{ 'table-th-radius-tl': item.code == 'index' }" :style="item.code == 'outTime' || item.code == 'backTime'
+                ? 'flex: 2;'
+                : ''
+                ">{{ item.title }}</view>
           </view>
           <view class="uni-flex table-td-divider" v-if="!recordList.length">
-            <view class="uni-flex-item table-td" style="text-align: center"
-              >暂无记录</view
-            >
+            <view class="uni-flex-item table-td" style="text-align: center">暂无记录</view>
           </view>
-          <scroll-view
-            v-else
-            scroll-y="true"
-            style="height: 378upx; width: 100%"
-            @scrolltolower="handleSearchDataToLower"
-          >
-            <view
-              v-for="(record, index) in recordList"
-              :key="record.id"
-              class="uni-flex table-td-divider"
-            >
-              <view
-                v-for="item in recordListTitleConfig"
-                :key="item.code"
-                class="uni-flex-item table-td"
-                :style="
-                  item.code == 'outTime' || item.code == 'backTime'
-                    ? 'flex: 2;'
-                    : ''
-                "
-              >
+          <scroll-view v-else scroll-y="true" style="height: 378upx; width: 100%"
+            @scrolltolower="handleSearchDataToLower">
+            <view v-for="(record, index) in recordList" :key="record.id" class="uni-flex table-td-divider">
+              <view v-for="item in recordListTitleConfig" :key="item.code" class="uni-flex-item table-td" :style="item.code == 'outTime' || item.code == 'backTime'
+                ? 'flex: 2;'
+                : ''
+                ">
                 {{ record[item.code] | dateFormatFilter(item.code, index) }}
               </view>
             </view>
@@ -149,11 +90,8 @@
         </view>
         <scroll-view scroll-y>
           <view class="person-list">
-            <view
-              v-for="item in displayedPersonList"
-              :key="item.rybh"
-              class="person-list-item uni-flex uni-column inner-glow-box"
-            >
+            <view v-for="item in displayedPersonList" :key="item.rybh"
+              class="person-list-item uni-flex uni-column inner-glow-box">
               <!-- 头像 -->
               <view class="img-warrper">
                 <image class="img" :src="item.imgUrl"></image>
@@ -162,9 +100,8 @@
               <view class="person-info">
                 <view class="name text-scroll-warrper">
                   <text class="val">姓名：</text>
-                  <scroll-view scroll-x class="text-scroll">{{
-                    item.name
-                  }}</scroll-view>
+                  <scroll-view scroll-x class="text-scroll">
+                    {{ item.name }}</scroll-view>
                 </view>
                 <view class="serial-num text-scroll-warrper">
                   <text class="val">编号：</text>
@@ -174,22 +111,18 @@
                 </view>
               </view>
               <!-- 操作按钮 带出/带回 -->
-              <text
-                class="operate-btn"
-                :class="{
-                  'red-btn': currentPage == 1,
-                  'take-btn': currentPage == 1 && item.waitForTakeState,
-                  'blue-btn': currentPage == 2,
-                  'process-btn': currentPage == 2 && item.processState,
-                }"
-                @click="handleOperate(item)"
-              >
+              <text class="operate-btn" :class="{
+                    'red-btn': currentPage == 1,
+                    'take-btn': currentPage == 1 && item.waitForTakeState,
+                    'blue-btn': currentPage == 2,
+                    'process-btn': currentPage == 2 && item.processState,
+                  }" @click="handleOperate(item)">
                 {{
                   currentPage == 1
-                    ? item.waitForTakeState
-                      ? `待${item.waitForTakeType}`
-                      : "带出"
-                    : item.processState
+                  ? item.waitForTakeState
+                    ? `待${item.waitForTakeType}`
+                    : "带出"
+                  : item.processState
                     ? `${item.waitForTakeType}带回`
                     : "带回"
                 }}
@@ -199,28 +132,14 @@
         </scroll-view>
       </view>
     </view>
-    <recognition-dialogs
-      ref="recognitionDialogs"
-      useFor="outroom"
-      isConfirm
-      confirmText="人工核对无误"
-      :regConfig="regConfig"
-      :isShow="showRecognitionDialogs"
-      @faceRecognitionSuccess="faceRecognitionSuccess"
-      @fingerRecognitionSuccess="fingerRecognitionSuccess"
-      @close="recognitionDialogsClose"
-      @confirm="confirmHandler"
-    ></recognition-dialogs>
-    <neil-modal
-      :show="showComfirmDialog"
-      :autoClose="true"
-      @close="closeComfirmDialog"
-    >
+    <recognition-dialogs ref="recognitionDialogs" useFor="outroom" isConfirm confirmText="人工核对无误" :regConfig="regConfig"
+      :isShow="showRecognitionDialogs" @faceRecognitionSuccess="faceRecognitionSuccess"
+      @fingerRecognitionSuccess="fingerRecognitionSuccess" @close="recognitionDialogsClose"
+      @confirm="confirmHandler"></recognition-dialogs>
+    <neil-modal :show="showComfirmDialog" :autoClose="true" @close="closeComfirmDialog">
       <view class="modal-header">
-        <view class="modal-title"
-          >{{ currentPage == 1 ? "外出" : "返回" }}监室</view
-        >
-        <div class="modal-close" @touchstart.stop="closeComfirmDialog">
+        <view class="modal-title">{{ currentPage == 1 ? "外出" : "返回" }}监室</view>
+        <div class="modal-close" @click="closeComfirmDialog">
           <image src="/static/images/common/close.png"></image>
         </div>
       </view>
@@ -228,14 +147,9 @@
       <view class="comfirm-dialog-content">
         <view v-if="currentPage == 1" class="out-type-select param-item">
           <text class="out-type-title">外出原因：</text>
-          <xfl-select
-            ref="outTypeRef"
-            :list="searchParamList.outTypeList"
-            :class="{ 'disabled-select': !!selectedPrisoner.waitForTake }"
-            :clearable="false"
-            placeholder="请选择外出原因"
-            @change="selectConfirmOutType"
-          ></xfl-select>
+          <xfl-select ref="outTypeRef" :list="searchParamList.outTypeList"
+            :class="{ 'disabled-select': !!selectedPrisoner.waitForTake }" :clearable="false" placeholder="请选择外出原因"
+            @change="selectConfirmOutType"></xfl-select>
         </view>
         <!-- 头像 -->
         <view class="selected-prisoner-img-box inner-glow-box">
@@ -247,15 +161,13 @@
         <view class="selected-prisoner-info">
           <view class="info-name text-scroll-warrper">
             <text class="val">姓名：</text>
-            <scroll-view scroll-x class="text-scroll">{{
-              selectedPrisoner.name
-            }}</scroll-view>
+            <scroll-view scroll-x class="text-scroll">
+              {{ selectedPrisoner.name }}</scroll-view>
           </view>
           <view class="info-dabh text-scroll-warrper">
             <text class="val">编号：</text>
-            <scroll-view scroll-x class="text-scroll">{{
-              selectedPrisoner.dabh
-            }}</scroll-view>
+            <scroll-view scroll-x class="text-scroll">
+              {{ selectedPrisoner.dabh }}</scroll-view>
           </view>
           <view class="info-user-name text-scroll-warrper">
             <text class="val">负责民警：</text>
@@ -263,10 +175,7 @@
               personInfo.name
             }}</scroll-view>
           </view>
-          <view
-            v-if="currentPage == 2"
-            class="info-out-type text-scroll-warrper"
-          >
+          <view v-if="currentPage == 2" class="info-out-type text-scroll-warrper">
             <text class="val">外出原因：</text>
             <scroll-view scroll-x class="text-scroll">{{
               selectedPrisoner.outType
@@ -274,14 +183,10 @@
           </view>
         </view>
         <!-- 操作按钮 带出/带回 -->
-        <text
-          class="operate-btn"
-          :class="{
-            'red-btn': currentPage == 1,
-            'blue-btn': currentPage == 2,
-          }"
-          @touchstart.stop="submit"
-        >
+        <text class="operate-btn" :class="{
+              'red-btn': currentPage == 1,
+              'blue-btn': currentPage == 2,
+            }" @click="submit">
           {{ currentPage == 1 ? "带出" : "带回" }}
         </text>
       </view>
@@ -297,11 +202,7 @@
         </div>
         <div class="page-horizontal-divider"></div>
         <div class="takeback-modal-box">
-          <common-icons
-            iconType="iconfail"
-            size="100"
-            color="#fff"
-          ></common-icons>
+          <common-icons iconType="iconfail" size="100" color="#fff"></common-icons>
           <text class="takeback-content">{{ takeBackTips }}</text>
         </div>
       </div>
@@ -314,7 +215,7 @@ import Api from "@/common/api.js";
 import { mapState } from "vuex";
 import ePicker from "@/components/e-picker/e-picker.vue";
 import xflSelect from "@/components/xfl-select/xfl-select.vue";
-import { dateFormat } from "@/common/utils/util.js";
+import { dateFormat, currentPages } from "@/common/utils/util.js";
 
 export default {
   name: "access",
@@ -500,7 +401,7 @@ export default {
   mounted() {
     this.getPrisonerInfo();
     // 开启倒计时
-    this.$parent.countTimer();
+    currentPages().countTimer();
   },
   destroyed() {
     this.showComfirmDialog = false;
@@ -569,15 +470,15 @@ export default {
               item.waitForTake == "01"
                 ? "家属会见"
                 : item.waitForTake == "02"
-                ? "律师会见"
-                : "提讯";
+                  ? "律师会见"
+                  : "提讯";
           }
         });
       }
     },
     // 带出弹框 外出原因 下拉选择
     selectConfirmOutType(outType) {
-      this.takeOutType = outType.originItem.code;
+      this.takeOutType = outType.orignItem.code;
     },
     // 人工核对确认
     confirmHandler() {
@@ -603,7 +504,7 @@ export default {
     // 带出/带回提交
     submit() {
       if (this.currentPage == 1 && !this.takeOutType) {
-        return this.$parent.handleShowToast("请选择外出原因！", "center");
+        return currentPages().handleShowToast("请选择外出原因！", "center");
       }
       this.showComfirmDialog = false;
       // 人脸验证开关
@@ -628,12 +529,12 @@ export default {
       if ([mKey, mKey2].includes(res.mKey)) {
         this.verifySuccess();
       } else {
-        this.$parent.voiceBroadcast("验证不通过，请确认在押人员信息");
+        currentPages().voiceBroadcast("验证不通过，请确认在押人员信息");
       }
     },
     // 验证成功
     verifySuccess() {
-      this.$parent.voiceBroadcast("验证通过");
+      currentPages().voiceBroadcast("验证通过");
       setTimeout(() => {
         this.recognitionDialogsClose();
         this.handleTakePrisoner();
@@ -674,7 +575,7 @@ export default {
         this.closeComfirmDialog();
       } else {
         if (this.currentPage == 1) {
-          this.$parent.handleShowToast("操作失败！", "center");
+          currentPages().handleShowToast("操作失败！", "center");
         } else {
           this.takeBackTips = res.state.msg || "操作失败";
           this.openModal("TakeBackTips");
@@ -690,7 +591,7 @@ export default {
         }
         return item;
       });
-      this.$parent.handleShowToast("操作成功！", "center");
+      currentPages().handleShowToast("操作成功！", "center");
     },
     // 关闭弹框
     closeComfirmDialog() {
@@ -716,11 +617,11 @@ export default {
     },
     // 外出原因 下拉选择
     selectOutType(outType) {
-      this.searchParams.data.outType = outType.originItem.code;
+      this.searchParams.data.outType = outType.orignItem.code;
     },
     // 负责民警 下拉选择
     selectDutyPolice(dutyPolice) {
-      this.searchParams.data.dutyPolice = dutyPolice.originItem.accountName;
+      this.searchParams.data.dutyPolice = dutyPolice.orignItem.accountName;
     },
     // 查询记录
     async searchRecord() {
@@ -746,7 +647,7 @@ export default {
     // 滑动加载
     handleSearchDataToLower() {
       if (this.recordList.length >= this.recordTotal) {
-        return this.$parent.handleShowToast("暂无更多数据", "center");
+        return currentPages().handleShowToast("暂无更多数据", "center");
       }
       this.searchParams.page.pageIndex += 1;
       this.searchRecord();
@@ -833,12 +734,15 @@ export default {
     &.red-btn {
       background-color: #d22d2d;
     }
+
     &.take-btn {
       background-color: #ff9900;
     }
+
     &.blue-btn {
       background-color: #007aff;
     }
+
     &.process-btn {
       background-color: #ff9900;
     }
@@ -1052,18 +956,21 @@ export default {
     }
   }
 }
+
 .takeback-modal-container {
   width: 556upx;
   height: 332upx;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+
   .modal-header {
     height: 61.11upx;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 27.77upx;
+
     .modal-title {
       height: 100%;
       display: flex;
@@ -1072,18 +979,21 @@ export default {
       font-weight: 500;
       color: #35fffa;
     }
+
     .modal-close {
       height: 100%;
       width: 22upx;
       display: flex;
       justify-content: center;
       align-items: center;
+
       image {
         height: 22upx;
         width: 22upx;
       }
     }
   }
+
   .takeback-modal-box {
     height: 100%;
     box-sizing: border-box;
@@ -1091,6 +1001,7 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     .takeback-content {
       font-size: 20upx;
       color: #35fffa;

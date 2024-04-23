@@ -1,8 +1,8 @@
 <template>
-	<view class="neil-modal" @touchmove.stop.prevent="bindTouchmove" :class="{ 'neil-modal--show': isOpen }">
-		<view class="neil-modal__mask" @click="clickMask"></view>
-		<view class="neil-modal__container">
-			<view class="neil-modal__header" v-if="title.length > 0">{{
+  <view class="neil-modal" @click.stop.prevent="bindTouchmove" :class="{ 'neil-modal--show': isOpen }">
+    <view class="neil-modal__mask" @click="clickMask"></view>
+    <view class="neil-modal__container">
+      <view class="neil-modal__header" v-if="title.length > 0">{{
         title
       }}</view>
 			<view class="neil-modal__content" :class="content ? 'neil-modal--padding' : ''" :style="{ textAlign: align }">

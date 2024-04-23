@@ -58,7 +58,9 @@
     }
     .home-content-wrapper {
       display: flex;
-      padding-left: 27.77upx;
+      padding: 0 6.88upx 0 13.88upx;
+      width: 100%;
+      box-sizing: border-box;
       .home-content-box {
         display: flex;
         flex-direction: column;
@@ -68,7 +70,6 @@
         .home-content-top {
           display: flex;
           height: 194.44upx;
-          overflow: hidden;
           .home-content-list {
             display: flex;
             flex: 1;
@@ -203,14 +204,10 @@
         }
       }
       .home-sidebar {
+        height: 100%;
         display: flex;
         flex-direction: column;
         flex: 1;
-        width: 100%;
-        height: 100%;
-        box-sizing: border-box;
-        overflow: hidden;
-        padding-left: 16upx;
         .home-sidebar-title {
           height: 24.3upx;
           color: rgba(53, 255, 250, 1);

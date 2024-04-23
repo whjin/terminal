@@ -111,12 +111,13 @@ export default {
 					this.clickNums = 0;
 					// #ifdef APP-PLUS
 					this.version = plus.runtime.version;
-					this.curIP = getApp().globalData.Base.getIpAddress().ip;
+					this.curIP = uni.getStorageSync("authTerminalIP") || "";
 					// #endif
 					this.deviceState = true;
 					setTimeout(() => {
 						this.deviceState = false;
 					}, 3000);
+					document.documentElement.requestFullscreen();
 				} else {
 					this.clickNums = this.clickNums + 1;
 				}

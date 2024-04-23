@@ -1,5 +1,7 @@
 <template>
   <div class="home-container" @click="initCountTimeout">
+    <!-- WebRTC对讲组件 -->
+    <rtc-video ref="rtcVideo" :rtcVideoStyle="rtcVideoStyle"></rtc-video>
     <nav-bar :homeState="homeState && showHomeState" :backState="backState && showBackState" @click-init="onClickInitSet"
       @click-home="onClickHome" @click-back="onClickBack" />
     <div class="home-wrapper">
@@ -12,7 +14,7 @@
         <div class="home-content-box">
           <div class="home-content-top">
             <div class="home-content-list">
-              <div class="home-police-item police" @touchstart.stop="openRoomLevelModal">
+              <div class="home-police-item police" @click="openRoomLevelModal">
                 <div class="home-police-box">
                   <text class="title">监室号</text>
                   <div class="room-box">
@@ -123,7 +125,7 @@
       <terminal-fingerprint v-else-if="currentTab == 7" ref="fingerprint"></terminal-fingerprint>
       <terminal-policeFingerprint v-else-if="currentTab == 34" ref="policeFingerprint"></terminal-policeFingerprint>
       <terminal-shopping v-else-if="currentTab == 8" ref="shopping"></terminal-shopping>
-      <terminal-rotation v-else-if="currentTab == 9" ref="rotation"></terminal-rotation>
+      <terminal-dutyCall v-else-if="currentTab == 9" ref="dutyCall"></terminal-dutyCall>
       <terminal-talk v-else-if="currentTab == 10" ref="talk"></terminal-talk>
       <terminal-illness v-else-if="currentTab == 11" ref="illness"></terminal-illness>
       <terminal-repairClaim v-else-if="currentTab == 12" ref="repairClaim"></terminal-repairClaim>
@@ -147,10 +149,6 @@
         @click-set="handleSetUp" />
     </div>
     <div class="neil-modal-container">
-      <!-- 人脸/指纹登录弹框 -->
-      <recognition-dialogs ref="recognitionDialogs" useFor="login" :isShow="showRecognitionDialogs"
-        @fingerRecognitionSuccess="fingerRecognitionSuccess" @faceRecognitionSuccess="faceRecognitionSuccess"
-        @close="closeRecognitionDialogs"></recognition-dialogs>
       <!-- APP配置-基础URL -->
       <neil-modal class="setting-modal-container" :show="showUrlConfig" @close="closeModal('UrlConfig')">
         <view style="width: 600upx; height: 400upx">
@@ -227,9 +225,7 @@
           </div>
           <div class="common-modal-button">
             <div class="btn-cancel" @click="closeModal('VideoCall')">取消</div>
-            <div class="btn-confirm" @touchstart.stop="handleVideoConnect">
-              确定
-            </div>
+            <div class="btn-confirm" @click="handleVideoConnect">确定</div>
           </div>
         </div>
       </neil-modal>
@@ -250,9 +246,7 @@
           </div>
           <div class="common-modal-button">
             <div class="btn-cancel" @click="closeModal('AlarmInit')">取消</div>
-            <div class="btn-confirm" @touchstart.stop="handleAlarmConfirm">
-              确定
-            </div>
+            <div class="btn-confirm" @click="handleAlarmConfirm">确定</div>
           </div>
         </div>
       </neil-modal>
@@ -277,6 +271,8 @@
               <li @click="openModal('PrisonerFinger')">同步在押人员指纹</li>
               <li @click="policeFingerprint">民警指纹录入</li>
               <li @click="openModal('PoliceFinger')">同步民警指纹</li>
+              <li @click="requestFullscreen">进入全屏</li>
+              <li @click="exitFullscreen">退出全屏</li>
               <li @click="showNavigationBar">显示状态栏</li>
               <li @click="hideNavigationBar">隐藏状态栏</li>
               <li @click="openModal('RestartDev')">设备重启</li>
@@ -290,6 +286,9 @@
           </scroll-view>
         </div>
       </neil-modal>
+      <recognition-dialogs ref="recognitionDialogs" useFor="login" :isShow="showRecognitionDialogs"
+        @fingerRecognitionSuccess="fingerRecognitionSuccess" @faceRecognitionSuccess="faceRecognitionSuccess"
+        @recognitionFail="recognitionFail" @close="closeRecognitionDialogs"></recognition-dialogs>
       <!-- 屏保 -->
       <screen-saver :show="showScreenSaver" @close="closeScreenSaver"></screen-saver>
       <!-- 同步在押人员指纹弹框 -->
@@ -302,9 +301,7 @@
             <div class="btn-cancel" @click="closeModal('PrisonerFinger')">
               取消
             </div>
-            <div class="btn-confirm" @touchstart.stop="syncPrisonerFinger">
-              确定
-            </div>
+            <div class="btn-confirm" @click="syncPrisonerFinger">确定</div>
           </div>
         </div>
       </neil-modal>
@@ -318,7 +315,7 @@
             <div class="btn-cancel" @click="closeModal('PoliceFinger')">
               取消
             </div>
-            <div class="btn-confirm" @touchstart.stop="syncPoliceFinger">
+            <div class="btn-confirm" @click="syncPoliceFinger">
               确定
             </div>
           </div>
@@ -332,9 +329,7 @@
           </div>
           <div class="common-modal-button">
             <div class="btn-cancel" @click="closeModal('RestartDev')">取消</div>
-            <div class="btn-confirm" @touchstart.stop="handleRestartDev">
-              确定
-            </div>
+            <div class="btn-confirm" @click="handleRestartDev">确定</div>
           </div>
         </div>
       </neil-modal>
@@ -346,9 +341,7 @@
           </div>
           <div class="common-modal-button">
             <div class="btn-cancel" @click="closeModal('RestartApp')">取消</div>
-            <div class="btn-confirm" @touchstart.stop="handleRestartApp">
-              确定
-            </div>
+            <div class="btn-confirm" @click="handleRestartApp">确定</div>
           </div>
         </div>
       </neil-modal>
@@ -360,9 +353,7 @@
           </div>
           <div class="common-modal-button">
             <div class="btn-cancel" @click="closeModal('ConfigInfo')">取消</div>
-            <div class="btn-confirm" @touchstart.stop="configInfoSync">
-              确定
-            </div>
+            <div class="btn-confirm" @click="configInfoSync">确定</div>
           </div>
         </div>
       </neil-modal>
@@ -378,7 +369,7 @@
           </scroll-view>
           <div class="update-modal-button">
             <div class="btn-cancel" @click="closeModal('UpdateApp')">取消</div>
-            <div class="btn-confirm" :class="{ 'btn-disabled': disabledClick }" @touchstart.stop="handleUpdateApp">
+            <div class="btn-confirm" :class="{ 'btn-disabled': disabledClick }" @click="handleUpdateApp">
               下载更新
             </div>
           </div>
@@ -400,7 +391,7 @@
             </p>
           </div>
           <div class="common-modal-button">
-            <div class="btn-confirm" @touchstart.stop="closeModal('LevelTimeModal')">
+            <div class="btn-confirm" @click="closeModal('LevelTimeModal')">
               关闭
             </div>
           </div>
@@ -434,10 +425,9 @@ import terminalCall from "@/pages/prisoner/call/call.vue";
 import terminalFingerprint from "@/pages/prisoner/fingerprint/fingerprint.vue";
 import terminalPoliceFingerprint from "@/pages/police/fingerprint/fingerprint.vue";
 import terminalShopping from "@/pages/prisoner/shopping/shopping.vue";
-import terminalRotation from "@/pages/prisoner/rotation/rotation.vue";
+import terminalDutyCall from "@/pages/prisoner/dutyCall/dutyCall.vue";
 import terminalTalk from "@/pages/prisoner/talk/talk.vue";
 import terminalIllness from "@/pages/prisoner/illness/illness.vue";
-import terminalRepairClaim from "@/pages/prisoner/repair/repair.vue";
 import terminalMood from "@/pages/prisoner/mood/mood.vue";
 import terminalBed from "@/pages/home/bed/bed.vue";
 import terminalTemperatureMonitor from "@/pages/prisoner/temperatureMonitor/temperatureMonitor.vue";
@@ -462,11 +452,13 @@ import commonIcons from "@/components/common-icons/common-icons.vue";
 import keyboard from "@/components/dt-keyboard/dt-keyboard.vue";
 import recognitionDialogs from "@/components/recognition-dialogs/recognition-dialogs.vue";
 import screenSaver from "@/components/screen-saver/screen-saver.vue";
-import { isNullStr, dateFormat } from "@/common/utils/util.js";
+import rtcVideo from "@/components/rtcVideo/rtcVideo.vue";
+import { isNullStr, dateFormat, currentPages } from "@/common/utils/util.js";
 import { pathToBase64 } from "@/common/utils/imageTools.js";
 import Api from "@/common/api.js";
 import Log from "@/common/utils/log.js";
 import { mapState, mapMutations } from "vuex";
+import { initRtcVideo } from "@/static/js/webrtc.js";
 
 const innerAudioContext = uni.createInnerAudioContext();
 innerAudioContext.autoplay = false;
@@ -489,10 +481,10 @@ export default {
     terminalFingerprint,
     terminalPoliceFingerprint,
     terminalShopping,
-    terminalRotation,
+    terminalDutyCall,
     terminalTalk,
     terminalIllness,
-    terminalRepairClaim,
+    terminalIllness,
     terminalMood,
     terminalBed,
     terminalTemperatureMonitor,
@@ -508,6 +500,7 @@ export default {
     terminalFace,
     terminalOutdoor,
     terminalCheck,
+    rtcVideo,
   },
   data() {
     return {
@@ -583,8 +576,11 @@ export default {
       BGAudioName: "",
       // 广播流地址
       broadcastUrl: "",
-      // 播放视频地址
-      bgVideoUrl: "",
+      // WebRTC对讲样式
+      rtcVideoStyle: {
+        width: "100px",
+        height: "100px",
+      },
       // 音频列表
       audioList: [],
       // 音频信息
@@ -619,7 +615,7 @@ export default {
       downloadUrl: "",
       // 倒计时定时器
       timer: null,
-      // 开启倒计时
+      // 倒计时时长
       loginTimeout: uni.getStorageSync("loginTimeout") || 30,
       // 系统菜单弹框
       showSystemMenu: false,
@@ -703,6 +699,8 @@ export default {
       isConversation: (state) => state.app.isConversation,
       // 正在心理测评
       isEvaluation: (state) => state.app.isEvaluation,
+      // webrtc视频组件
+      rtcVideoRef: (state) => state.app.rtcVideoRef,
     }),
     // 监室动态日期格式化
     dynamicInfos() {
@@ -731,9 +729,7 @@ export default {
     },
     // 分机IP
     terminalIP() {
-      return (
-        getApp().globalData.Base.getIpAddress().ip || this.$config.terminalIP
-      );
+      return this.$config.terminalIP;
     },
   },
   onLoad() {
@@ -750,254 +746,6 @@ export default {
       // 同步配置信息
       this.configInfoSync();
 
-      // 来邦初始化对讲服务
-      getApp().globalData.FloatUniModule.initIPCManager((e) => {
-        console.log("初始化来邦服务：" + JSON.stringify(e));
-        if (e.code == 0) {
-          this.setIPCState(true);
-          // 设备校时
-          if (this.timing) {
-            getApp().globalData.FloatUniModule.setSystemTime(this.timing);
-          }
-          getApp().globalData.FloatUniModule.hideTalkView(true);
-          // 来邦监听对讲事件
-          getApp().globalData.FloatUniModule.talkEventCallback((res) => {
-            console.log("对讲服务事件：" + JSON.stringify(res));
-            getApp().globalData.FloatUniModule.hideTalkView(true);
-            if (res.eventID == 1) {
-              // 呼出处理中
-            } else if (res.eventID == 2) {
-              // 呼出振铃
-            } else if (res.eventID == 3 || res.eventID == 4) {
-              // 3-监听接通 4-对讲接通
-              this.intercomType = 0;
-              this.intercomHandler();
-              if (res.eventID == 4) {
-                // 对讲接通
-                this.intercomType = 1;
-                if (this.showRecognitionDialogs) {
-                  this.closeRecognitionDialogs();
-                }
-                this.voiceBroadcast("请注意，已经开启视频对讲");
-                if (this.audioPlayState) {
-                  // 暂停播放音频
-                  uni.$emit("video-player", "audio", "pause");
-                }
-                if (this.videoPlayState) {
-                  // 暂停播放视频
-                  uni.$emit("video-player", "video", "pause");
-                }
-                if (this.isCalling && this.currentTab == 6) {
-                  this.$refs.call.discontinueCall(true);
-                }
-                if (res.devRegType == 8) {
-                  let { masterNum, slaveNum, devRegType } = res;
-                  console.log(masterNum, slaveNum, devRegType);
-                  getApp().globalData.FloatUniModule.openLocalCamera(true);
-                  getApp().globalData.FloatUniModule.nativeAnswer(
-                    0,
-                    masterNum,
-                    slaveNum,
-                    devRegType
-                  );
-                }
-                // 停止播放电教
-                this.stopEduPlay();
-                this.disabledState = true;
-              }
-            } else if (res.eventID == 5) {
-              this.disabledState = false;
-              if (this.intercomType == 1) {
-                this.voiceBroadcast("对讲已挂断！");
-                // 通话或呼叫挂断
-                if (this.audioPlayState) {
-                  // 继续播放音频
-                  uni.$emit("video-player", "audio", "resume");
-                  this.disabledState = false;
-                }
-                if (this.videoPlayState) {
-                  // 继续播放视频
-                  uni.$emit("video-player", "video", "resume");
-                  this.disabledState = true;
-                }
-                // 开始播放电教
-                this.startEduPlay();
-              }
-            } else if (res.eventID == 7) {
-              this.voiceBroadcast("对方正忙，请稍后再拨！");
-            }
-          });
-          // 来邦监听指纹事件
-          getApp().globalData.FloatUniModule.setCompareFingerprintCallBack(
-            (res) => {
-              if (!this.isFingerRepeat) {
-                this.isFingerRepeat = true;
-                setTimeout(() => {
-                  this.isFingerRepeat = false;
-                }, 1500);
-                if ([7, 34].includes(this.currentTab)) {
-                  if (this.currentTab == 7) {
-                    // 在押人员指纹录入
-                    this.$refs.fingerprint.handleFingerprint(res);
-                  }
-                  if (this.currentTab == 34) {
-                    // 民警指纹录入
-                    this.$refs.policeFingerprint.handleFingerprint(res);
-                  }
-                } else {
-                  if (res.code == "0") {
-                    let params = {
-                      mKey: res.id,
-                      temperature: this.temperature,
-                    };
-                    switch (this.currentTab) {
-                      case 6:
-                        this.$refs.call &&
-                          this.$refs.call.fingerRecognitionSuccess(params);
-                        break;
-                      case 8:
-                        this.$refs.shopping &&
-                          this.$refs.shopping.fingerRecognitionSuccess(params);
-                        break;
-                      case 9:
-                        this.$refs.rotation &&
-                          this.$refs.rotation.fingerRecognitionSuccess(params);
-                        break;
-                      case 19:
-                        this.$refs.conversation &&
-                          this.$refs.conversation.fingerRecognitionSuccess(
-                            params
-                          );
-                        break;
-                      case 21:
-                        this.$refs.evaluation &&
-                          this.$refs.evaluation.fingerRecognitionSuccess(
-                            params
-                          );
-                        break;
-                      case 27:
-                        this.$refs.outroom &&
-                          this.$refs.outroom.fingerRecognitionSuccess(params);
-                        break;
-                      default:
-                        this.fingerRecognitionSuccess(params);
-                        break;
-                    }
-                  } else {
-                    this.voiceBroadcast("指纹识别失败");
-                  }
-                }
-              }
-            }
-          );
-          // 来邦监听测温事件
-          getApp().globalData.FloatUniModule.syncStopTemperature();
-          getApp().globalData.FloatUniModule.setTemperatureDataCallBack(
-            (res) => {
-              if (res.code == "0") {
-                this.temperature = res.temperature;
-                switch (this.currentTab) {
-                  case 6:
-                    this.$refs.call &&
-                      this.$refs.call.setTemperature(res.temperature);
-                    break;
-                  case 11:
-                    this.$refs.illness &&
-                      this.$refs.illness.setTemperature(res.temperature);
-                    break;
-                  case 15:
-                    this.$refs.temperatureMonitor &&
-                      this.$refs.temperatureMonitor.setTemperature(
-                        res.temperature
-                      );
-                    break;
-                }
-              } else {
-                console.log("测温失败");
-              }
-            }
-          );
-          // 来邦监听刷卡事件
-          getApp().globalData.FloatUniModule.setCardDataCallBack((res) => {
-            console.log("刷卡状态：" + JSON.stringify(res));
-            if (res.code == "0") {
-              // 关闭刷卡
-              getApp().globalData.FloatUniModule.syncStopCard();
-              if (this.currentTab == 3) {
-                this.closeModal("RecognitionDialogs");
-                // 管教刷卡时间
-                let registerTime = dateFormat(
-                  "YYYY-MM-DD hh:mm:ss",
-                  new Date()
-                );
-                let { roomNo } = uni.getStorageSync("terminalInfo");
-                let cardNo = res.cardNum;
-                let params = { roomNo, registerTime, cardNo };
-                this.saveFaceManager(params);
-                this.getPoliceByCardNum(cardNo);
-              }
-            }
-          });
-          // 来邦监听门磁事件
-          getApp().globalData.FloatUniModule.onDoorContactValue((res) => {
-            console.log("门磁状态：" + JSON.stringify(res));
-            // 门磁防拆报警 1开启 0关闭
-            if (res.isOpen == 1) {
-              this.setAlarmDynamic(res.isOpen);
-            }
-          });
-          // 来邦初始化电教系统
-          getApp().globalData.FloatUniModule.initEducation();
-          getApp().globalData.FloatUniModule.setEducationStateListener(
-            (res) => {
-              console.log("电教任务状态：" + JSON.stringify(res));
-              if (this.isIntercom || this.isCalling || this.radioPlayState) {
-                return;
-              }
-              let isOpenEdu = uni.getStorageSync("isOpenEdu") || 0;
-              if (isOpenEdu == 1) {
-                const { taskState } = JSON.parse(res.educationTaskStateBean);
-                switch (taskState) {
-                  case 0:
-                    // 开始播放电教
-                    this.startEduPlay();
-                    break;
-                  case 1:
-                    // 播放电教成功
-                    this.eduPlayState = true;
-                    this.disabledState = false;
-                    if (this.currentTab == 18) {
-                      this.$refs.video.stopPlayVideo(false);
-                    }
-                    if (this.audioPlayState) {
-                      this.stopAudioHandler("0", false);
-                    }
-                    if (this.videoPlayState) {
-                      this.stopVideoHandler("0", false);
-                    }
-                    this.receiveTask("edu", "start");
-                    break;
-                  case 2:
-                    // 播放电教失败
-                    this.eduPlayState = false;
-                    this.disabledState = false;
-                    this.callbackEduVideoInfo(0);
-                    this.receiveTask("edu", "0");
-                    break;
-                  case 3:
-                    // 停止播放电教
-                    this.stopEduPlay();
-                    this.receiveTask("edu", "stop");
-                    break;
-                }
-              }
-            }
-          );
-        } else {
-          this.setIPCState(false);
-          this.handleShowToast("服务已离线");
-        }
-      });
       //websocket连接
       if (!getApp().globalData.webSocketConnected) {
         if (!isNullStr(uni.getStorageSync("terminalInfo").terminalCode)) {
@@ -1010,11 +758,16 @@ export default {
     }
   },
   mounted() {
-    // 获取首页数据
-    this.initHomeData(false);
-  },
-  onBackPress() {
-    this.handleRestartApp();
+    if (!isNullStr(uni.getStorageSync("baseUrl"))) {
+      // 获取首页数据
+      this.initHomeData(false);
+      // 连接socket服务
+      const { controlCode, terminalCode } = uni.getStorageSync("terminalInfo");
+      initRtcVideo(this.rtcVideoRef, controlCode, terminalCode);
+
+      // 连接RabbitMQ服务
+      this.connectServer();
+    }
   },
   destroyed() {
     this.clickNums = 0;
@@ -1047,13 +800,7 @@ export default {
       setIsConversation: "app/SET_ISCONVERSATION",
       // 设置心理测评状态
       setIsEvaluation: "app/SET_ISEVALUATION",
-      // 来邦服务状态
-      setIPCState: "app/SET_IPCSTATE",
     }),
-    // 分机视频通话
-    intercomHandler() {
-      getApp().globalData.FloatUniModule.setTalkViewPosition(0, 0, 1, 1);
-    },
     // 获取APP配置菜单
     async getAppMenuList() {
       const { areaCode } = uni.getStorageSync("terminalInfo");
@@ -1084,17 +831,33 @@ export default {
         }
       }
     },
+    // 连接RabbitMQ服务
+    connectServer() {
+      const ws = new WebSocket('ws://localhost:15674/ws');
+      const client = Stomp.over(ws);
+
+      client.connect("admin", "admin", () => {
+        console.log("连接RabbitMQ成功！");
+        client.subscribe("/exchange/terminal_mq/terminal_msg", message => {
+          console.log("收到的数据：", message);
+        }, error => {
+          console.log("订阅主题失败", error);
+        });
+      }, err => {
+        console.log("连接RabbitMQ失败！", err);
+      });
+    },
     // 开始播放电教
     startEduPlay() {
       let isOpenEdu = uni.getStorageSync("isOpenEdu") || 0;
       if (isOpenEdu == 1) {
         // 停止播放电教
-        this.stopEduPlay();
-        getApp().globalData.FloatUniModule.hdmiOpen(1);
-        let audioSyncOpen = uni.getStorageSync("audioSyncOpen") || 1;
-        getApp().globalData.FloatUniModule.audioSyncOutput(Number(audioSyncOpen));
-        getApp().globalData.FloatUniModule.enterEducationTask();
-        this.disabledState = false;
+        // this.stopEduPlay();
+        // getApp().globalData.FloatUniModule.hdmiOpen(1);
+        // let audioSyncOpen = uni.getStorageSync("audioSyncOpen") || 1;
+        // getApp().globalData.FloatUniModule.audioSyncOutput(Number(audioSyncOpen));
+        // getApp().globalData.FloatUniModule.enterEducationTask();
+        // this.disabledState = false;
       }
     },
     // 暂停播放电教
@@ -1108,26 +871,26 @@ export default {
     stopEduPlay() {
       let isOpenEdu = uni.getStorageSync("isOpenEdu") || 0;
       if (isOpenEdu == 1) {
-        getApp().globalData.FloatUniModule.exitEducationTask();
+        // getApp().globalData.FloatUniModule.exitEducationTask();
         this.eduPlayState = false;
         this.disabledState = false;
       }
     },
     // 开启测温
     openThermometryModule() {
-      getApp().globalData.FloatUniModule.syncStartTemperature((res) => {
-        if (res.code == 0) {
-          console.log("开启测温");
-        }
-      });
+      // getApp().globalData.FloatUniModule.syncStartTemperature((res) => {
+      //   if (res.code == 0) {
+      //     console.log("开启测温");
+      //   }
+      // });
     },
     // 停止测温
     closeThermometryModule() {
-      getApp().globalData.FloatUniModule.syncStopTemperature((res) => {
-        if (res.code == 0) {
-          console.log("关闭测温");
-        }
-      });
+      // getApp().globalData.FloatUniModule.syncStopTemperature((res) => {
+      //   if (res.code == 0) {
+      //     console.log("关闭测温");
+      //   }
+      // });
     },
     // 开始屏保
     startScreenSaver() {
@@ -1262,11 +1025,11 @@ export default {
           this.countTimer();
           if (index == 3) {
             // 打开刷卡
-            getApp().globalData.FloatUniModule.syncStartCard((res) => {
-              if (res.code == 0) {
-                console.log("刷卡已开启");
-              }
-            });
+            // getApp().globalData.FloatUniModule.syncStartCard((res) => {
+            //   if (res.code == 0) {
+            //     console.log("刷卡已开启");
+            //   }
+            // });
           }
           if (this.person.id !== "0999") {
             this.openModal("RecognitionDialogs");
@@ -1289,7 +1052,7 @@ export default {
     },
     // 开启倒计时
     countTimer() {
-      this.initCountTimeout();
+      this.loginTimeout = uni.getStorageSync("loginTimeout") || 150;
       this.timer = setInterval(() => {
         this.loginTimeout--;
         if (this.loginTimeout <= 0) {
@@ -1373,7 +1136,9 @@ export default {
     getPassword(e) {
       let adminPassword = uni.getStorageSync("adminPassword");
       if (e == adminPassword) {
-        this.showSystemPwd = false;
+        setTimeout(() => {
+          this.showSystemPwd = false;
+        }, 0);
         if (this.initState) {
           this.openModal("UrlConfig");
           this.initState = false;
@@ -1406,18 +1171,26 @@ export default {
     },
     // 重启设备
     handleRestartDev() {
-      getApp().globalData.FloatUniModule.rebootSystem();
       uni.closeSocket();
     },
     // 重启应用
     handleRestartApp() {
       this.closeSocket();
-      getApp().globalData.Base.rebootApp("com.gksc.terminal");
+      location.reload();
+    },
+    // 进入全屏
+    requestFullscreen() {
+      document.documentElement.requestFullscreen();
+    },
+    // 退出全屏
+    exitFullscreen() {
+      document.exitFullscreen();
     },
     // 显示状态栏
     showNavigationBar() { },
     //隐藏状态栏
     hideNavigationBar() { },
+
     // 同步配置信息
     configInfoSync() {
       this.sysCacheInfo = "";
@@ -1518,12 +1291,12 @@ export default {
     echoCalibrate() { },
     // 开启守护
     openCrashHandle() {
-      getApp().globalData.FloatUniModule.openGuard(1);
+      // getApp().globalData.FloatUniModule.openGuard(1);
       console.log("开启守护成功");
     },
     // 关闭守护
     closeCrashHandle() {
-      getApp().globalData.FloatUniModule.openGuard(0);
+      // getApp().globalData.FloatUniModule.openGuard(0);
       console.log("关闭守护成功");
     },
     // 点击打开设置
@@ -1718,13 +1491,11 @@ export default {
         this.handleRestartApp();
       }
     },
-
     // 开始拍照
     startTakePicture() {
       this.isTakingPic = true;
       uni.$on("get-img-path", (path) => {
-        this.handlePathToBase64(path).then((base64) => {
-          let base64Str = base64.replace(/[\r\n]/g, "");
+        this.handlePathToBase64(path).then((base64Str) => {
           this.faceRecognition(base64Str);
         });
       });
@@ -1763,11 +1534,11 @@ export default {
         true,
         true
       );
-      this.faceParams.image = `data:image/png;base64,${base64Str}`;
+      this.faceParams.image = base64Str;
       if (res.state.code == 200) {
         const { rybh } = res.data;
         this.faceParams.rybh = rybh;
-        this.saveAlarmPicInfo();
+        this.saceAlarmPicInfo();
       } else {
         this.startTakePicture();
       }
@@ -1780,7 +1551,7 @@ export default {
       });
       await this.clearPictures();
       if (state && this.isTakingPic) {
-        await this.saveAlarmPicInfo();
+        await this.saceAlarmPicInfo();
       }
     },
     // 清空照片
@@ -1796,7 +1567,7 @@ export default {
       // #endif
     },
     // 保存拍照信息
-    async saveAlarmPicInfo() {
+    async saceAlarmPicInfo() {
       this.isTakingPic = false;
       let params = {
         data: this.faceParams,
@@ -1853,7 +1624,7 @@ export default {
     },
     // 发送WebSocket数据
     sendWebsocket(data) {
-      this.socketTask.send({
+      this.socketTask && this.socketTask.send({
         data,
         success(res) {
           console.log("消息发送成功:" + JSON.stringify(data));
@@ -1923,8 +1694,6 @@ export default {
         this.showDevOffline = false;
         return;
       }
-      let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-      Log.writeLog(`== connectWebSocketInit-${now}`, false);
       if (this.socketTask != null) {
         this.closeSocket();
       }
@@ -1938,25 +1707,13 @@ export default {
         },
       });
       this.socketTask.onOpen((res) => {
-        let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-        Log.writeLog(`==== socketTask.onOpen-${now}`, false);
         this.handleShowToast("绑定终端信息成功！");
         this.webSocketOn();
       });
       this.socketTask.onError((err) => {
-        let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-        Log.writeLog(
-          `==== socketTask.onError-${JSON.stringify(err)}-${now}`,
-          false
-        );
       });
       // 关闭WebSocket
       this.socketTask.onClose((res) => {
-        let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-        Log.writeLog(
-          `==== socketTask.onClose-${JSON.stringify(res)}-${now}`,
-          false
-        );
       });
       // 获取主机websocket数据
       this.socketTask.onMessage((res) => {
@@ -1966,7 +1723,7 @@ export default {
           // 收到心跳包
           this.isHeartbeat = true;
           const { terminalCode } = uni.getStorageSync("terminalInfo");
-          this.sendWebsocket(
+          currentPages().sendWebsocket(
             `{maindevno:'', devno:'${terminalCode}', type:'000', msg:'1',extend:{'ip':'${this.terminalIP}'}}`
           );
         } else if (info.type == this.$config.controlType.INTERCOM) {
@@ -1995,18 +1752,18 @@ export default {
           } else if (info.msg == "8") {
             if (info.extend == "") {
               // 回传本机通话音量
-              getApp().globalData.FloatUniModule.getStreamVolumeTypeVoiceCall(
-                (e) => {
-                  this.sendWebsocket(
-                    `{maindevno:'${info.maindevno}', devno:'${info.devno}', type:'100', msg:'9',extend:'${e.value}'}`
-                  );
-                }
-              );
+              // getApp().globalData.FloatUniModule.getStreamVolumeTypeVoiceCall(
+              //   (e) => {
+              //     currentPages().sendWebsocket(
+              //       `{maindevno:'${info.maindevno}', devno:'${info.devno}', type:'100', msg:'9',extend:'${e.value}'}`
+              //     );
+              //   }
+              // );
             } else {
               // 设置本机通话音量
-              getApp().globalData.FloatUniModule.setStreamVolumeTypeVoiceCall(
-                Number(info.extend)
-              );
+              // getApp().globalData.FloatUniModule.setStreamVolumeTypeVoiceCall(
+              //   Number(info.extend)
+              // );
             }
           } else if (info.msg == "10" || info.msg == "13") {
             // 主机离线，分机对讲请求超时
@@ -2063,21 +1820,21 @@ export default {
             // 分机静音
             if (info.extend == "0") {
               // 关闭静音
-              getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(
-                Number(uni.getStorageSync("mediaDefaultVolume"))
-              );
+              // getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(
+              //   Number(uni.getStorageSync("mediaDefaultVolume"))
+              // );
             } else if (info.extend == "1") {
               // 开启静音
-              getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(0);
+              // getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(0);
             }
           } else if (info.msg == "5") {
             // 回传主机音量
             let { volumeList } = JSON.parse(info.extend);
             volumeList.forEach((item) => {
               if (item.terminalCode == info.devno) {
-                getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(
-                  Number(item.volume)
-                );
+                // getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(
+                //   Number(item.volume)
+                // );
               }
             });
             // 分机回传音量
@@ -2085,6 +1842,8 @@ export default {
           }
         } else if (info.type == this.$config.controlType.AUDIO) {
           if (info.msg == "0") {
+            this.audioPlayState = true;
+            this.videoPlayState = false;
             // 开始播放音频
             if (this.isCalling || this.eduPlayState) {
               return;
@@ -2127,16 +1886,16 @@ export default {
               }, 1000);
             } else {
               // 主机播放音频
-              getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic(
-                (e) => {
-                  terminalObj.extend = {
-                    devno: uni.getStorageSync("terminalInfo").terminalCode,
-                    audio: this.audioInfo.name,
-                    volume: e.value,
-                  };
-                  this.sendWebsocket(JSON.stringify(terminalObj));
-                }
-              );
+              // getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic(
+              //   (e) => {
+              //     terminalObj.extend = {
+              //       devno: uni.getStorageSync("terminalInfo").terminalCode,
+              //       audio: this.audioInfo.name,
+              //       volume: e.value,
+              //     };
+              //     currentPages().sendWebsocket(JSON.stringify(terminalObj));
+              //   }
+              // );
             }
             uni.$emit("video-player", "audio", "start", this.audioInfo.url);
             uni.$on("onEnded", () => {
@@ -2148,16 +1907,16 @@ export default {
               this.audioInfo = this.audioList[audioIndex];
               uni.$emit("video-player", "audio", "start", this.audioInfo.url);
               if (!extend.hasOwnProperty("duration")) {
-                getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic(
-                  (e) => {
-                    terminalObj.extend = {
-                      devno: uni.getStorageSync("terminalInfo").terminalCode,
-                      audio: this.audioInfo.name,
-                      volume: e.value,
-                    };
-                    this.sendWebsocket(JSON.stringify(terminalObj));
-                  }
-                );
+                // getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic(
+                //   (e) => {
+                //     terminalObj.extend = {
+                //       devno: uni.getStorageSync("terminalInfo").terminalCode,
+                //       audio: this.audioInfo.name,
+                //       volume: e.value,
+                //     };
+                //     currentPages().sendWebsocket(JSON.stringify(terminalObj));
+                //   }
+                // );
               }
             });
             this.receiveTask("audio", "start");
@@ -2180,26 +1939,28 @@ export default {
             let { volumeList } = JSON.parse(info.extend);
             volumeList.forEach((item) => {
               if (item.terminalCode == info.devno) {
-                getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(
-                  Number(item.volume)
-                );
+                // getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(
+                //   Number(item.volume)
+                // );
               }
             });
-            getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic((e) => {
-              uni.setStorageSync("mediaDefaultVolume", e.value);
-              const { terminalCode } = uni.getStorageSync("terminalInfo");
-              let terminalObj = {
-                maindevno: info.maindevno,
-                devno: terminalCode,
-                type: "300",
-                msg: "6",
-                extend: e.value,
-              };
-              this.sendWebsocket(JSON.stringify(terminalObj));
-            });
+            // getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic((e) => {
+            //   uni.setStorageSync("mediaDefaultVolume", e.value);
+            //   const { terminalCode } = uni.getStorageSync("terminalInfo");
+            //   let terminalObj = {
+            //     maindevno: info.maindevno,
+            //     devno: terminalCode,
+            //     type: "300",
+            //     msg: "6",
+            //     extend: e.value,
+            //   };
+            //   currentPages().sendWebsocket(JSON.stringify(terminalObj));
+            // });
           }
         } else if (info.type == this.$config.controlType.VIDEO) {
           if (info.msg == "0") {
+            this.videoPlayState = true;
+            this.audioPlayState = false;
             // 开始播放视频
             if (this.isCalling || this.eduPlayState) {
               return;
@@ -2233,23 +1994,23 @@ export default {
                 }
               }, 1000);
             } else {
-              getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic(
-                (e) => {
-                  // 主机播放视频
-                  let terminalObj = {
-                    maindevno: info.maindevno,
-                    devno: uni.getStorageSync("terminalInfo").terminalCode,
-                    type: "400",
-                    msg: "3",
-                    extend: {
-                      devno: uni.getStorageSync("terminalInfo").terminalCode,
-                      video: videoInfo.name,
-                      volume: e.value,
-                    },
-                  };
-                  this.sendWebsocket(JSON.stringify(terminalObj));
-                }
-              );
+              // getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic(
+              //   (e) => {
+              //     // 主机播放视频
+              //     let terminalObj = {
+              //       maindevno: info.maindevno,
+              //       devno: uni.getStorageSync("terminalInfo").terminalCode,
+              //       type: "400",
+              //       msg: "3",
+              //       extend: {
+              //         devno: uni.getStorageSync("terminalInfo").terminalCode,
+              //         video: videoInfo.name,
+              //         volume: e.value,
+              //       },
+              //     };
+              //     currentPages().sendWebsocket(JSON.stringify(terminalObj));
+              //   }
+              // );
             }
             this.receiveTask("video", "start");
             this.disabledState = true;
@@ -2269,26 +2030,25 @@ export default {
             let { volumeList } = JSON.parse(info.extend);
             volumeList.forEach((item) => {
               if (item.terminalCode == info.devno) {
-                getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(
-                  Number(item.volume)
-                );
+                // getApp().globalData.FloatUniModule.setStreamVolumeTypeMusic(
+                //   Number(item.volume)
+                // );
               }
             });
-            getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic((e) => {
-              uni.setStorageSync("mediaDefaultVolume", e.value);
-              const { terminalCode } = uni.getStorageSync("terminalInfo");
-              let terminalObj = {
-                maindevno: info.maindevno,
-                devno: terminalCode,
-                type: "400",
-                msg: "7",
-                extend: e.value,
-              };
-              this.sendWebsocket(JSON.stringify(terminalObj));
-            });
+            // getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic((e) => {
+            //   uni.setStorageSync("mediaDefaultVolume", e.value);
+            //   const { terminalCode } = uni.getStorageSync("terminalInfo");
+            //   let terminalObj = {
+            //     maindevno: info.maindevno,
+            //     devno: terminalCode,
+            //     type: "400",
+            //     msg: "7",
+            //     extend: e.value,
+            //   };
+            //   currentPages().sendWebsocket(JSON.stringify(terminalObj));
+            // });
           }
         } else if (info.type == this.$config.controlType.ALARM) {
-          // 声光报警线路输出
           if (info.msg == "2" || info.msg == "3") {
             this.voiceBroadcast("对方正忙，请稍后再拨");
             this.intercomState = false;
@@ -2372,23 +2132,19 @@ export default {
           }
         } else if (info.type == this.$config.controlType.DEVICE) {
           if (info.msg == "0") {
-            let options = {
-              content: info.extend,
-            };
-            getApp().globalData.Base.speech(options);
+            this.voiceBroadcast(info.extend);
           } else if (info.msg == "1") {
-            getApp().globalData.Base.speechStop();
+            this.voiceSpeechHandler("cancel");
           } else if (info.msg == "2") {
             console.log("设备校时");
             this.timing = info.extend;
-            getApp().globalData.FloatUniModule.setSystemTime(info.extend);
           } else if (info.msg == "3") {
             // 关闭视频
             clearInterval(this.videoTimer);
             uni.$emit("video-player", "video", "stop");
             // 设备重启
             uni.closeSocket();
-            getApp().globalData.FloatUniModule.rebootSystem();
+            // getApp().globalData.FloatUniModule.rebootSystem();
           } else if (info.msg == "4") {
             if (!!info.extend) {
               let ids = info.extend;
@@ -2409,9 +2165,6 @@ export default {
             this.getUpdateAppInfo(1);
           } else if (info.msg == "8") {
             this.closeModal("RecognitionDialogs");
-            getApp().globalData.FloatUniModule.hideLocalPreView(true);
-            getApp().globalData.FloatUniModule.stopTakeFrame();
-            // 关闭视频
             clearInterval(this.videoTimer);
             uni.$emit("video-player", "video", "stop");
             setTimeout(() => {
@@ -2426,11 +2179,11 @@ export default {
             // 回声消除
           } else if (info.msg == "11") {
             // 开启守护
-            getApp().globalData.FloatUniModule.openGuard(1);
+            // getApp().globalData.FloatUniModule.openGuard(1);
             console.log("开启守护成功");
           } else if (info.msg == "12") {
             // 关闭守护
-            getApp().globalData.FloatUniModule.openGuard(0);
+            // getApp().globalData.FloatUniModule.openGuard(0);
             console.log("关闭守护成功");
           } else if (info.msg == "13") {
             Log.uploadLogFile(info.extend);
@@ -2463,7 +2216,7 @@ export default {
             this.stopEduPlay();
             uni.$emit("video-player", "video", "stop");
           } else if (info.msg == "18") {
-            if (Reflect.has(info, "extend") && Object.keys(info.extend).length) {
+            if (Reflect.has(info, "extend")) {
               let extend = JSON.parse(info.extend);
               this.loginStatusHanlder(extend);
               this.setCurrentTab(2);
@@ -2572,18 +2325,18 @@ export default {
     },
     // 分机广播回传音量
     radioVolumeHandler(info, msg) {
-      getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic((e) => {
-        uni.setStorageSync("mediaDefaultVolume", e.value);
-        const { terminalCode } = uni.getStorageSync("terminalInfo");
-        let terminalObj = {
-          maindevno: info.maindevno,
-          devno: terminalCode,
-          type: "200",
-          msg,
-          extend: e.value,
-        };
-        this.sendWebsocket(JSON.stringify(terminalObj));
-      });
+      // getApp().globalData.FloatUniModule.getStreamVolumeTypeMusic((e) => {
+      //   uni.setStorageSync("mediaDefaultVolume", e.value);
+      //   const { terminalCode } = uni.getStorageSync("terminalInfo");
+      //   let terminalObj = {
+      //     maindevno: info.maindevno,
+      //     devno: terminalCode,
+      //     type: "200",
+      //     msg,
+      //     extend: e.value,
+      //   };
+      //   currentPages().sendWebsocket(JSON.stringify(terminalObj));
+      // });
     },
     // 获取首页数据
     initHomeData(state) {
@@ -2607,49 +2360,49 @@ export default {
     // 删除在押人员指纹
     delPrisonerFingerId(ids) {
       // 打开指纹设备
-      getApp().globalData.FloatUniModule.fingerModuleStop();
-      getApp().globalData.FloatUniModule.syncStartFinger((e) => {
-        if (e.code == 0) {
-          let res = 0;
-          for (let i = 0; i < ids.length; i++) {
-            getApp().globalData.FloatUniModule.clearFingerprintById(ids[i]);
-            res++;
-          }
-          if (res > 0) {
-            this.handleShowToast("删除在押人员指纹成功");
-            console.log("删除在押人员指纹成功");
-          } else {
-            this.handleShowToast("删除在押人员指纹失败");
-            console.log("删除在押人员指纹失败");
-          }
-          getApp().globalData.FloatUniModule.syncStopFinger((e) => {
-            if (e.code == 0) {
-              console.log("关闭指纹");
-              getApp().globalData.FloatUniModule.fingerModuleStop();
-            }
-          });
-        } else {
-          this.voiceBroadcast("指纹设备未打开");
-          console.log("指纹设备未打开");
-        }
-      });
+      // getApp().globalData.FloatUniModule.fingerModuleStop();
+      // getApp().globalData.FloatUniModule.syncStartFinger((e) => {
+      //   if (e.code == 0) {
+      //     let res = 0;
+      //     for (let i = 0; i < ids.length; i++) {
+      //       getApp().globalData.FloatUniModule.clearFingerprintById(ids[i]);
+      //       res++;
+      //     }
+      //     if (res > 0) {
+      //       this.handleShowToast("删除在押人员指纹成功");
+      //       console.log("删除在押人员指纹成功");
+      //     } else {
+      //       this.handleShowToast("删除在押人员指纹失败");
+      //       console.log("删除在押人员指纹失败");
+      //     }
+      //     getApp().globalData.FloatUniModule.syncStopFinger((e) => {
+      //       if (e.code == 0) {
+      //         console.log("关闭指纹");
+      //         getApp().globalData.FloatUniModule.fingerModuleStop();
+      //       }
+      //     });
+      //   } else {
+      //     this.voiceBroadcast("指纹设备未打开");
+      //     console.log("指纹设备未打开");
+      //   }
+      // });
     },
     // 同步在押人员指纹
     syncPrisonerFinger() {
       // 打开指纹设备
-      getApp().globalData.FloatUniModule.fingerModuleStop();
-      getApp().globalData.FloatUniModule.syncStartFinger((e) => {
-        if (e.code == 0) {
-          console.log("打开指纹");
-          getApp().globalData.FloatUniModule.clearAllFingerprint();
-          // 同步在押人员信息
-          this.syncPrisonerFingerInfo();
-          console.log("删除全部指纹成功");
-        } else {
-          this.voiceBroadcast("指纹设备未打开");
-          console.log("指纹设备未打开");
-        }
-      });
+      // getApp().globalData.FloatUniModule.fingerModuleStop();
+      // getApp().globalData.FloatUniModule.syncStartFinger((e) => {
+      //   if (e.code == 0) {
+      //     console.log("打开指纹");
+      //     getApp().globalData.FloatUniModule.clearAllFingerprint();
+      //     // 同步在押人员信息
+      //     this.syncPrisonerFingerInfo();
+      //     console.log("删除全部指纹成功");
+      //   } else {
+      //     this.voiceBroadcast("指纹设备未打开");
+      //     console.log("指纹设备未打开");
+      //   }
+      // });
     },
     // 同步在押人员指纹信息
     async syncPrisonerFingerInfo() {
@@ -2664,10 +2417,20 @@ export default {
             successList = [],
             failList = [];
           res.data.map((item) => {
-            getApp().globalData.FloatUniModule.fingerprintFeatureInput(
-              item.mKey,
-              item.pHint
-            );
+            // getApp().globalData.FloatUniModule.fingerprintFeatureInput(
+            //   item.mKey,
+            //   "mKey",
+            //   item.pHint,
+            //   (res) => {
+            //     if (res == 0) {
+            //       successNum++;
+            //       successList.push(item.mKey);
+            //     } else {
+            //       failNum++;
+            //       failList.push(item.mKey);
+            //     }
+            //   }
+            // );
             successNum++;
             successList.push(item.mKey);
           });
@@ -2679,33 +2442,34 @@ export default {
           let content = `设备指纹特征同步结果：监室号：${roomNo}，成功：${successList}，失败：${failList}`;
           this.saveFingerStateInfo(content, "06");
         } else {
+          this.closeFingerPrint();
           this.closeModal("PrisonerFinger");
           this.handleShowToast("同步在押人员指纹为空");
           console.log("在押人员指纹为空");
         }
-        getApp().globalData.FloatUniModule.syncStopFinger((e) => {
-          if (e.code == 0) {
-            console.log("关闭指纹");
-            getApp().globalData.FloatUniModule.fingerModuleStop();
-          }
-        });
+        // getApp().globalData.FloatUniModule.syncStopFinger((e) => {
+        //   if (e.code == 0) {
+        //     console.log("关闭指纹");
+        //     getApp().globalData.FloatUniModule.fingerModuleStop();
+        //   }
+        // });
       }
     },
     // 同步民警指纹信息
     syncPoliceFinger() {
       // 打开指纹设备
-      getApp().globalData.FloatUniModule.syncStartFinger((e) => {
-        if (e.code == 0) {
-          console.log("指纹设备已打开");
-          getApp().globalData.FloatUniModule.clearAllFingerprint();
-          // 同步民警信息
-          this.syncPoliceFingerInfo();
-          console.log("删除全部指纹成功");
-        } else {
-          this.voiceBroadcast("指纹设备未打开");
-          console.log("指纹设备未打开");
-        }
-      });
+      // getApp().globalData.FloatUniModule.syncStartFinger((e) => {
+      //   if (e.code == 0) {
+      //     console.log("指纹设备已打开");
+      //     getApp().globalData.FloatUniModule.clearAllFingerprint();
+      //     // 同步民警信息
+      //     this.syncPoliceFingerInfo();
+      //     console.log("删除全部指纹成功");
+      //   } else {
+      //     this.voiceBroadcast("指纹设备未打开");
+      //     console.log("指纹设备未打开");
+      //   }
+      // });
     },
     // 民警指纹信息
     async syncPoliceFingerInfo() {
@@ -2721,18 +2485,18 @@ export default {
             failList = [];
           res.data.map((item) => {
             if (!!item.mKey) {
-              getApp().globalData.FloatUniModule.fingerprintFeatureInput(
-                item.mKey,
-                item.pHint
-              );
+              // getApp().globalData.FloatUniModule.fingerprintFeatureInput(
+              //   item.mKey,
+              //   item.pHint
+              // );
               successNum++;
               successList.push(item.mKey);
             }
             if (!!item.mKey2) {
-              getApp().globalData.FloatUniModule.fingerprintFeatureInput(
-                item.mKey2,
-                item.pHint2
-              );
+              // getApp().globalData.FloatUniModule.fingerprintFeatureInput(
+              //   item.mKey2,
+              //   item.pHint2
+              // );
               successNum++;
               successList.push(item.mKey2);
             }
@@ -2750,12 +2514,12 @@ export default {
           this.handleShowToast("同步民警指纹为空");
           console.log("民警指纹为空");
         }
-        getApp().globalData.FloatUniModule.syncStopFinger((e) => {
-          if (e.code == 0) {
-            console.log("指纹设备已关闭");
-            getApp().globalData.FloatUniModule.fingerModuleStop();
-          }
-        });
+        // getApp().globalData.FloatUniModule.syncStopFinger((e) => {
+        //   if (e.code == 0) {
+        //     console.log("指纹设备已关闭");
+        //     getApp().globalData.FloatUniModule.fingerModuleStop();
+        //   }
+        // });
       }
     },
     // 保存指纹同步状态（成功|失败）信息
@@ -2786,7 +2550,7 @@ export default {
         this.showVideoCall = false;
         this.showVideoConnect = true;
         const { terminalCode } = uni.getStorageSync("terminalInfo");
-        this.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:'', devno:'${terminalCode}', type:'100', msg:'4'}`
         );
       }
@@ -2839,7 +2603,7 @@ export default {
         const { terminalCode } = uni.getStorageSync("terminalInfo");
         const { roomName } = uni.getStorageSync("terminalInfo");
         let alarmId = res.data.id;
-        this.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:'', devno:'${terminalCode}', type:'500', msg:'0',extend:{'roomName':'${roomName}', 'alarmId':'${alarmId}'}}`
         );
         this.closeModal("AlarmInit");
@@ -2963,27 +2727,62 @@ export default {
         params
       );
     },
+    handleFingerRecognition(params) {
+      switch (this.currentTab) {
+        case 6:
+          this.$refs.call &&
+            this.$refs.call.fingerRecognitionSuccess(params);
+          break;
+        case 8:
+          console.log(this.$refs.shopping);
+          this.$refs.shopping &&
+            this.$refs.shopping.fingerRecognitionSuccess(params);
+          break;
+        case 9:
+          this.$refs.dutyCall &&
+            this.$refs.dutyCall.fingerRecognitionSuccess(params);
+          break;
+        case 19:
+          this.$refs.conversation &&
+            this.$refs.conversation.fingerRecognitionSuccess(
+              params
+            );
+          break;
+        case 21:
+          this.$refs.evaluation &&
+            this.$refs.evaluation.fingerRecognitionSuccess(
+              params
+            );
+          break;
+        case 27:
+          this.$refs.outroom &&
+            this.$refs.outroom.fingerRecognitionSuccess(params);
+          break;
+        default:
+          this.fingerRecognitionSuccess(params);
+          break;
+      }
+    },
     // 人脸认证成功回调
     faceRecognitionSuccess(res) {
       this.recognitionHanlder(res);
     },
     // 指纹认证成功回调
     fingerRecognitionSuccess(res) {
-      this.getLoginPersonInfo(res);
+      this.getLoginPersonInfo(res.mKey);
     },
     // 获取指纹认证登录人员信息
-    async getLoginPersonInfo(data) {
+    async getLoginPersonInfo(mKey) {
       let params = {
-        mKey: data.mKey,
+        mKey,
       };
       let url = "";
-      if (this.currentTab == 2) {
-        url = Api.index.getOdsPrisonerInfo;
-        params.roomNo = uni.getStorageSync("terminalInfo").roomNo;
-      }
       if (this.currentTab == 3) {
-        url = Api.index.getOdsPoliceInfo;
         params.roomId = uni.getStorageSync("terminalInfo").roomId;
+        url = Api.index.getOdsPoliceInfo;
+      } else {
+        params.roomNo = uni.getStorageSync("terminalInfo").roomNo;
+        url = Api.index.getOdsPrisonerInfo;
       }
       let res = await Api.apiCall("get", url, params, true);
       if (res.state.code == 200) {
@@ -3015,6 +2814,10 @@ export default {
       }
       this.loginStatusHanlder(data);
     },
+    // 认证失败
+    recognitionFail() {
+      this.closeRecognitionDialogs();
+    },
     // 关闭登录弹框
     closeRecognitionDialogs() {
       clearInterval(this.timer);
@@ -3026,16 +2829,16 @@ export default {
     },
     // 回传电教播放信息
     async callbackEduVideoInfo(status) {
-      const { terminalCode } = uni.getStorageSync("terminalInfo");
+      const { code } = uni.getStorageSync("terminalInfo");
       await Api.apiCall(
         "get",
-        Api.index.updateEduTaskStatus + `${terminalCode}` + `&status=${status}`,
+        Api.index.updateEduTaskStatus + `${code}` + `&status=${status}`,
         null
       );
     },
     receiveTask(task, status) {
       const { terminalCode } = uni.getStorageSync("terminalInfo");
-      this.sendWebsocket(
+      currentPages().sendWebsocket(
         `{maindevno:'', devno:'${terminalCode}', type:'000', msg:'1',extend:{'task':${task},'status':${status}}}`
       );
     },
@@ -3047,10 +2850,30 @@ export default {
       let interval = messagePlayTime.split(",");
       let now = dateFormat("hh:mm", new Date());
       if (now >= interval[0] && now <= interval[1]) {
-        let options = {
-          content: voiceText,
-        };
-        getApp().globalData.Base.speech(options);
+        if ("speechSynthesis" in window) {
+          const utterance = new SpeechSynthesisUtterance(voiceText);
+          speechSynthesis.speak(utterance);
+        } else {
+          console.error("浏览器不支持语音引擎");
+        }
+      }
+    },
+    // 语音播放
+    voiceSpeechHandler(action) {
+      if ("speechSynthesis" in window) {
+        switch (action) {
+          case "cancel":
+            speechSynthesis.cancel();
+            break;
+          case "pause":
+            speechSynthesis.pause();
+            break;
+          case "resume":
+            speechSynthesis.resume();
+            break;
+        }
+      } else {
+        console.error("浏览器不支持语音引擎");
       }
     },
     // 打开弹框
