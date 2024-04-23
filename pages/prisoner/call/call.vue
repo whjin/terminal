@@ -46,7 +46,7 @@
         </div>
       </div>
     </div>
-    <recognition-dialogs ref="recognitionDialogs" useFor="call" :regConfig="regConfig" :isShow="showRecognitionDialogs"
+    <recognition-dialogs ref="recognitionDialogs" useFor="call" :callConfig="callConfig" :isShow="showRecognitionDialogs"
       @fingerRecognitionSuccess="fingerRecognitionSuccess" @faceRecognitionSuccess="faceRecognitionSuccess"
       @close="closeRecognitionDialogs"></recognition-dialogs>
   </div>
@@ -74,29 +74,39 @@ export default {
       // 在线点名人员列表
       rollCallList: [],
       // 签到成功人员信息
-      regName: "",
+      callName: "",
+      // 点名倒计时
+      callTimer: null,
       // 第一次点名计时器
       rollCallTimer: null,
       // 当前点名ID
       callId: "",
       // 点名索引
       callIndex: 0,
-      // 当前点名索引
-      curIndex: 0,
       // 点名轮次
       callRound: 1,
+      // 点名时长
+      duration: 0,
       // 点名间隔时间
-      timeSpace: 0,
+      callSpace: 0,
       // 已签到人员列表
       signedList: [],
       // 未签到人员列表
       unSignCallList: [],
+      // 当前点名人员索引
+      curIndex: 0,
+      // 签到开始时间
+      startTime: "",
+      // 签到结束时间
+      endTime: "",
       // 点名认证弹框配置
-      regConfig: {
-        regName: "", // 当前被点名人员
+      callConfig: {
+        callName: "", // 当前被点名人员
         isRecognitionSuccess: false, // 是否点名认证成功
         rybh: "",
       },
+      // 当前时间
+      nowDate: new Date(),
       // 自动滚动
       scrollToView: "",
       temperature: 0,
@@ -106,25 +116,25 @@ export default {
     ...mapState({
       // 是否正在点名
       isCalling: (state) => state.app.isCalling,
-      // 点名信息
+      // 点名类型
+      rollType: (state) => state.app.rollType,
+      // 在线点名ID
+      rollId: (state) => state.app.rollId,
+      // 临时点名信息
       rollInfo: (state) => state.app.rollInfo,
     }),
   },
   created() {
     if (!this.isCalling) {
-      // 停止屏保
-      this.$parent.stopScreenSaver();
       this.setIsCalling(true);
       // 开始点名
       this.$parent.receiveTask("rollCall", "start");
       // 获取在线点名人员列表
-      this.getRollCallInfo();
+      this.startRollCall();
     }
   },
   beforeDestroy() {
     this.discontinueCall(false);
-    // 开启屏保
-    this.$parent.openScreenSaver();
   },
   methods: {
     ...mapMutations({
@@ -134,26 +144,73 @@ export default {
       setIsCalling: "app/SET_ISCALLING",
     }),
     // 获取在线点名人员列表
+    startRollCall() {
+      if (this.rollType == "0") {
+        // 获取在线点名人员列表
+        this.getRollCallInfo();
+      }
+      if (this.rollType == "1") {
+        // 临时点名
+        this.duration = this.rollInfo.duration || 120;
+        this.callSpace = this.rollInfo.callSpace || 30;
+        let params = {
+          duration: this.duration,
+          callSpace: this.callSpace,
+          roomId: uni.getStorageSync("terminalInfo").roomId,
+        };
+        // 获取临时点名人员列表
+        this.getTempRollCallInfo(params);
+      }
+    },
+    // 获取在线点名人员列表
     async getRollCallInfo() {
-      const { rollId, rollDetailId } = this.rollInfo;
-      const { roomId } = uni.getStorageSync("terminalInfo");
-      let params = { rollId, rollDetailId, roomId };
+      let params = {
+        rollId: this.rollId,
+        roomId: uni.getStorageSync("terminalInfo").roomId,
+      };
       let res = await Api.apiCall("get", Api.index.getRollCallRyList, params);
+      this.requestRollCallInfo(res);
+    },
+    // 获取临时点名人员列表
+    async getTempRollCallInfo(params) {
+      let res = await Api.apiCall(
+        "get",
+        Api.index.getTempRollCallRyList,
+        params
+      );
+      this.requestRollCallInfo(res);
+    },
+    // 校验请求数据
+    requestRollCallInfo(res) {
       if (res.state.code == 200 && Reflect.has(res, "data")) {
         this.rollCallInfoHanlder(res);
       } else {
-        this.stopRollCall();
+        setTimeout(() => {
+          this.stopRollCall();
+        }, 1500);
       }
     },
     // 处理点名人员信息
     rollCallInfoHanlder(res) {
+      this.nowDate = res.date ? new Date(res.date) : new Date();
+      this.duration = res.data.rollCall.duration || 120;
       this.callSpace = res.data.rollCall.callSpace || 30;
-      this.rollCallList = res.data.rollCallRyList;
-      let roundState =
-        this.rollCallList.some((item) => item.round == 2) ||
-        this.rollCallList.every((item) => item.round == 1);
-      this.callRound = roundState ? 2 : 1;
+      this.startTime = res.data.rollCall.startTime;
+      this.endTime = res.data.rollCall.endTime;
+      let rollCallInfo = uni.getStorageSync("rollCallInfo");
+      if (!rollCallInfo) {
+        this.rollCallList = res.data.rollCallRyList;
+        this.rollCallList.map((item) => {
+          item.called = false;
+          item.round = 1;
+          item.temperature = 0;
+        });
+        uni.setStorageSync("rollCallInfo", this.rollCallList);
+      } else {
+        this.rollCallList = rollCallInfo;
+      }
       this.rollCallList.map((item, index) => {
+        this.callRound = item.round;
         item.index = index;
         item.statusText = item.status == "1" ? "已签到" : "未签到";
       });
@@ -161,26 +218,18 @@ export default {
         (item) => item.status == "0"
       );
       if (this.unSignCallList.length) {
-        let round1State = this.unSignCallList.every((item) => item.round == 1);
-        let round2State = this.unSignCallList.some((item) => item.round == 1);
-        if (this.callRound == 2) {
-          // 第二轮
-          if (round1State) {
-            this.curIndex = 0;
-          }
-          if (round2State) {
-            this.curIndex = this.unSignCallList.findIndex((item) => {
-              return item.round == this.callRound - 1;
-            });
-          }
+        let flag = this.unSignCallList.every((item) => item.called);
+        if (flag) {
+          this.curIndex =
+            this.callRound == 2 ? this.unSignCallList.length - 1 : 0;
         } else {
-          // 第一轮
           this.curIndex = this.unSignCallList.findIndex((item) => {
-            return item.round == this.callRound - 1;
+            return !item.called;
           });
         }
       }
       this.handleRollCall();
+      this.startRollCallTimer();
     },
     // 在线点名
     handleRollCall() {
@@ -191,23 +240,21 @@ export default {
       this.rollCallHandler();
       clearInterval(this.rollCallTimer);
       this.rollCallTimer = setInterval(() => {
-        let round = this.rollCallList[this.callIndex].round;
-        this.rollCallList[this.callIndex].round = round + 1 > 1 ? 2 : 1;
-        this.updateRollCall(this.rollCallList[this.callIndex]);
+        // 缓存人员信息
+        this.setRollCallStorage(this.unSignCallList[this.curIndex]);
         this.nextSignHandler(this.rollCallHandler);
       }, this.callSpace * 1000);
     },
     rollCallHandler() {
       this.showRecognitionDialogs = false;
-      this.voiceBroadcast(
+      this.$parent.voiceBroadcast(
         `请${this.unSignCallList[this.curIndex].name}进行签到`
       );
       this.callIndex = this.unSignCallList[this.curIndex].index;
       this.callId = this.unSignCallList[this.curIndex].rybh;
       this.scrollToView = `id${this.callId}`;
-      this.regConfig.rybh = this.callId;
-      this.regConfig.regName = `${this.unSignCallList[this.curIndex].name}`;
-      this.rollCallList[this.callIndex].called = true;
+      this.callConfig.rybh = this.callId;
+      this.callConfig.callName = `${this.unSignCallList[this.curIndex].name}`;
       setTimeout(() => {
         this.showRecognitionDialogs = true;
         this.$nextTick(() => {
@@ -220,28 +267,49 @@ export default {
       this.showRecognitionDialogs = false;
       clearInterval(this.rollCallTimer);
       this.curIndex = 0;
+      if (this.callRound == 1) {
+        this.$parent.voiceBroadcast("第一轮点名结束");
+      }
       if (this.callRound == 2) {
-        this.stopRollCall();
+        this.$parent.voiceBroadcast("第二轮点名结束");
+        setTimeout(() => {
+          this.stopRollCall();
+        }, 0);
         return;
       }
       this.callRound = 2;
       this.unSignCallList = [];
       this.rollCallList.map((item, index) => {
+        item.round = 2;
         if (item.status == "0") {
           item.index = index;
           this.unSignCallList.push(item);
         }
       });
-      if (this.unSignCallList.length) {
-        // 开始第二轮点名
-        this.handleRollCall();
-      } else {
-        this.stopRollCall();
-      }
+      setTimeout(() => {
+        if (this.unSignCallList.length) {
+          // 开始第二轮点名
+          this.handleRollCall();
+        } else {
+          this.stopRollCall();
+        }
+      }, 0);
+    },
+    // 缓存点名人员信息
+    setRollCallStorage(curCallInfo) {
+      this.rollCallList.map((item) => {
+        item.round = this.callRound;
+        if (item.rybh == curCallInfo.rybh) {
+          item.called = true;
+          item.temperature = this.temperature;
+        }
+      });
+      uni.setStorageSync("rollCallInfo", this.rollCallList);
     },
     // 签到成功
     signSuccess(temperature) {
       this.temperature = temperature;
+      clearInterval(this.rollCallTimer);
       this.rollCallList[this.callIndex].signDate = dateFormat(
         "YYYY-MM-DD hh:mm",
         new Date()
@@ -249,12 +317,9 @@ export default {
       this.rollCallList[this.callIndex].status = "1";
       this.rollCallList[this.callIndex].statusText = "已签到";
       this.rollCallList[this.callIndex].temperature = temperature;
-      this.rollCallList[this.callIndex].called = true;
-      let round = this.rollCallList[this.callIndex].round;
-      this.rollCallList[this.callIndex].round = round + 1 > 1 ? 2 : 1;
-      this.updateRollCall(this.rollCallList[this.callIndex]);
-      this.regConfig.isRecognitionSuccess = true;
-      this.voiceBroadcast(`${this.rollCallList[this.callIndex].name}签到成功`);
+      this.setRollCallStorage(this.unSignCallList[this.curIndex]);
+      this.callConfig.isRecognitionSuccess = true;
+      this.$parent.voiceBroadcast(`${this.rollCallList[this.callIndex].name}签到成功`);
       let params = {
         rybh: this.rollCallList[this.callIndex].rybh,
         temperature,
@@ -266,7 +331,7 @@ export default {
         this.showRecognitionDialogs = false;
       }, 2000);
       setTimeout(() => {
-        this.regConfig.isRecognitionSuccess = false;
+        this.callConfig.isRecognitionSuccess = false;
         this.nextSignHandler(this.handleRollCall);
       }, 5000);
     },
@@ -279,59 +344,52 @@ export default {
         this.unSignCallHandler();
       }
     },
-    // 更新已签到人员信息
-    async updateRollCall(curCallInfo) {
-      const { rollId, rollDetailId } = this.rollInfo;
-      const { roomId } = uni.getStorageSync("terminalInfo");
-      const { rybh, name, location, called, round, temperature, status } =
-        curCallInfo;
-      let params = {
-        data: {
-          rollId,
-          rollDetailId,
-          roomId,
-          rybh,
-          name,
-          location,
-          called,
-          round,
-          temperature,
-          status,
-        },
-      };
-      let res = await Api.apiCall(
-        "post",
-        Api.prisoner.call.updateRollCallRes,
-        params
-      );
-      if (res.state.code == 200) {
-        this.$parent.handleShowToast("签到信息保存成功");
-      }
+    // 签到时长倒计时
+    startRollCallTimer() {
+      this.callTimer = setInterval(() => {
+        this.duration--;
+        if (this.duration <= 0) {
+          this.stopRollCall();
+        }
+      }, 1000);
     },
     // 点名结束
     stopRollCall() {
       this.showRecognitionDialogs = false;
+      clearInterval(this.callTimer);
       clearInterval(this.rollCallTimer);
+      this.$parent.voiceBroadcast("签到结束");
       this.setIsCalling(false);
-      this.$parent.receiveTask("rollCall", "stop");
-      setTimeout(() => {
-        this.voiceBroadcast("点名结束");
-      }, 0);
-      setTimeout(() => {
-        this.setCurrentTab(1);
-      }, 1500);
+      this.saveSignedCallInfo();
     },
-    // 对讲中止点名
-    discontinueCall(state) {
-      clearInterval(this.rollCallTimer);
-      this.showRecognitionDialogs = false;
-      this.setIsCalling(false);
-      if (state) {
-        this.$parent.receiveTask("rollCall", "0");
+    // 保存已签到人员信息
+    async saveSignedCallInfo() {
+      this.rollCallList.map((item) => {
+        if (item.status == "0") {
+          item.temperature = 0;
+        }
+      });
+      let callTime = dateFormat("YYYY-MM-DD", this.nowDate);
+      let startTime = this.startTime ? this.startTime : callTime;
+      let endTime = this.endTime ? this.endTime : callTime;
+      let { roomId } = uni.getStorageSync("terminalInfo");
+      let params = {
+        callTime,
+        startTime,
+        endTime,
+        roomId,
+        rollCallRes: this.rollCallList,
+      };
+      let res = await Api.apiCall("post", Api.index.saveRollCallInfo, params);
+      uni.removeStorageSync("rollCallInfo");
+      this.$parent.receiveTask("rollCall", "stop");
+      if (res.state.code == 200) {
+        this.$parent.handleShowToast("签到信息保存成功");
       }
       setTimeout(() => {
+        this.$parent.handleCallOver();
         this.setCurrentTab(1);
-      });
+      }, 0);
     },
     // 保存体温超出预警值的人员
     async saveWarningTemperature(params) {
@@ -346,37 +404,33 @@ export default {
       if (this.rollCallList[this.callIndex].mKeys.includes(String(res.mKey))) {
         this.signSuccess(res.temperature);
       } else {
-        this.voiceBroadcast(
-          `识别失败，请${this.rollCallList[this.callIndex].name}进行签到`
+        this.$parent.voiceBroadcast(
+          `指纹识别失败，请${this.rollCallList[this.callIndex].name}进行签到`
         );
       }
+      this.callConfig.callName = this.rollCallList[this.callIndex].name;
     },
     // 人脸认证成功回调
     faceRecognitionSuccess(res) {
       this.signSuccess(res.temperature);
+      this.callConfig.callName = this.rollCallList[this.callIndex].name;
     },
-    // 登录弹框关闭回调
+    // 认证弹框关闭回调
     closeRecognitionDialogs() {
       this.showRecognitionDialogs = false;
     },
-    // 测温回调方法
-    setTemperature(temperature) {
-      this.$refs.recognitionDialogs &&
-        this.$refs.recognitionDialogs.setTemperature(temperature);
-    },
-    // 语音播放
-    voiceBroadcast(voiceText) {
-      // 语音播放时段
-      let messagePlayTime =
-        uni.getStorageSync("messagePlayTime") || "05:00,22:00";
-      let interval = messagePlayTime.split(",");
-      let now = dateFormat("hh:mm", new Date());
-      if (now >= interval[0] && now <= interval[1]) {
-        let options = {
-          content: voiceText,
-        };
-        getApp().globalData.Base.speech(options);
+    // 对讲中止点名
+    discontinueCall(state) {
+      this.showRecognitionDialogs = false;
+      clearInterval(this.callTimer);
+      clearInterval(this.rollCallTimer);
+      this.setIsCalling(false);
+      if (state) {
+        this.$parent.receiveTask("rollCall", "0");
       }
+      setTimeout(() => {
+        this.setCurrentTab(1);
+      }, 0);
     },
   },
 };

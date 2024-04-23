@@ -233,7 +233,7 @@ export default {
     signFail(err) {
       this.$parent.handleShowToast("获取签名失败", "center", 5000);
     },
-    // 开始指纹采集
+    // 开始指纹确认
     startFingerprint() {
       this.showFingerModal = true;
       this.initFingerPrint();

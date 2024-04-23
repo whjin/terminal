@@ -24,20 +24,96 @@
       </div>
       <div class="shopping-content">
         <div class="shopping-menu">
-          <div class="shopping-menu-item shopping-menu-active">
-            <common-icons iconType="iconother" size="28" style="color: 35fffa" />
-            <text>全部商品</text>
+          <div class="shopping-menu-item" :class="currentPage == 1 ? 'shopping-menu-active' : ''"
+            @touchstart.stop="switchPage(1)">
+            <common-icons iconType="iconfood" size="28" :style="{ color: currentPage == 1 ? '#35fffa' : '#fff' }" />
+            <text>食品类</text>
+          </div>
+          <div class="shopping-menu-item" :class="currentPage == 2 ? 'shopping-menu-active' : ''"
+            @touchstart.stop="switchPage(2)">
+            <common-icons iconType="iconclothes" size="28" :style="{ color: currentPage == 2 ? '#35fffa' : '#fff' }" />
+            <text>生活类</text>
+          </div>
+          <div class="shopping-menu-item" :class="currentPage == 3 ? 'shopping-menu-active' : ''"
+            @touchstart.stop="switchPage(3)">
+            <common-icons iconType="iconother" size="28" :style="{ color: currentPage == 3 ? '#35fffa' : '#fff' }" />
+            <text>其他类</text>
           </div>
         </div>
-        <div class="shopping-goods-container">
+        <div v-show="currentPage == 1" class="shopping-goods-container">
           <scroll-view scroll-y="true" class="shopping-goods-scroll">
             <div class="shopping-goods-box">
-              <div class="shopping-goods-item shopping-img" :class="{ 'shopping-select-img': item.goodsId == goodsId }"
-                v-for="item in commonGoodsList" :key="item.goodsId" @click="handleSelectGoods(item)">
+              <div class="shopping-goods-item shopping-img" :class="{ 'shopping-select-img': item.id == goodsId }"
+                v-for="item in foodGoodsList" :key="item.id" @click="handleSelectGoods(item)">
                 <div class="goods-img">
-                  <image :src="item.imageUrl ? item.imageUrl : defaultUrl" lazy-load></image>
+                  <image :src="item.image ? fileUrlPrefix + item.image : defaultUrl"></image>
                 </div>
-                <div class="goods-name">{{ item.goodsName }}</div>
+                <div class="goods-info">
+                  <div class="name">{{ item.name }}</div>
+                  <div class="stock">
+                    库存:<span>{{ item.stock }}</span>
+                  </div>
+                </div>
+                <div class="purchase">
+                  <div class="price">￥{{ item.price }}</div>
+                  <div class="count">
+                    <div class="minus-btn" :class="{ 'minus-disabled': item.disabled }" @click="handleMinusGoods(item)">
+                      <common-icons iconType="iconminus" size="18" color="#fff" />
+                    </div>
+                    <div class="num">{{ item.selectNum }}</div>
+                    <div class="plus-btn" @touchstart.stop="handlePlusGoods(item)">
+                      <common-icons iconType="iconplus" size="18" color="#fff" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </scroll-view>
+        </div>
+        <div v-show="currentPage == 2" class="shopping-goods-container">
+          <scroll-view scroll-y="true" class="shopping-goods-scroll">
+            <div class="shopping-goods-box">
+              <div class="shopping-goods-item shopping-img" :class="{ 'shopping-select-img': item.id == goodsId }"
+                v-for="item in dailyGoodsList" :key="item.id" @click="handleSelectGoods(item)">
+                <div class="goods-img">
+                  <image :src="item.image ? fileUrlPrefix + item.image : defaultUrl"></image>
+                </div>
+                <div class="goods-info">
+                  <div class="name">{{ item.name }}</div>
+                  <div class="stock">
+                    库存:<span>{{ item.stock }}</span>
+                  </div>
+                </div>
+                <div class="purchase">
+                  <div class="price">￥{{ item.price }}</div>
+                  <div class="count">
+                    <div class="minus-btn" :class="{ 'minus-disabled': item.disabled }" @click="handleMinusGoods(item)">
+                      <common-icons iconType="iconminus" size="18" color="#fff" />
+                    </div>
+                    <div class="num">{{ item.selectNum }}</div>
+                    <div class="plus-btn" @touchstart.stop="handlePlusGoods(item)">
+                      <common-icons iconType="iconplus" size="18" color="#fff" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </scroll-view>
+        </div>
+        <div v-show="currentPage == 3" class="shopping-goods-container">
+          <scroll-view scroll-y="true" class="shopping-goods-scroll">
+            <div class="shopping-goods-box">
+              <div class="shopping-goods-item shopping-img" :class="{ 'shopping-select-img': item.id == goodsId }"
+                v-for="item in otherGoodsList" :key="item.id" @click="handleSelectGoods(item)">
+                <div class="goods-img">
+                  <image :src="item.image ? fileUrlPrefix + item.image : defaultUrl"></image>
+                </div>
+                <div class="goods-info">
+                  <div class="name">{{ item.name }}</div>
+                  <div class="stock">
+                    库存:<span>{{ item.stock }}</span>
+                  </div>
+                </div>
                 <div class="purchase">
                   <div class="price">￥{{ item.price }}</div>
                   <div class="count">
@@ -74,9 +150,9 @@
                 </div>
               </div>
               <scroll-view scroll-y="true" class="cart-table-scroll">
-                <div class="table-content" v-for="(item, index) in cartGoodsList" :key="index">
+                <div class="table-content" v-for="(item, index) in cartGoodsList" :key="item.id">
                   <div class="cart-table-item" style="flex: 2">
-                    {{ item.goodsName }}
+                    {{ item.name }}
                   </div>
                   <div class="cart-table-item" style="flex: 1; color: #fd0404">
                     ￥{{ item.price }}
@@ -111,10 +187,20 @@
               商品合计：<text>{{ cartTotal }}</text>元
             </div>
             <div class="cart-settlement">
-              <div class="clearup-btn" @click="handleClearCart">
+              <div class="clearup-btn" :style="{
+                'pointer-events': !this.cartGoodsList.length
+                  ? 'none'
+                  : 'auto',
+              }" @click="handleClearCart">
                 清空所有商品
               </div>
-              <div class="settlement-btn" @click="handleSettleCart">结算</div>
+              <div class="settlement-btn" :style="{
+                'pointer-events': !this.cartGoodsList.length
+                  ? 'none'
+                  : 'auto',
+              }" @click="handleSettleCart">
+                结算
+              </div>
             </div>
           </div>
         </div>
@@ -151,7 +237,7 @@
                   {{ item.title }}
                 </div>
               </div>
-              <scroll-view scroll-y="true" class="record-table-scroll" @scrolltolower="handleRecorListScrolltolower">
+              <scroll-view scroll-y="true" class="record-table-scroll" @scrolltolower="handleScrolltolower">
                 <div class="table-content" v-for="(item, index) in orderRecordList" :key="item.orderNo">
                   <div class="record-table-item" style="flex: 2">
                     {{ item.orderNo }}
@@ -209,7 +295,7 @@
                 </div>
               </div>
               <scroll-view scroll-y="true" class="record-table-scroll">
-                <div class="table-content" v-for="(item, index) in recordDetailsList" :key="item.goodsId">
+                <div class="table-content" v-for="(item, index) in recordDetailsList" :key="item.id">
                   <div class="record-table-item" style="flex: 2">
                     {{ item.goodsName }}
                   </div>
@@ -258,6 +344,15 @@
               </scroll-view>
             </div>
           </div>
+          <view class="record-modal-footer">
+            <button type="primary" class="shortcut-btn" :disabled="confirming ||
+              !curRecordDetails.canConfirm ||
+              curRecordDetails.finishConfirm == 1
+              " :loading="confirming" @click.stop="handleShortcutConfirm">
+              一键确认收货
+            </button>
+            <text class="shortcut-tips">请核对收到的商品，确认无误后点击“一键确认收货”，如商品存在疑问需逐一进行确认收货并备注！</text>
+          </view>
         </div>
       </neil-modal>
       <neil-modal :show="showOrderInit" @close="closeModal('OrderInit')">
@@ -290,7 +385,7 @@
           <view class="modal-horizontal-divider"></view>
           <div class="size-modal-content">
             <div class="size-box">
-              <div class="size-item" :class="{ 'size-item-select': selectSizeIdx == index }"
+              <div class="size-item" :class="{ 'size-item-select': selectSizeIdx === index }"
                 v-for="(size, index) in goodsSizeInfo.size" :key="size" @click="selectGoodsSize(size, index)">
                 {{ size }}
               </div>
@@ -318,9 +413,10 @@
           </div>
         </div>
       </neil-modal>
-      <recognition-dialogs ref="recognitionDialogs" useFor="shopping" :regConfig="regConfig"
-        :isShow="showRecognitionDialogs" @fingerRecognitionSuccess="fingerRecognitionSuccess"
-        @faceRecognitionSuccess="faceRecognitionSuccess" @close="closeRecognitionDialogs"></recognition-dialogs>
+      <recognition-dialogs ref="recognitionDialogs" useFor="shopping" :callConfig="callConfig"
+        :isShow="showRecognitionDialogs" @close="handleRecognitionClose"
+        @fingerRecognitionSuccess="fingerRecognitionSuccess" @faceRecognitionSuccess="faceRecognitionSuccess"
+        @recognitionFail="recognitionFail"></recognition-dialogs>
     </div>
   </div>
 </template>
@@ -351,17 +447,21 @@ export default {
     return {
       // 错误提示
       errTips: "",
+      fileUrlPrefix: uni.getStorageSync("fileUrlPrefix"),
       // 账户余额
       accountBalance: 0,
       // 商品数量
       quantity: 0,
+      // 菜单索引
+      currentPage: 1,
       // 人员档案信息
       prisonerInfo: {},
-      // 所有商品信息
-      allGoodsList: [],
-      // 当前商品列表
-      commonGoodsList: [],
-      pageSize: 15,
+      // 食品类商品列表
+      foodGoodsList: [],
+      // 生活类商品列表
+      dailyGoodsList: [],
+      // 其他类商品列表
+      otherGoodsList: [],
       // 默认商品图片
       defaultUrl: "/static/images/shopping/default.png",
       // 购物车弹框
@@ -418,14 +518,17 @@ export default {
       // 购物车暂存信息
       saveCartItem: {},
       // 购物验证信息
-      regConfig: {
-        regName: "",
+      callConfig: {
+        callName: "",
+        isRecognitionSuccess: false,
         rybh: "",
       },
       // 显示验证弹框
       showRecognitionDialogs: false,
       // 是否在购物时间
       isShoppingTime: true,
+      // 正在一键确认收货
+      confirming: false,
       // 购物跨月审批弹框
       showCrossMonthModal: false,
       // 禁止重复提交
@@ -453,23 +556,25 @@ export default {
       return value.toFixed(2);
     },
   },
-  created() {
+  mounted() {
     // 购物跨月审批提示
     this.openCrossMonthModal();
     // 获取商品列表
     this.getPrisonInfo(this.personInfo.rybh);
-  },
-  mounted() {
-    // 开启倒计时
-    this.$parent.countTimer();
     // 获取备注类型列表
     this.getConfirmTypeList();
+    // 开启倒计时
+    this.$parent.countTimer();
   },
   destroyed() {
     // 暂存购物车列表
     // this.saveCartInfo();
   },
   methods: {
+    // 切换菜单
+    switchPage(index) {
+      this.currentPage = index;
+    },
     // 购物跨月审批提示
     openCrossMonthModal() {
       if (this.personInfo.hasOwnProperty("dayOfMonth")) {
@@ -489,21 +594,44 @@ export default {
         this.accountBalance = money
           ? formatFloat(money, 2)
           : 0;
-        this.regConfig.callName = name;
-        this.regConfig.rybh = rybh;
+        this.callConfig.callName = name;
+        this.callConfig.rybh = rybh;
         let params = { roomno, roomSex, rybh };
-        // 商品列表请求参数
-        let goodParams = {
+        let pageParam = {
+          pageIndex: 1,
+          pageSize: 100,
+        };
+        // 获取食品类商品列表
+        let foodParams = {
           data: {
+            ...{ id: "01" },
             ...params,
           },
+          pageParam,
         };
-        // 获取商品列表
-        this.getGoodsList(goodParams);
+        this.getFoodGoodsInfo(foodParams);
+        // 获取生活类商品列表
+        let dailyParams = {
+          data: {
+            ...{ id: "02" },
+            ...params,
+          },
+          pageParam,
+        };
+        this.getDailyGoodsInfo(dailyParams);
+        // 获取其它类商品列表
+        let otherParams = {
+          data: {
+            ...{ id: "03" },
+            ...params,
+          },
+          pageParam,
+        };
+        this.getOtherGoodsInfo(otherParams);
       }
     },
-    // 获取商品列表
-    async getGoodsList(params) {
+    // 获取食品类商品列表
+    async getFoodGoodsInfo(params) {
       let res = await Api.apiCall(
         "post",
         Api.index.getShoppingGoodsInfo,
@@ -512,18 +640,51 @@ export default {
       );
       if (res.state.code == 200) {
         if (res.data == "NoShopping") {
+          this.foodGoodsList = [];
+          return;
+        }
+        this.foodGoodsList = res.data;
+      }
+    },
+    // 获取生活类商品列表
+    async getDailyGoodsInfo(params) {
+      let res = await Api.apiCall(
+        "post",
+        Api.index.getShoppingGoodsInfo,
+        params,
+        true
+      );
+      if (res.state.code == 200) {
+        if (res.data == "NoShopping") {
+          this.dailyGoodsList = [];
           this.isShoppingTime = false;
           this.showTips(false, "未到开放购物时间！");
           return;
         }
-        if (Array.isArray(res.data) && res.data.length) {
-          this.commonGoodsList = res.data;
+        this.dailyGoodsList = res.data;
+      }
+    },
+    // 获取其他类商品列表
+    async getOtherGoodsInfo(params) {
+      let res = await Api.apiCall(
+        "post",
+        Api.index.getShoppingGoodsInfo,
+        params,
+        true
+      );
+      if (res.state.code == 200) {
+        if (res.data == "NoShopping") {
+          this.otherGoodsList = [];
+          return;
         }
+        this.otherGoodsList = res.data;
+        // 获取暂存购物车列表
+        // this.getCartInfo();
       }
     },
     // 选择商品
     handleSelectGoods(item) {
-      this.goodsId = item.goodsId;
+      this.goodsId = item.id;
     },
     // 减少商品数量
     handleMinusGoods(item) {
@@ -532,12 +693,12 @@ export default {
         item.selectNum--;
         this.quantity--;
         this.cartGoodsList.map((list, index) => {
-          if (list.goodsId == item.goodsId) {
+          if (list.id == item.id) {
             list.selectNum = item.selectNum;
             if (!list.selectNum) {
               this.cartGoodsList.splice(index, 1);
               if (list.hasOwnProperty("selectSize")) {
-                this.resetGoodsSize(list.goodsId);
+                this.resetGoodsSize(list.id);
               }
             }
           }
@@ -548,8 +709,18 @@ export default {
     },
     // 重置商品尺码信息
     resetGoodsSize(id) {
-      this.commonGoodsList.map((list) => {
-        if (list.goodsId == id) {
+      this.foodGoodsList.map((list) => {
+        if (list.id == id) {
+          delete list.selectSize;
+        }
+      });
+      this.dailyGoodsList.map((list) => {
+        if (list.id == id) {
+          delete list.selectSize;
+        }
+      });
+      this.otherGoodsList.map((list) => {
+        if (list.id == id) {
           delete list.selectSize;
         }
       });
@@ -557,15 +728,15 @@ export default {
     // 增加商品数量
     handlePlusGoods(item) {
       item.disabled = false;
-      if (!item.goodsUpperLimit) {
+      if (!item.upperLimit) {
         // 不限购商品
         this.plusGoodsHandler(item);
       } else {
-        if (item.selectNum < item.goodsUpperLimit) {
+        if (item.selectNum < item.upperLimit) {
           // 限购商品
           this.plusGoodsHandler(item);
         } else {
-          this.showTips(false, `该商品限购${item.goodsUpperLimit}件`);
+          this.showTips(false, `该商品限购${item.upperLimit}件`);
           return;
         }
       }
@@ -596,7 +767,7 @@ export default {
     plusGoodsCartHandler(item) {
       if (this.cartGoodsList.length) {
         this.cartGoodsList.map((list, index) => {
-          if (list.goodsId == item.goodsId) {
+          if (list.id == item.id) {
             this.cartGoodsList.splice(index, 1, item);
           } else {
             this.cartGoodsList.push(item);
@@ -625,15 +796,15 @@ export default {
     // 增加购物车商品数量
     handlePlusCart(item, index) {
       item.disabled = false;
-      if (!item.goodsUpperLimit) {
+      if (!item.upperLimit) {
         // 不限购商品
         this.plusCartHandler(item, index);
       } else {
-        if (item.selectNum < item.goodsUpperLimit) {
+        if (item.selectNum < item.upperLimit) {
           // 限购商品
           this.plusCartHandler(item, index);
         } else {
-          this.showTips(false, `该商品限购${item.goodsUpperLimit}件`);
+          this.showTips(false, `该商品限购${item.upperLimit}件`);
           return;
         }
       }
@@ -670,8 +841,24 @@ export default {
       this.cartTotal = formatFloat(minusGoods, 2);
       this.cartGoodsList[index].selectNum = 0;
       this.cartGoodsList.splice(index, 1);
-      this.commonGoodsList.map((list) => {
-        if (list.goodsId == item.goodsId) {
+      this.foodGoodsList.map((list) => {
+        if (list.id == item.id) {
+          list.selectNum = 0;
+          if (list.hasOwnProperty("selectSize")) {
+            delete list.selectSize;
+          }
+        }
+      });
+      this.dailyGoodsList.map((list) => {
+        if (list.id == item.id) {
+          list.selectNum = 0;
+          if (list.hasOwnProperty("selectSize")) {
+            delete list.selectSize;
+          }
+        }
+      });
+      this.otherGoodsList.map((list) => {
+        if (list.id == item.id) {
           list.selectNum = 0;
           if (list.hasOwnProperty("selectSize")) {
             delete list.selectSize;
@@ -682,17 +869,28 @@ export default {
     // 清空购物车
     handleClearCart() {
       if (!this.cartGoodsList.length) {
-        this.$parent.handleShowToast("购物车为空", "center");
         return;
       }
       // 初始化商品信息
       this.initGoodsInfo();
       // 清空暂存购物车
-      uni.removeStorageSync("saveCartList");
+      // uni.removeStorageSync("saveCartList");
     },
     // 初始化商品信息
     initGoodsInfo() {
-      this.commonGoodsList.map((list) => {
+      this.foodGoodsList.map((list) => {
+        list.selectNum = 0;
+        if (list.hasOwnProperty("selectSize")) {
+          delete list.selectSize;
+        }
+      });
+      this.dailyGoodsList.map((list) => {
+        list.selectNum = 0;
+        if (list.hasOwnProperty("selectSize")) {
+          delete list.selectSize;
+        }
+      });
+      this.otherGoodsList.map((list) => {
         list.selectNum = 0;
         if (list.hasOwnProperty("selectSize")) {
           delete list.selectSize;
@@ -704,9 +902,19 @@ export default {
     },
     // 增加减少购物车商品数量
     modifyCartQuantity(item) {
-      this.commonGoodsList.map((list, index) => {
-        if (list.goodsId == item.goodsId) {
-          this.commonGoodsList.splice(index, 1, item);
+      this.foodGoodsList.map((list, index) => {
+        if (list.id == item.id) {
+          this.foodGoodsList.splice(index, 1, item);
+        }
+      });
+      this.dailyGoodsList.map((list, index) => {
+        if (list.id == item.id) {
+          this.dailyGoodsList.splice(index, 1, item);
+        }
+      });
+      this.otherGoodsList.map((list, index) => {
+        if (list.id == item.id) {
+          this.otherGoodsList.splice(index, 1, item);
         }
       });
     },
@@ -715,24 +923,48 @@ export default {
       // 购物车缓存不为空
       if (!isNullStr(uni.getStorageSync("saveCartList"))) {
         let saveCartList = uni.getStorageSync("saveCartList");
-        let allGoodsList = [...this.commonGoodsList];
+        let allGoodsList = [
+          ...this.foodGoodsList,
+          ...this.dailyGoodsList,
+          ...this.otherGoodsList,
+        ];
         // 所有商品不为空
         if (allGoodsList.length) {
           saveCartList.map((list) => {
-            if (list.goodsId == this.prisonerInfo.rybh) {
+            if (list.id == this.prisonerInfo.rybh) {
               this.cartGoodsList = list.cartList;
-              let goodsIdList = allGoodsList.map((goods) => goods.goodsId);
+              let goodsIdList = allGoodsList.map((goods) => goods.id);
               this.cartGoodsList.map((item, index) => {
-                if (!goodsIdList.includes(item.goodsId)) {
+                if (!goodsIdList.includes(item.id)) {
                   this.cartGoodsList.splice(index, 1);
                 }
               });
               this.cartGoodsList.map((item) => {
                 this.quantity += item.selectNum;
               });
-              this.commonGoodsList.map((list) => {
+              this.foodGoodsList.map((list) => {
                 this.cartGoodsList.map((item) => {
-                  if (list.goodsId == item.goodsId) {
+                  if (list.id == item.id) {
+                    list.selectNum = item.selectNum;
+                    if (item.hasOwnProperty("selectSize")) {
+                      list.selectSize = item.selectSize;
+                    }
+                  }
+                });
+              });
+              this.dailyGoodsList.map((list) => {
+                this.cartGoodsList.map((item) => {
+                  if (list.id == item.id) {
+                    list.selectNum = item.selectNum;
+                    if (item.hasOwnProperty("selectSize")) {
+                      list.selectSize = item.selectSize;
+                    }
+                  }
+                });
+              });
+              this.otherGoodsList.map((list) => {
+                this.cartGoodsList.map((item) => {
+                  if (list.id == item.id) {
                     list.selectNum = item.selectNum;
                     if (item.hasOwnProperty("selectSize")) {
                       list.selectSize = item.selectSize;
@@ -773,9 +1005,9 @@ export default {
             id: this.prisonerInfo.rybh,
             cartList: this.cartGoodsList,
           };
-          let cardIdList = this.saveCartList.map((item) => item.goodsId);
+          let cardIdList = this.saveCartList.map((item) => item.id);
           this.saveCartList.map((list, index) => {
-            if (list.goodsId == this.prisonerInfo.rybh) {
+            if (list.id == this.prisonerInfo.rybh) {
               // 替换该人员缓存
               this.saveCartList.splice(index, 1, this.saveCartItem);
             } else {
@@ -788,7 +1020,7 @@ export default {
         } else {
           // 购物车为空，删除该人员缓存
           this.saveCartList.map((list, index) => {
-            if (list.goodsId == this.prisonerInfo.rybh) {
+            if (list.id == this.prisonerInfo.rybh) {
               this.saveCartList.splice(index, 1);
             }
           });
@@ -804,17 +1036,20 @@ export default {
           this.isRepeatState = false;
         }, 3000);
         if (!this.cartGoodsList.length) {
-          this.$parent.handleShowToast("购物车为空", "center");
           return;
         }
-        if (this.prisonerInfo.rybh == "0999") {
-          this.saveCartOrderInfo();
+        if (this.accountBalance < this.cartTotal) {
+          this.showTips(false, "余额不足，购买失败");
         } else {
-          this.openModal("RecognitionDialogs");
-          this.$nextTick(() => {
-            this.$refs.recognitionDialogs &&
-              this.$refs.recognitionDialogs.startRecognition();
-          });
+          if (this.prisonerInfo.rybh === "0999") {
+            this.saveCartOrderInfo();
+          } else {
+            this.openModal("RecognitionDialogs");
+            this.$nextTick(() => {
+              this.$refs.recognitionDialogs &&
+                this.$refs.recognitionDialogs.startRecognition();
+            });
+          }
         }
       }
     },
@@ -825,12 +1060,8 @@ export default {
       this.cartGoodsList.map((item) => {
         if (item.selectNum > 0) {
           let goods = {
-            goodsId: item.goodsId,
+            goodsId: item.id,
             buyNum: item.selectNum,
-            price: item.price,
-            goodsUnit: item.goodsUnit,
-            goodsNo: item.goodsNo,
-            goodsName: item.goodsName,
           };
           if (item.hasOwnProperty("selectSize")) {
             goods.size = item.selectSize;
@@ -851,6 +1082,10 @@ export default {
       );
       if (res.state.code == 200) {
         this.showTips(true, "购买成功");
+        this.accountBalance = formatFloat(
+          this.accountBalance - this.cartTotal,
+          2
+        );
         // 初始化商品信息
         this.initGoodsInfo();
         this.showShoppingCart = false;
@@ -877,10 +1112,10 @@ export default {
       this.endDate = e;
     },
     // 消费记录滑动到底部触发加载
-    handleRecorListScrolltolower() {
+    handleScrolltolower() {
       // 已获取所有数据
       if (this.orderRecordList.length >= this.orderRecordTotal) {
-        return this.$parent.handleShowToast("暂无更多数据", "center");
+        return this.$parent.handleShowToast("暂无更多数据");
       }
       this.orderPageParams.pageIndex += 1;
       this.getOrderHistoryInfo();
@@ -963,7 +1198,7 @@ export default {
               return item;
             })) ||
           [];
-        if (this.orderPageParams.pageIndex == 1) {
+        if (this.orderPageParams.pageIndex === 1) {
           this.orderRecordList = list;
         } else {
           this.orderRecordList = this.orderRecordList.concat(list);
@@ -998,7 +1233,7 @@ export default {
     },
     // 关闭消费记录详情
     closeRecordDetailsModal() {
-      this.recordDetailsList.map((item) => {
+      this.recordDetailsList.forEach((item) => {
         item.remarks = "";
       });
       this.setOrderPageParams(1, 10);
@@ -1037,8 +1272,8 @@ export default {
         },
       });
       if (res.state.code == 200) {
-        this.recordDetailsList.map((item) => {
-          if (item.id == goods.id) {
+        this.recordDetailsList.forEach((item) => {
+          if (item.id === goods.id) {
             item.confirmStatus = 1;
           }
         });
@@ -1048,6 +1283,27 @@ export default {
         this.$parent.handleShowToast("确认失败", "center");
       }
     },
+    handleShortcutConfirm() {
+      this.confirming = true;
+      this.shortcutConfirm();
+    },
+    // 一键确认收货
+    async shortcutConfirm() {
+      let res = await Api.apiCall("get", Api.index.shortcutConfirm, {
+        orderNo: this.curRecordDetails.orderNo,
+      });
+      this.confirming = false;
+      if (res.state.code == 200) {
+        this.curRecordDetails.finishConfirm = 1;
+        this.recordDetailsList.forEach((item) => {
+          item.confirmStatus = 1;
+        });
+        this.$forceUpdate();
+        this.$parent.handleShowToast("一键确认成功", "center");
+      } else {
+        this.$parent.handleShowToast("一键确认失败", "center");
+      }
+    },
     // 设置消费记录分页参数
     setOrderPageParams(pageIndex, pageSize) {
       this.orderPageParams = {
@@ -1055,26 +1311,34 @@ export default {
         pageSize,
       };
     },
+    // 验证成功
+    verifySuccess() {
+      this.$parent.voiceBroadcast("验证通过");
+      this.callConfig.isRecognitionSuccess = true;
+      setTimeout(() => {
+        this.closeModal("RecognitionDialogs");
+        this.callConfig.isRecognitionSuccess = false;
+        this.saveCartOrderInfo();
+      }, 1000);
+    },
     // 指纹验证成功回调
     fingerRecognitionSuccess(res) {
       if (this.prisonerInfo.mkeys.includes(String(res.mKey))) {
         this.verifySuccess();
       } else {
-        this.voiceBroadcast("识别失败，没有录入该指纹");
+        this.$parent.voiceBroadcast("指纹识别失败，没有录入该指纹");
       }
     },
     // 人脸验证成功回调
     faceRecognitionSuccess(res) {
       this.verifySuccess();
     },
-    // 验证成功
-    verifySuccess() {
-      this.voiceBroadcast("验证通过");
+    // 验证失败回调
+    recognitionFail() {
       this.closeModal("RecognitionDialogs");
-      this.saveCartOrderInfo();
     },
-    // 登录弹框关闭回调
-    closeRecognitionDialogs() {
+    // 验证窗口关闭回调
+    handleRecognitionClose() {
       this.closeModal("RecognitionDialogs");
     },
     // 弹出提示框
@@ -1082,20 +1346,6 @@ export default {
       this.errTips = tips;
       this.showSuccess = isSuccess;
       this.openModal("OrderInit");
-    },
-    // 语音播放
-    voiceBroadcast(voiceText) {
-      // 语音播放时段
-      let messagePlayTime =
-        uni.getStorageSync("messagePlayTime") || "05:00,22:00";
-      let interval = messagePlayTime.split(",");
-      let now = dateFormat("hh:mm", new Date());
-      if (now >= interval[0] && now <= interval[1]) {
-        let options = {
-          content: voiceText,
-        };
-        getApp().globalData.Base.speech(options);
-      }
     },
     openModal(type) {
       this[`show${type}`] = true;

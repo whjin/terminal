@@ -43,20 +43,8 @@
     },
     {
       "name": "服药管理",
-      "image": "/static/images/index/prisoner/fygl.png",
+      "image": "/static/images/index/prisoner/medication.png",
       "url": "",
       "index": 17
-    },
-    {
-      "name": "投诉建议",
-      "image": "/static/images/index/prisoner/yyth.png",
-      "url": "",
-      "index": 23
-    },
-    {
-      "name": "家属通信",
-      "image": "/static/images/index/prisoner/yyxx.png",
-      "url": "",
-      "index": 24
     }
 ]

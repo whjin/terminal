@@ -1,10 +1,10 @@
 <template>
   <view class="uni-grid-wrap">
     <view :id="elId" ref="uni-grid" class="uni-grid" :class="{ 'uni-grid--border': showBorder }" :style="{
-        'border-left-style': 'solid',
-        'border-left-color': borderColor,
-        'border-left-width': showBorder ? '1px' : 0,
-      }">
+      'border-left-style': 'solid',
+      'border-left-color': borderColor,
+      'border-left-width': showBorder ? '1px' : 0,
+    }">
       <slot />
     </view>
   </view>
@@ -12,7 +12,6 @@
 
 <script>
 // #ifdef APP-NVUE
-const dom = uni.requireNativePlugin("dom");
 // #endif
 export default {
   name: "UniGrid",
@@ -42,26 +41,26 @@ export default {
       default: true,
     },
   },
-  provide () {
+  provide() {
     return {
       grid: this,
     };
   },
-  data () {
+  data() {
     const elId = `Uni_${Math.ceil(Math.random() * 10e5).toString(36)}`;
     return {
       elId,
       width: 0,
     };
   },
-  created () {
+  created() {
     this.children = [];
   },
-  mounted () {
+  mounted() {
     this.init();
   },
   methods: {
-    init () {
+    init() {
       setTimeout(() => {
         this._getSize((width) => {
           this.children.forEach((item, index) => {
@@ -70,10 +69,10 @@ export default {
         });
       }, 50);
     },
-    change (e) {
+    change(e) {
       this.$emit("change", e);
     },
-    _getSize (fn) {
+    _getSize(fn) {
       // #ifndef APP-NVUE
       uni
         .createSelectorQuery()
@@ -86,7 +85,7 @@ export default {
         });
       // #endif
       // #ifdef APP-NVUE
-      dom.getComponentRect(this.$refs["uni-grid"], (ret) => {
+      getApp().globalData.Dom.getComponentRect(this.$refs["uni-grid"], (ret) => {
         this.width = parseInt((ret.size.width - 1) / this.column) + "px";
         fn(this.width);
       });

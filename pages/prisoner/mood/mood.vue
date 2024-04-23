@@ -1,14 +1,16 @@
 <template>
   <view>
     <view class="main-area">
-      <view class="mood-title">
+      <view class="uni-flex page-title">
         <text>心情记录</text>
-        <button type="primary" class="button" @click="openMoodStatusModal">
-          登记
-        </button>
+        <view>
+          <button type="primary" class="button" @click="openMoodStatusModal">
+            登记
+          </button>
+        </view>
       </view>
       <view class="uni-flex uni-row">
-        <view class="flex-item uni-column" style="font-size: 25upx;">
+        <view class="flex-item uni-column" style="margin-top: 46upx; font-size: 25upx;">
           <view class="flex-item flex-item-V flex-item-view">
             <view>第一周</view>
           </view>
@@ -25,7 +27,7 @@
             <view>第五周</view>
           </view>
         </view>
-        <view class="flex-item" style="width: 1200upx;padding-right: 27.77upx;">
+        <view class="flex-item" style="margin-left: 25upx; width: 1200upx;">
           <view class="uni-flex" style="text-align: center;" id="weekList">
             <view class="uni-flex-item table-th">
               <view>星期一</view>
@@ -90,7 +92,7 @@
 <script>
 import Api from '@/common/api.js';
 import { mapState } from "vuex";
-import { getDate } from '@/common/utils/util.js';
+import { getDate } from '@/common/utils/tools.js';
 import neilModal from "@/components/neil-modal/neil-modal.vue";
 
 export default {
@@ -161,7 +163,7 @@ export default {
     }),
     // 监室ID
     roomId() {
-      return uni.getStorageSync('terminalInfo').roomId;
+      return uni.getStorageSync("terminalInfo").roomId;
     }
   },
   methods: {
@@ -293,23 +295,6 @@ export default {
 </script>
 
 <style scoped>
-.mood-title {
-  width: 100%;
-  box-sizing: border-box;
-  height: 83.33upx;
-  padding: 0 27.77upx;
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.mood-title text {
-  white-space: nowrap;
-  color: #35fffa;
-  font-size: 27.77upx;
-  font-weight: bold;
-}
-
 .table-td-divider .table-td {
   height: 86upx;
 }
@@ -320,9 +305,9 @@ export default {
 
 .flex-item-view {
   margin-bottom: 9upx;
-  margin-left: 27.77upx;
+  margin-left: 50upx;
   height: 83upx;
-  width: 168upx;
+  width: 190upx;
   text-align: center;
   background: rgba(19, 42, 78, 0.4);
 }
@@ -338,12 +323,14 @@ export default {
 .button {
   width: 84upx;
   height: 42upx;
+  margin-top: 30upx;
+  margin-left: 1080upx;
+  float: right;
   font-size: 20upx;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  position: absolute;
-  right: 27.77upx;
+  line-height: 40upx;
+  text-align: center;
+  padding: 0 0 0 0;
 }
 
 .uni-flex .table-th {

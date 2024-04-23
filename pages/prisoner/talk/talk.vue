@@ -7,19 +7,11 @@
         </div>
         <div class="talk-box">
           <div class="talk-menu-list">
-            <div
-              class="talk-menu-item"
-              :class="currentPage == 1 ? 'talk-menu-active' : ''"
-              @click="switchPage(1)"
-            >
+            <div class="talk-menu-item" :class="currentPage == 1 ? 'talk-menu-active' : ''" @click="switchPage(1)">
               <common-icons iconType="icondispose" size="38" color="#fff" />
               <text>预约登记</text>
             </div>
-            <div
-              class="talk-menu-item"
-              :class="currentPage == 2 ? 'talk-menu-active' : ''"
-              @click="switchPage(2)"
-            >
+            <div class="talk-menu-item" :class="currentPage == 2 ? 'talk-menu-active' : ''" @click="switchPage(2)">
               <common-icons iconType="iconrecord" size="46" color="#fff" />
               <text>预约记录</text>
             </div>
@@ -38,30 +30,19 @@
             </div>
             <div class="register-select">
               <label>最近外出类型：</label>
-              <div class="register-person">{{ outTypeInfo.name || "无" }}</div>
+              <div class="register-person">{{ outTypeInfo.name || '无' }}</div>
             </div>
             <div class="register-select register-item">
               <label>预约类型：</label>
-              <xfl-select
-                :list="appointmentTypeList"
-                :clearable="false"
-                :placeholder="'请选择预约类型'"
-                @change="selectAppointmentType"
-              ></xfl-select>
+              <xfl-select :list="appointmentTypeList" :clearable="false" :placeholder="'请选择预约类型'"
+                @change="selectAppointmentType"></xfl-select>
             </div>
             <div class="register-mood register-item">
               <label>今日心情：</label>
-              <div
-                class="today-mood"
-                v-for="(item, index) in todayMoodList"
-                :key="index"
-              >
+              <div class="today-mood" v-for="(item, index) in todayMoodList" :key="index">
                 <div class="today-mood-item">
-                  <div
-                    class="mood-image mood-img"
-                    :class="{ 'mood-select-img': item.code == moodCode }"
-                    @click="selectTodayMood(item)"
-                  >
+                  <div class="mood-image mood-img" :class="{ 'mood-select-img': item.code == moodCode }"
+                    @click="selectTodayMood(item)">
                     <image :src="moodImgList[index]"></image>
                   </div>
                   <text>{{ item.value }}</text>
@@ -69,28 +50,20 @@
               </div>
             </div>
             <div class="register-button">
-              <div class="btn-submit" @click="handleRegSubmit">预约登记</div>
+              <div class="btn-submit" @click="handleRegSubmit">
+                预约登记
+              </div>
             </div>
           </div>
           <div v-if="currentPage == 2" class="talk-record-container">
             <div class="record-form-box">
               <div class="record-select">
                 <label>预约时间：</label>
-                <e-picker
-                  mode="date"
-                  class="picker-img"
-                  :showValue="startDate"
-                  @change="selectStartDate"
-                >
+                <e-picker mode="date" class="picker-img" :showValue="startDate" @change="selectStartDate">
                   <div class="talk-date">{{ startDate }}</div>
                 </e-picker>
                 <div class="divider-line">-</div>
-                <e-picker
-                  mode="date"
-                  class="picker-img"
-                  :showValue="endDate"
-                  @change="selectEndDate"
-                >
+                <e-picker mode="date" class="picker-img" :showValue="endDate" @change="selectEndDate">
                   <div class="talk-date">{{ endDate }}</div>
                 </e-picker>
               </div>
@@ -100,25 +73,13 @@
             </div>
             <div class="record-table-box">
               <div class="table-head">
-                <div
-                  class="table-head-item"
-                  v-for="(item, index) in talkColumns"
-                  :key="index"
-                  :style="{ flex: item.flex }"
-                >
+                <div class="table-head-item" v-for="(item, index) in talkColumns" :key="index"
+                  :style="{ flex: item.flex }">
                   {{ item.title }}
                 </div>
               </div>
-              <scroll-view
-                scroll-y="true"
-                class="record-table-scroll"
-                @scrolltolower="handleRecorListScrolltolower"
-              >
-                <div
-                  class="table-content"
-                  v-for="(item, index) in talkRecordList"
-                  :key="index"
-                >
+              <scroll-view scroll-y="true" class="record-table-scroll" @scrolltolower="handleScrolltolower">
+                <div class="table-content" v-for="(item, index) in talkRecordList" :key="index">
                   <div class="record-table-item" style="flex: 1">
                     {{ item.name }}
                   </div>
@@ -140,15 +101,11 @@
                   <div class="record-table-item" style="flex: 2">
                     {{ item.talkTime }}
                   </div>
-                  <div
-                    class="record-table-item"
-                    style="flex: 1"
-                    :class="{
-                      'verify-status': item.statusCode == '01',
-                      'success-status': item.statusCode == '02',
-                      'refuse-status': item.statusCode == '03',
-                    }"
-                  >
+                  <div class="record-table-item" style="flex: 1" :class="{
+                    'verify-status': item.statusCode == '01',
+                    'success-status': item.statusCode == '02',
+                    'refuse-status': item.statusCode == '03',
+                  }">
                     {{ item.status }}
                   </div>
                 </div>
@@ -192,7 +149,7 @@ import { dateFormat } from "@/common/utils/util.js";
 import Api from "@/common/api";
 import { mapState } from "vuex";
 import moodImgList from "@/static/mock/moodImgList.json";
-import prisonerTalkColumns from "@/static/mock/prisonerTalkColumns.json";
+import talkColumns from "@/static/mock/talkColumns.json";
 
 export default {
   components: {
@@ -216,7 +173,7 @@ export default {
       // 外出类型
       outTypeInfo: {},
       // 预约类型
-      appointmentType: "",
+      appointmentType: '',
       // 今日心情ID
       moodCode: "",
       // 预约开始时间
@@ -224,7 +181,7 @@ export default {
       // 预约结束时间
       endDate: "",
       // 预约记录表头
-      talkColumns: prisonerTalkColumns,
+      talkColumns: talkColumns,
       // 预约记录列表
       talkRecordList: [],
       // 谈话预约弹框
@@ -234,10 +191,10 @@ export default {
       // 预约记录分页参数
       talkRecordPageParam: {
         pageIndex: 1,
-        pageSize: 10,
+        pageSize: 10
       },
       // 预约记录列表总数
-      talkRecordTotal: 999,
+      talkRecordTotal: 999
     };
   },
   computed: {
@@ -261,8 +218,8 @@ export default {
     switchPage(index) {
       this.currentPage = index;
       if (index == 2) {
-        this.outType = "";
-        this.appointmentType = "";
+        this.outType = '';
+        this.appointmentType = '';
         this.talkRecordList = [];
         this.setTalkRecordPageParam(1, 10);
         this.endDate = dateFormat("YYYY-MM-DD", new Date());
@@ -274,25 +231,15 @@ export default {
     },
     // 获取最近外出类型
     async getRecentOutType() {
-      let res = await Api.apiCall(
-        "get",
-        Api.index.getRecentOutType + this.personInfo.rybh,
-        null
-      );
+      let res = await Api.apiCall("get", Api.index.getRecentOutType + this.personInfo.rybh, null);
       if (res.state.code == 200) {
         this.outTypeInfo = res.data || {};
-        this.regDate = res.date
-          ? dateFormat("YYYY-MM-DD", new Date(res.date))
-          : dateFormat("YYYY-MM-DD", new Date());
+        this.regDate = res.date ? dateFormat("YYYY-MM-DD", new Date(res.date)) : dateFormat("YYYY-MM-DD", new Date());
       }
     },
     // 获取预约类型
     async getAppointmentTypeInfo() {
-      let res = await Api.apiCall(
-        "get",
-        Api.index.getAppointmentTypeInfo,
-        null
-      );
+      let res = await Api.apiCall("get", Api.index.getAppointmentTypeInfo, null);
       if (res.state.code == 200) {
         this.appointmentTypeList = (res.data && res.data.data) || [];
       }
@@ -306,7 +253,7 @@ export default {
     },
     // 选择预约类型
     selectAppointmentType(e) {
-      this.appointmentType = e.originItem.code;
+      this.appointmentType = e.orignItem.code;
     },
     // 选择今日心情
     selectTodayMood(item) {
@@ -324,7 +271,7 @@ export default {
         appointmentTime: this.regDate,
         outType: this.outTypeInfo.code,
         todayMood: this.moodCode,
-        appointmentType: this.appointmentType,
+        appointmentType: this.appointmentType
       };
       this.saveTalkInfo(params);
     },
@@ -357,10 +304,10 @@ export default {
       this.getTalkRecordInfo();
     },
     // 滑动到底部触发加载
-    handleRecorListScrolltolower() {
+    handleScrolltolower() {
       // 已获取所有数据
       if (this.talkRecordList.length >= this.talkRecordTotal) {
-        return this.$parent.handleShowToast("暂无更多数据", "center");
+        return this.$parent.handleShowToast("暂无更多数据");
       }
       this.talkRecordPageParam.pageIndex += 1;
       this.getTalkRecordInfo();
@@ -373,14 +320,14 @@ export default {
           startDate: this.startDate,
           endDate: this.endDate,
         },
-        pageParam: this.talkRecordPageParam,
+        pageParam: this.talkRecordPageParam
       };
       let res = await Api.apiCall("post", Api.index.getTalkRecordInfo, params);
       if (res.state.code == 200) {
-        if (this.talkRecordPageParam.pageIndex == 1 && !res.data.length) {
+        if (this.talkRecordPageParam.pageIndex === 1 && !res.data.length) {
           this.$parent.handleShowToast("暂无数据", "center");
         }
-        if (this.talkRecordPageParam.pageIndex == 1) {
+        if (this.talkRecordPageParam.pageIndex === 1) {
           this.talkRecordList = res.data;
         } else {
           this.talkRecordList = this.talkRecordList.concat(res.data);
@@ -392,7 +339,7 @@ export default {
     setTalkRecordPageParam(pageIndex, pageSize) {
       this.talkRecordPageParam = {
         pageIndex,
-        pageSize,
+        pageSize
       };
     },
     openModal(type) {
@@ -406,5 +353,5 @@ export default {
 </script>
 
 <style lang="less">
-@import "../../../common/less/index.less";
+@import '../../../common/less/index.less';
 </style>

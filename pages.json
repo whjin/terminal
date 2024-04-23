@@ -16,15 +16,22 @@
 							}
 						},
 						{
-							"id": "coverImage",
-							"path": "pages/home/index/subnvue/coverImage",
+							"id": "nodePlayer",
+							"path": "pages/home/index/subnvue/nodePlayer",
 							"style": {
 								"background": "transparent"
 							}
 						},
 						{
-							"id": "videoPlayer",
-							"path": "pages/home/index/subnvue/videoPlayer",
+							"id": "nodeMediaPlayer",
+							"path": "pages/home/index/subnvue/nodeMediaPlayer",
+							"style": {
+								"background": "transparent"
+							}
+						},
+						{
+							"id": "coverImage",
+							"path": "pages/home/index/subnvue/coverImage",
 							"style": {
 								"background": "transparent"
 							}
@@ -37,7 +44,7 @@
 	"globalStyle": {
 		"navigationStyle": "custom",
 		"pageOrientation": "landscape",
-		"rpxCalcBaseDeviceWidth": 980
+		"rpxCalcBaseDeviceWidth": 1040
 	},
 	"condition": {
 		"current": 0,

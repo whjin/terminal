@@ -1,9 +1,9 @@
 {
     "name" : "终端分机",
     "appid" : "__UNI__E9B1944",
-    "description" : "终端分机系统（仓内屏-来邦）",
-    "versionName" : "4.4.0",
-    "versionCode" : 440,
+    "description" : "终端分机系统（仓内屏-白云）",
+    "versionName" : "2.5.6.3",
+    "versionCode" : 2563,
     "transformPx" : false,
     "networkTimeout" : {
         "request" : 20000,
@@ -25,8 +25,7 @@
         /* 模块配置 */
         "modules" : {
             "VideoPlayer" : {},
-            "LivePusher" : {},
-            "Webview-x5" : {}
+            "LivePusher" : {}
         },
         /* 应用发布信息 */
         "distribute" : {
@@ -37,53 +36,29 @@
                     "<uses-feature android:name=\"android.hardware.camera.autofocus\"/>",
                     "<uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\"/>",
                     "<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>",
-                    "<uses-permission android:name=\"android.permission.ACCESS_LOCATION_EXTRA_COMMANDS\"/>",
                     "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.CALL_PHONE\"/>",
                     "<uses-permission android:name=\"android.permission.CAMERA\"/>",
-                    "<uses-permission android:name=\"android.permission.CAPTURE_AUDIO_OUTPUT\"/>",
-                    "<uses-permission android:name=\"android.permission.CAPTURE_VIDEO_OUTPUT\"/>",
-                    "<uses-permission android:name=\"android.permission.CHANGE_CONFIGURATION\"/>",
                     "<uses-permission android:name=\"android.permission.CHANGE_NETWORK_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.CHANGE_WIFI_STATE\"/>",
-                    "<uses-permission android:name=\"android.permission.CLEAR_APP_CACHE\"/>",
-                    "<uses-permission android:name=\"android.permission.CLEAR_APP_USER_DATA\"/>",
-                    "<uses-permission android:name=\"android.permission.DELETE_CACHE_FILES\"/>",
-                    "<uses-permission android:name=\"android.permission.DELETE_PACKAGES\"/>",
                     "<uses-permission android:name=\"android.permission.FLASHLIGHT\"/>",
                     "<uses-permission android:name=\"android.permission.GET_ACCOUNTS\"/>",
-                    "<uses-permission android:name=\"android.permission.INSTALL_PACKAGES\"/>",
-                    "<uses-permission android:name=\"android.permission.INTERNET\"/>",
                     "<uses-permission android:name=\"android.permission.MODIFY_AUDIO_SETTINGS\"/>",
                     "<uses-permission android:name=\"android.permission.MOUNT_UNMOUNT_FILESYSTEMS\"/>",
-                    "<uses-permission android:name=\"android.permission.NFC\"/>",
                     "<uses-permission android:name=\"android.permission.READ_CONTACTS\"/>",
-                    "<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\"/>",
                     "<uses-permission android:name=\"android.permission.READ_LOGS\"/>",
-                    "<uses-permission android:name=\"android.permission.READ_PHONE_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.RECORD_AUDIO\"/>",
-                    "<uses-permission android:name=\"android.permission.REORDER_TASKS\"/>",
-                    "<uses-permission android:name=\"android.permission.REQUEST_INSTALL_PACKAGES\"/>",
-                    "<uses-permission android:name=\"android.permission.SET_TIME\"/>",
-                    "<uses-permission android:name=\"android.permission.UPDATE_DEVICE_STATS\"/>",
-                    "<uses-permission android:name=\"android.permission.USE_FINGERPRINT\"/>",
                     "<uses-permission android:name=\"android.permission.VIBRATE\"/>",
                     "<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>",
                     "<uses-permission android:name=\"android.permission.WRITE_CONTACTS\"/>",
-                    "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>",
-                    "<uses-permission android:name=\"android.permission.WRITE_PROFILE\"/>",
-                    "<uses-permission android:name=\"android.permission.WRITE_SECURE_SETTINGS\"/>",
-                    "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>",
-                    "<uses-permission android:name=\"android.permission.WRITE_SYNC_SETTINGS\"/>"
+                    "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
                 ],
                 "minSdkVersion" : 21,
                 "abiFilters" : [ "armeabi-v7a" ]
             },
             /* ios打包配置 */
-            "ios" : {
-                "dSYMs" : false
-            },
+            "ios" : {},
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {}
@@ -157,16 +132,13 @@
     "h5" : {
         "title" : "智能终端",
         "router" : {
-            "base" : "",
-            "mode" : "history"
+            "base" : "terminal",
+            "mode" : "hash"
         },
         "permissions" : {
             "File" : {
                 "description" : "文件系统"
             }
-        },
-        "devServer" : {
-            "https" : true
         }
     }
 }

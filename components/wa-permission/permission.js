@@ -43,6 +43,16 @@ function judgeIosPermissionLocation() {
   var cllocationManger = plus.ios.import("CLLocationManager");
   var status = cllocationManger.authorizationStatus();
   result = status != 2;
+  console.log("定位权限开启：" + result);
+  // 以下代码判断了手机设备的定位是否关闭，推荐另行使用方法 checkSystemEnableLocation
+  /* var enable = cllocationManger.locationServicesEnabled();
+	var status = cllocationManger.authorizationStatus();
+	if (enable && status != 2) {
+		result = true;
+		console.log("手机定位服务已开启且已授予定位权限");
+	} else {
+		console.log("手机系统的定位没有打开或未给予定位权限");
+	} */
   plus.ios.deleteObject(cllocationManger);
   return result;
 }
@@ -53,6 +63,7 @@ function judgeIosPermissionRecord() {
   var avaudiosession = plus.ios.import("AVAudioSession");
   var avaudio = avaudiosession.sharedInstance();
   var permissionStatus = avaudio.recordPermission();
+  console.log("permissionStatus:" + permissionStatus);
   if (permissionStatus == 1684369017 || permissionStatus == 1970168948) {
     console.log("麦克风权限没有开启");
   } else {
@@ -161,6 +172,10 @@ function requestAndroidPermission(permissionID) {
           result = -1;
         }
         resolve(result);
+        // 若所需权限被拒绝,则打开APP设置界面,可以在APP设置界面打开相应权限
+        // if (result != 1) {
+        // gotoAppPermissionSetting()
+        // }
       },
       function (error) {
         resolve({
@@ -200,6 +215,7 @@ function gotoAppPermissionSetting() {
     var UIApplication = plus.ios.import("UIApplication");
     var application2 = UIApplication.sharedApplication();
     var NSURL2 = plus.ios.import("NSURL");
+    // var setting2 = NSURL2.URLWithString("prefs:root=LOCATION_SERVICES");
     var setting2 = NSURL2.URLWithString("app-settings:");
     application2.openURL(setting2);
 
@@ -220,6 +236,7 @@ function gotoAppPermissionSetting() {
 }
 
 // 检查系统的设备服务是否开启
+// var checkSystemEnableLocation = async function () {
 function checkSystemEnableLocation() {
   if (isIos) {
     var result = false;
@@ -240,8 +257,8 @@ function checkSystemEnableLocation() {
 }
 
 module.exports = {
-  judgeIosPermission,
-  requestAndroidPermission,
-  checkSystemEnableLocation,
-  gotoAppPermissionSetting,
+  judgeIosPermission: judgeIosPermission,
+  requestAndroidPermission: requestAndroidPermission,
+  checkSystemEnableLocation: checkSystemEnableLocation,
+  gotoAppPermissionSetting: gotoAppPermissionSetting,
 };

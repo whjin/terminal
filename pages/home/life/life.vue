@@ -7,27 +7,16 @@
       <scroll-view scroll-y="true" class="life-scroll">
         <div v-for="(item, index) in lifeList" :key="index" class="life-box">
           <div class="life-list">
-            <image :src="getCurrentStauts(item.startTime, item.endTime, index, 'icon')
-              "></image>
+            <image :src="getCurrentStauts(item.startTime, item.endTime, index, 'icon')"></image>
             <div class="life-date">
               <div class="content timeline" :style="{
-                color: getCurrentStauts(
-                  item.startTime,
-                  item.endTime,
-                  '',
-                  'font'
-                ),
+                color: getCurrentStauts(item.startTime, item.endTime, '', 'font'),
               }">
                 {{ item.startTime }}—{{ item.endTime }}
               </div>
             </div>
             <div class="content detail" :style="{
-              color: getCurrentStauts(
-                item.startTime,
-                item.endTime,
-                '',
-                'font'
-              ),
+              color: getCurrentStauts(item.startTime, item.endTime, '', 'font'),
             }">
               {{ item.livingContent }}
             </div>
@@ -69,27 +58,9 @@ export default {
       let currentDate = currentTime.getDate();
       beginTime = beginTime.split(":");
       endTime = endTime.split(":");
-      beginTime = new Date(
-        currentYear,
-        currentMonth,
-        currentDate,
-        beginTime[0],
-        beginTime[1]
-      );
-      endTime = new Date(
-        currentYear,
-        currentMonth,
-        currentDate,
-        endTime[0],
-        endTime[1]
-      );
-      let lastTime = new Date(
-        currentYear,
-        currentMonth,
-        currentDate,
-        "22",
-        "00"
-      );
+      beginTime = new Date(currentYear, currentMonth, currentDate, beginTime[0], beginTime[1]);
+      endTime = new Date(currentYear, currentMonth, currentDate, endTime[0], endTime[1]);
+      let lastTime = new Date(currentYear, currentMonth, currentDate, "22", "00");
       if (currentTime > endTime && currentTime > beginTime) {
         if (type == "icon") {
           if (!index % 2) {
@@ -104,10 +75,7 @@ export default {
           return this.gray;
         }
         return this.future;
-      } else if (
-        (currentTime >= beginTime && currentTime <= endTime) ||
-        currentTime >= lastTime
-      ) {
+      } else if ((currentTime >= beginTime && currentTime <= endTime) || currentTime >= lastTime) {
         if (type == "icon") {
           return this.blue;
         }
@@ -125,5 +93,5 @@ export default {
 </script>
 
 <style lang="less">
-@import "../../../common/less/index.less";
+@import '../../../common/less/index.less';
 </style>
