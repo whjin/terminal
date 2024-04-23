@@ -8,6 +8,7 @@
         <view class="left-box inner-glow-box">
           <view class="title">体温监测实时视频</view>
           <view class="video-box"></view>
+          <view class="video-box"></view>
         </view>
         <view class="right-box">
           <view class="temperature-tips inner-glow-box">
@@ -15,6 +16,8 @@
             <view class="measur-steps">
               <view class="title">测温步骤</view>
               <view class="details">
+                <view v-for="item in stepsDetails" :key="item.className" class="details-item"
+                  :class="{ 'next-steps': item.hasNextSteps }">
                 <view v-for="item in stepsDetails" :key="item.className" class="details-item"
                   :class="{ 'next-steps': item.hasNextSteps }">
                   <view class="img sprite-sheet" :class="item.className"></view>
@@ -27,6 +30,7 @@
             <!-- 温度读取 -->
             <view class="cur-temperature">
               <view class="title cur-title">温度读取</view>
+              <view class="title cur-title">温度读取</view>
               <view class="details">
                 <view class="details-item sprite-sheet">
                   实时额头温度<text class="temperature-text">{{
@@ -38,6 +42,9 @@
           </view>
           <!-- 功能按钮 -->
           <view class="btn-box">
+            <view v-if="debounceMeasure" class="btn measure-btn" @click="debounceMeasure">测温</view>
+            <view v-if="debounceApply" class="btn apply-btn" :class="{ disabled: !haveAFever }" @click="debounceApply">
+              报病申请</view>
             <view v-if="debounceMeasure" class="btn measure-btn" @click="debounceMeasure">测温</view>
             <view v-if="debounceApply" class="btn apply-btn" :class="{ disabled: !haveAFever }" @click="debounceApply">
               报病申请</view>
@@ -55,7 +62,7 @@
                 <image src="/static/images/common/close.png"></image>
               </div>
             </view>
-            <view class="modal-horizontal-divider"></view>
+            <view class="page-horizontal-divider"></view>
             <div class="illness-modal-content">
               <div v-if="showSuccess" class="modal-talkInit">
                 <common-icons iconType="iconsuccess" size="100" color="#fff" />
@@ -191,7 +198,7 @@ export default {
     },
     // 保存体温超出预警值的人员
     async saveWarningTemperature(params) {
-      let res = await Api.apiCall(
+      await Api.apiCall(
         "post",
         Api.prisoner.call.saveWarningTemperature,
         params
@@ -240,16 +247,16 @@ export default {
     showNodePlayer() {
       getApp().globalData.FloatUniModule.initFrame();
       getApp().globalData.FloatUniModule.setLocalVideoViewPosition(
-        68,
-        230,
-        572,
-        382
+        72,
+        312,
+        810,
+        534
       );
       getApp().globalData.FloatUniModule.hideLocalPreView(false);
       uni.getSubNVueById("coverImage").show();
       uni.getSubNVueById("coverImage").setStyle({
-        top: "342px",
-        left: "280px",
+        top: "542px",
+        left: "432px",
       });
     },
     // 关闭视频流预览
@@ -264,9 +271,11 @@ export default {
 <style lang="less" scoped>
 @import "../../../common/less/index.less";
 
+
 .temperature-monitor /deep/ .neil-modal__container {
   transform: translate(9%, -50%) !important;
 }
+
 
 .inner-glow-box {
   box-sizing: border-box;
@@ -275,17 +284,21 @@ export default {
   box-shadow: inset 0upx 0upx 5upx 5upx rgba(25, 106, 190, 0.5);
 }
 
+
 .temperature-monitor {
   .sprite-sheet {
     background-image: url("/static/images/temperatureMonitor/temperature_monitor.png");
+    background-image: url("/static/images/temperatureMonitor/temperature_monitor.png");
     background-repeat: no-repeat;
   }
+
 
   .content {
     margin: 0 48.61upx;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+
 
     .title {
       margin-bottom: 20.83upx;
@@ -295,16 +308,19 @@ export default {
       color: #35fffa;
     }
 
+
     .left-box {
       padding: 20.83upx;
       width: 625upx;
       box-sizing: border-box;
+
 
       .video-box {
         position: relative;
         width: 583.33upx;
         height: 388.89upx;
         background-color: #000;
+
 
         .recognition-tips {
           position: absolute;
@@ -316,13 +332,15 @@ export default {
       }
     }
 
+
     .right-box {
-      width: 568upx;
+      width: 680upx;
 
       .temperature-tips {
         margin-bottom: 15.83upx;
         padding: 15.83upx 0;
         box-sizing: border-box;
+
 
         .measur-steps {
           .details {
@@ -331,58 +349,80 @@ export default {
             justify-content: space-between;
             align-items: flex-start;
 
+
             .details-item {
               display: flex;
               flex-direction: column;
               align-items: center;
               text-align: center;
 
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              text-align: center;
+
               .img {
-                width: 136upx;
-                height: 158upx;
+                width: 135upx;
+                height: 125upx;
               }
+
 
               .steps-one {
-                background-position: 0 -4upx;
+                background-position: 16upx 4upx;
               }
+
 
               .steps-two {
-                background-position: -199upx -4upx;
+                background-position: -132upx 4upx;
               }
+
 
               .steps-three {
-                background-position: -398upx -4upx;
+                background-position: -280upx 4upx;
               }
 
+
               .tips {
+                width: 106upx;
+                font-size: 16upx;
+                line-height: 24upx;
                 width: 106upx;
                 font-size: 16upx;
                 line-height: 24upx;
               }
             }
 
+
             .next-steps {
               position: relative;
+
 
               &::after {
                 content: " ";
                 display: inline-block;
-                width: 42upx;
+                width: 64upx;
                 height: 25upx;
                 background-image: url("/static/images/temperatureMonitor/temperature_monitor.png");
+                background-image: url("/static/images/temperatureMonitor/temperature_monitor.png");
                 background-repeat: no-repeat;
-                background-position: -8upx -172upx;
+                background-position: 10.38upx -124upx;
                 position: absolute;
-                bottom: 12upx;
-                left: 152upx;
+                bottom: 6.88upx;
+                left: 156upx;
               }
             }
           }
         }
 
+
         .parting-line {
-          margin: 6.88upx 0;
+          margin: 3.68upx 0;
           width: 100%;
+          height: 1upx;
+          background: linear-gradient(90deg,
+              rgba(0, 198, 255, 0),
+              #00c6ff,
+              rgba(0, 198, 255, 0));
           height: 1upx;
           background: linear-gradient(90deg,
               rgba(0, 198, 255, 0),
@@ -390,48 +430,56 @@ export default {
               rgba(0, 198, 255, 0));
         }
 
+
         .cur-temperature {
           .cur-title {
-            margin: 13.88upx 0;
+            margin: 13.88upx 0 6.88upx;
           }
 
           .details {
             display: flex;
             justify-content: center;
 
+
             .details-item {
               display: flex;
               justify-content: center;
               align-items: center;
-              width: 288upx;
-              height: 84upx;
-              font-size: 18upx;
-              background-position: -8upx -230upx;
+              width: 360upx;
+              height: 76upx;
+              font-size: 16upx;
+              background-position: 68upx -163upx;
 
               .temperature-text {
-                font-size: 32upx;
+                font-size: 28upx;
                 font-weight: 400;
                 color: #35fffa;
-                padding-left: 10.88upx;
+                padding-left: 6.88upx;
               }
             }
           }
         }
       }
 
+
       .btn-box {
         display: flex;
         justify-content: flex-end;
         align-items: flex-start;
 
+
         .btn {
+          margin-left: 14upx;
           margin-left: 14upx;
           padding: 10upx 0;
           width: 108upx;
+          width: 108upx;
           text-align: center;
+          font-size: 18upx;
           font-size: 18upx;
           background: #007aff;
           border-radius: 4px;
+
 
           &.disabled {
             opacity: 0.5;

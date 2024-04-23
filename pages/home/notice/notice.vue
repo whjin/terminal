@@ -100,7 +100,7 @@ export default {
       if (!!imgNode) {
         let imgList = [];
         for (let i = 0; i < imgNode.length; i++) {
-          imgNode[i].replace(/<img[^>]*src=['"]([^'"]+)[^>]*>/gi, (match, capture) => {
+          imgNode[i].replace(/<img[^>]*src=['"]([^'"]+)[^>]*>/gi, function (match, capture) {
             imgList.push(capture);
           });
         }
@@ -119,7 +119,7 @@ export default {
   },
 };
 </script>
-  
+
 <style lang="less" scoped>
 @import "@/static/quill/quill.core.css";
 @import "@/static/quill/quill.snow.css";

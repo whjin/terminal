@@ -1,6 +1,6 @@
 const state = {
   // 当前页面
-  currentTab: 25,
+  currentTab: 1,
   // 点名信息
   rollInfo: {},
   // 人脸|指纹认证人员信息

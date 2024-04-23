@@ -159,16 +159,14 @@ export default {
     },
     // 值班签到
     rotation: {
-      // 获取值班信息
-      checkDutyPermissions: "terminal/pacRoomDutyData/checkDutyPermissions",
       // 获取值班计划详情
       getDutyWeekPlan: "terminal/pacRoomDutyData/getDutyWeekPlan",
-      // 保存签到记录
-      saveSignRecord: "terminal/pacRoomDutyData/saveSignRecord",
       // 提交值班登记
       updateSituation: "terminal/pacRoomDutyData/updateSituation",
       // 查询值班记录
       findSignRecord: "terminal/pacRoomDutyData/findSignRecord",
+      // 保存签到记录
+      saveSignRecord: "terminal/pacRoomDutyData/saveSignRecord",
     },
     // 保存投诉建议
     saveSuggestion: "terminal/terComplain/save",

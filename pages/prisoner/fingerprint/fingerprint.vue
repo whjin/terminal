@@ -13,12 +13,14 @@
         <div class="fingerprint-list" v-for="(item, index) in fingerList" :key="index">
           <div class="fingerprint-item" :class="{ disabledClick: item.fingerNum >= 6 }" @click="handleCheckChange(item)">
             <checkbox class="checkbox" :checked="item.fingerNum >= 6
+              ? true
+              : item.rybh == checkedId
                 ? true
-                : item.rybh == checkedId
-                  ? true
-                  : false
+                : false
               " :disabled="item.fingerNum >= 6" :class="{ disabledCheck: item.fingerNum >= 6 }">
               <text>{{ item.name }}</text>
+              <text :class="{ mark: item.fingerNum > 0 && item.fingerNum <= 6 }">{{ item.fingerNum > 0 ? item.fingerNum :
+                "" }}</text>
               <text :class="{ mark: item.fingerNum > 0 && item.fingerNum <= 6 }">{{ item.fingerNum > 0 ? item.fingerNum :
                 "" }}</text>
             </checkbox>
@@ -41,7 +43,9 @@
           </div>
           <view class="page-horizontal-divider"></view>
           <view class="uni-flex uni-flex-item uni-column" style="justify-content: center; align-items: center">
+          <view class="uni-flex uni-flex-item uni-column" style="justify-content: center; align-items: center">
             <common-icons iconType="iconzhiwen" size="100" color="#FFFFFF" />
+            <text style="font-size: 20.83upx; font-weight: 400">验证指纹，进行登录...</text>
             <text style="font-size: 20.83upx; font-weight: 400">验证指纹，进行登录...</text>
           </view>
         </div>
@@ -132,10 +136,10 @@ export default {
     },
     // 在押人员指纹录入信息
     async getPersonFingerInfo() {
-      const { roomNo } = uni.getStorageSync("terminalInfo");
-      let res = await Api.apiCall("get", Api.index.getPersonFingerInfo, {
-        roomNo,
-      });
+      let params = {
+        roomNo: uni.getStorageSync("terminalInfo").roomNo,
+      };
+      let res = await Api.apiCall("get", Api.index.getPersonFingerInfo, params);
       if (res.state.code == 200) {
         this.fingerList = res.data;
       }
@@ -173,12 +177,10 @@ export default {
           if (e.code == 0) {
             this.isOpen = true;
             this.openModal("Finger");
-            console.log("打开指纹");
             // 获取建档ID
             this.getFingerKey();
           } else {
             this.$parent.voiceBroadcast("指纹设备未打开");
-            console.log("指纹设备未打开");
             // 关闭指纹连接
             this.closeFingerPrint();
           }
@@ -187,7 +189,7 @@ export default {
     },
     // 获取建档ID
     async getFingerKey() {
-      const { roomNo } = uni.getStorageSync("terminalInfo");
+      let roomNo = uni.getStorageSync("terminalInfo").roomNo;
       let rybh = this.checkedInfo.rybh;
       let params = { roomNo, rybh };
       let res = await Api.apiCall("get", Api.index.getPersonFingerKey, params);
@@ -223,9 +225,9 @@ export default {
       getApp().globalData.FloatUniModule.syncStopFinger((e) => {
         if (e.code == 0) {
           console.log("关闭指纹");
-          getApp().globalData.FloatUniModule.fingerModuleStop();
         }
       });
+      getApp().globalData.FloatUniModule.fingerModuleStop();
     },
     openModal(type) {
       this[`show${type}`] = true;

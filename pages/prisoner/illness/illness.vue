@@ -24,7 +24,7 @@
               <text>预约记录</text>
             </div>
           </div>
-          <div class="illness-vertical-divider"></div>
+          <div class="page-vertical-divider"></div>
           <div v-if="currentPage == 1" class="illness-reserve-container">
             <scroll-view scroll-y="true" class="illness-reserve-scroll">
               <div
@@ -174,7 +174,7 @@
               <image src="/static/images/common/close.png"></image>
             </div>
           </view>
-          <view class="modal-horizontal-divider"></view>
+          <view class="page-vertical-divider"></view>
           <div class="illness-modal-content">
             <div v-if="showSuccess" class="modal-talkInit">
               <common-icons iconType="iconsuccess" size="100" color="#fff" />

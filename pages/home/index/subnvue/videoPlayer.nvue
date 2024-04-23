@@ -22,7 +22,7 @@
 				if (status == 'start') {
 					uni.getSubNVueById('videoPlayer').show();
 					if (type == 'video') {
-						_this.setPlayerStyle(1720, 1080);
+						_this.setPlayerStyle(2560, 1440);
 					} else {
 						_this.setPlayerStyle(1, 1);
 					}

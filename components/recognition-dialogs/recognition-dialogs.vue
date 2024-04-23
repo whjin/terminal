@@ -4,7 +4,7 @@
       <!-- 顶部操作栏 -->
       <template v-if="showHeader">
         <view class="modal-header">
-          <view class="modal-title">{{ regTitle }}</view>
+          <view class="modal-title">{{ modalTitle }}</view>
           <div class="modal-close" @click="handleClose">
             <image src="/static/images/common/close.png"></image>
           </div>
@@ -26,8 +26,8 @@
           <div class="face-recognition-bg">
             <image class="loading-tips" src="/static/images/index/connect.png"></image>
           </div>
-          <text v-if="faceRegConfig" style="font-size: 20.83upx; font-weight: 400; color: #35fffa">
-            {{ regConfig.regName }}</text>
+          <text v-if="faceRegConfig" style="font-size: 20.83upx; font-weight: 400; color: #35fffa">{{
+            regConfig.regName }}</text>
           <text style="font-size: 20.83upx; font-weight: 400">{{
             faceConfig.scanTips
           }}</text>
@@ -55,8 +55,8 @@
         <div class="check-btn" v-if="isConfirm">
           <span @touchstart.stop="handleConfirm">{{ confirmText }}</span>
         </div>
-        <div type="default" class="switch-type-btn" v-if="useFor !== 'call' ||
-          (useFor == 'call' && !regConfig.isRecognitionSuccess)
+        <div type="default" class="switch-type-btn" v-if="this.useFor !== 'call' ||
+          (this.useFor == 'call' && !this.regConfig.isRecognitionSuccess)
           " @touchstart.stop="debounceSwitch">
           切换{{ isFaceRecognition ? "指纹" : "人脸" }}
         </div>
@@ -137,7 +137,7 @@ export default {
     withoutHeader() {
       return !["login", "shopping", "rotation"].includes(this.useFor);
     },
-    regTitle() {
+    modalTitle() {
       return this.currentTab == 7
         ? "人脸认证"
         : this.isFaceRecognition
@@ -175,14 +175,14 @@ export default {
     },
     // 预览画面位置top
     topPos() {
-      if (["rotation", "shopping"].includes(this.useFor)) {
-        return 223;
+      if (["rotation", "shopping", "outroom"].includes(this.useFor)) {
+        return 304;
       } else if (this.useFor == "call") {
-        return 243;
+        return 236;
       } else if (this.currentTab == 7) {
-        return 248;
+        return 340;
       } else {
-        return 232;
+        return 318;
       }
     },
   },
@@ -312,13 +312,13 @@ export default {
     startFacePreview() {
       getApp().globalData.FloatUniModule.initFrame();
       getApp().globalData.FloatUniModule.setLocalVideoViewPosition(
-        420,
+        665,
         this.topPos,
-        440,
-        268
+        590,
+        360
       );
       getApp().globalData.FloatUniModule.hideLocalPreView(false);
-      getApp().globalData.FloatUniModule.setViewWidthHeight(440, 268);
+      getApp().globalData.FloatUniModule.setViewWidthHeight(590, 360);
       getApp().globalData.FloatUniModule.startTakeFrame();
       getApp().globalData.FloatUniModule.takePictureCallBack((res) => {
         let base64Str = res.bytes.replace(/[\r\n]/g, "");

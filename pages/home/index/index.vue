@@ -160,7 +160,7 @@
               <text style="font-size: 20upx; font-weight: 400; color: #ff0000">(非专业人员请勿操作)</text>
             </view>
           </view>
-          <view class="modal-horizontal-divider"></view>
+          <view class="page-horizontal-divider"></view>
           <view style="padding: 15upx 50upx; height: 100%">
             <view class="uni-flex" style="align-items: center; height: 100upx">
               <text style="flex: 1; font-size: 20upx; font-weight: 400">基础Url：</text>
@@ -194,7 +194,7 @@
                 @click="closeModal('CacheConfig')">(非专业人员请勿操作)</text>
             </view>
           </view>
-          <view class="modal-horizontal-divider"></view>
+          <view class="page-horizontal-divider"></view>
           <view style="padding: 15upx 35upx; height: 100%">
             <view class="uni-flex" style="align-items: center; height: 50upx">
               <text style="flex: 1; font-size: 20upx; font-weight: 400">系统缓存：{{ sysCacheInfo }}</text>
@@ -390,7 +390,7 @@
           <view class="modal-header">
             <view class="modal-title">监室等级时段</view>
           </view>
-          <view class="modal-horizontal-divider"></view>
+          <view class="page-horizontal-divider"></view>
           <div class="common-modal-content">
             <p>
               开始时间：<text style="color: #35fffa">{{ beginTime }}</text>
@@ -531,8 +531,6 @@ export default {
       sysWebSocketInfo: "",
       // 是否关闭WebSocket
       isWebSocketDisable: false,
-      // WebSocket连接定时器
-      socketTimer: null,
       // 监室等级
       roomLevel: "",
       // 严管监室开始时间
@@ -677,8 +675,6 @@ export default {
       isTakingPic: false,
       // 是否收到心跳
       isHeartbeat: false,
-      // 服务初始化状态
-      initIPCState: false,
     };
   },
   computed: {
@@ -755,11 +751,14 @@ export default {
         console.log("初始化来邦服务：" + JSON.stringify(e));
         if (e.code == 0) {
           this.setIPCState(true);
+          // 获取设备信息
+          getApp().globalData.FloatUniModule.getCurrentDeviceInfo((info) => {
+            console.log(info);
+          });
           // 设备校时
           if (this.timing) {
             getApp().globalData.FloatUniModule.setSystemTime(this.timing);
           }
-          getApp().globalData.FloatUniModule.hideTalkView(true);
           // 来邦监听对讲事件
           getApp().globalData.FloatUniModule.talkEventCallback((res) => {
             console.log("对讲服务事件：" + JSON.stringify(res));
@@ -771,10 +770,11 @@ export default {
             } else if (res.eventID == 3 || res.eventID == 4) {
               // 3-监听接通 4-对讲接通
               this.intercomType = 0;
-              this.intercomHandler();
               if (res.eventID == 4) {
                 // 对讲接通
                 this.intercomType = 1;
+                // 结束人脸拍照
+                this.stopTakePicture();
                 if (this.showRecognitionDialogs) {
                   this.closeRecognitionDialogs();
                 }
@@ -791,7 +791,7 @@ export default {
                   this.$refs.call.discontinueCall(true);
                 }
                 if (res.devRegType == 8) {
-                  let { masterNum, slaveNum, devRegType } = res;
+                  const { masterNum, slaveNum, devRegType } = res;
                   console.log(masterNum, slaveNum, devRegType);
                   getApp().globalData.FloatUniModule.openLocalCamera(true);
                   getApp().globalData.FloatUniModule.nativeAnswer(
@@ -808,7 +808,7 @@ export default {
             } else if (res.eventID == 5) {
               this.disabledState = false;
               if (this.intercomType == 1) {
-                this.voiceBroadcast("对讲已挂断！");
+                this.voiceBroadcast("对讲已挂断");
                 // 通话或呼叫挂断
                 if (this.audioPlayState) {
                   // 继续播放音频
@@ -824,12 +824,13 @@ export default {
                 this.startEduPlay();
               }
             } else if (res.eventID == 7) {
-              this.voiceBroadcast("对方正忙，请稍后再拨！");
+              this.voiceBroadcast("对方正忙，请稍后再拨");
             }
           });
           // 来邦监听指纹事件
           getApp().globalData.FloatUniModule.setCompareFingerprintCallBack(
             (res) => {
+              console.log("指纹状态：" + JSON.stringify(res));
               if (!this.isFingerRepeat) {
                 this.isFingerRepeat = true;
                 setTimeout(() => {
@@ -874,6 +875,20 @@ export default {
                           this.$refs.evaluation.fingerRecognitionSuccess(
                             params
                           );
+                        break;
+                      case 27:
+                        this.$refs.outroom &&
+                          this.$refs.outroom.fingerRecognitionSuccess(params);
+                        break;
+                      case 19:
+                        this.$refs.conversation &&
+                          this.$refs.conversation.fingerRecognitionSuccess(
+                            params
+                          );
+                        break;
+                      case 21:
+                        this.$refs.evaluation &&
+                          this.$refs.evaluation.fingerRecognitionSuccess(params);
                         break;
                       case 27:
                         this.$refs.outroom &&
@@ -1289,7 +1304,7 @@ export default {
     },
     // 开启倒计时
     countTimer() {
-      this.initCountTimeout();
+      this.loginTimeout = uni.getStorageSync("loginTimeout") || 150;
       this.timer = setInterval(() => {
         this.loginTimeout--;
         if (this.loginTimeout <= 0) {
@@ -2463,7 +2478,7 @@ export default {
             this.stopEduPlay();
             uni.$emit("video-player", "video", "stop");
           } else if (info.msg == "18") {
-            if (Reflect.has(info, "extend") && Object.keys(info.extend).length) {
+            if (Reflect.has(info, "extend")) {
               let extend = JSON.parse(info.extend);
               this.loginStatusHanlder(extend);
               this.setCurrentTab(2);
@@ -2892,13 +2907,16 @@ export default {
     },
     // 底栏设置
     handleSetUp() {
-      if (this.currentTab == 1) {
-        if (this.clickNums == 3) {
-          this.clickNums = 0;
-          this.setupState = true;
-          this.showSystemPwd = true;
-        } else {
-          this.clickNums = this.clickNums + 1;
+      let isOpenConfig = uni.getStorageSync("isOpenConfig") || 0;
+      if (!getApp().globalData.webSocketConnected || isOpenConfig == 1) {
+        if (this.currentTab == 1) {
+          if (this.clickNums == 3) {
+            this.clickNums = 0;
+            this.setupState = true;
+            this.showSystemPwd = true;
+          } else {
+            this.clickNums = this.clickNums + 1;
+          }
         }
       }
     },
@@ -2969,22 +2987,23 @@ export default {
     },
     // 指纹认证成功回调
     fingerRecognitionSuccess(res) {
-      this.getLoginPersonInfo(res);
+      this.getLoginPersonInfo(res.mKey);
     },
     // 获取指纹认证登录人员信息
-    async getLoginPersonInfo(data) {
+    async getLoginPersonInfo(mKey) {
       let params = {
-        mKey: data.mKey,
+        mKey,
       };
-      let url = "";
       if (this.currentTab == 2) {
-        url = Api.index.getOdsPrisonerInfo;
         params.roomNo = uni.getStorageSync("terminalInfo").roomNo;
       }
       if (this.currentTab == 3) {
-        url = Api.index.getOdsPoliceInfo;
         params.roomId = uni.getStorageSync("terminalInfo").roomId;
       }
+      let url =
+        this.currentTab == 3
+          ? Api.index.getOdsPoliceInfo
+          : Api.index.getOdsPrisonerInfo;
       let res = await Api.apiCall("get", url, params, true);
       if (res.state.code == 200) {
         if (Reflect.has(res, "data")) {
@@ -3026,10 +3045,10 @@ export default {
     },
     // 回传电教播放信息
     async callbackEduVideoInfo(status) {
-      const { terminalCode } = uni.getStorageSync("terminalInfo");
+      const { code } = uni.getStorageSync("terminalInfo");
       await Api.apiCall(
         "get",
-        Api.index.updateEduTaskStatus + `${terminalCode}` + `&status=${status}`,
+        Api.index.updateEduTaskStatus + `${code}` + `&status=${status}`,
         null
       );
     },

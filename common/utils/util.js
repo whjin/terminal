@@ -270,7 +270,6 @@ export const removePrivateDoc = () => {
       fs.root.removeRecursively(
         () => { },
         (e) => {
-          console.log(`删除应用私有文档目录失败，${JSON.stringify(e)}`);
         }
       );
     }

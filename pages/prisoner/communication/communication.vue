@@ -23,7 +23,7 @@
             <image :src="mediaUrl" mode="widthFix"></image>
           </div>
         </div>
-        <div class="communication-vertical-divider"></div>
+        <div class="page-vertical-divider"></div>
         <div class="communication-right">
           <div class="communication-title">文件详情</div>
           <scroll-view class="communication-right-scroll" scroll-y show-scrollbar>

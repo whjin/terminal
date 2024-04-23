@@ -32,7 +32,7 @@
               <text>违规通报</text>
             </div>
           </div>
-          <div class="message-vertical-divider"></div>
+          <div class="page-vertical-divider"></div>
           <div v-if="currentPage == page" class="message-list-box">
             <scroll-view
               scroll-y="true"

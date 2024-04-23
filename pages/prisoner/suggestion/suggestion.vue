@@ -25,7 +25,7 @@ import { mapState, mapMutations } from "vuex";
 export default {
   name: "suggestion",
   components: {},
-  data () {
+  data() {
     return {
       // 建议内容
       content: "",
@@ -37,7 +37,7 @@ export default {
       personInfo: (state) => state.app.personInfo,
     })
   },
-  created () {
+  created() {
     // 开启倒计时
     this.$parent.countTimer();
   },
@@ -47,14 +47,14 @@ export default {
       setCurrentTab: "app/SET_CURRENTTAB",
     }),
     // 建议内容
-    handleInputChange (e) {
+    handleInputChange(e) {
       this.content = e.target.value;
     },
-    handleCancel () {
+    handleCancel() {
       this.setCurrentTab(2);
     },
     // 提交建议
-    handleSubmit () {
+    handleSubmit() {
       if (!this.content) {
         this.$parent.handleShowToast("请先填写投诉建议内容", "center");
         return;
@@ -62,7 +62,7 @@ export default {
       this.saveSuggestion();
     },
     // 保存投诉建议
-    async saveSuggestion () {
+    async saveSuggestion() {
       let content = this.content;
       let recordTime = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
       let rybh = this.personInfo.rybh;

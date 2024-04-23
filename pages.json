@@ -37,7 +37,7 @@
 	"globalStyle": {
 		"navigationStyle": "custom",
 		"pageOrientation": "landscape",
-		"rpxCalcBaseDeviceWidth": 980
+		"rpxCalcBaseDeviceWidth": 1320
 	},
 	"condition": {
 		"current": 0,

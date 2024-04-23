@@ -5,8 +5,6 @@ import Api from "@/common/api.js";
 const Base = uni.requireNativePlugin("GK-Base");
 // 升级APP
 const UpdateApp = uni.requireNativePlugin("GK-UpdateApp");
-// 看门狗
-const CrashHandle = uni.requireNativePlugin("CrashHandle");
 // 来邦对讲模块
 const FloatUniModule = uni.requireNativePlugin("FloatUniModule");
 
@@ -16,7 +14,7 @@ export default {
     if (process.env.NODE_ENV == "production") {
       FloatUniModule.openGuard(1);
     }
-    // 设置媒体音量+
+    // 设置媒体音量
     FloatUniModule.setStreamVolumeTypeMusic(
       Number(uni.getStorageSync("mediaDefaultVolume"))
     );
@@ -24,7 +22,6 @@ export default {
     FloatUniModule.setStreamVolumeTypeVoiceCall(
       Number(uni.getStorageSync("mediaDefaultVolume"))
     );
-    CrashHandle.startGather(0); //开启日志，参数无效，默认保存着
     // 设置全屏
     plus.navigator.setFullscreen(true);
     // 添加week自定义字体规则

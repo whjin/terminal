@@ -193,7 +193,7 @@
         </div>
       </neil-modal>
       <neil-modal :show="showRecordDetails" @close="closeRecordDetailsModal">
-        <div class="record-modal-box" style="height: 600upx">
+        <div class="record-modal-box" style="height: 480upx">
           <div class="modal-header">
             <view class="modal-title">消费记录详情</view>
             <div class="modal-close" @click="closeRecordDetailsModal">
@@ -268,7 +268,7 @@
               <image src="/static/images/common/close.png"></image>
             </div>
           </view>
-          <view class="modal-horizontal-divider"></view>
+          <view class="page-horizontal-divider"></view>
           <div class="order-modal-content">
             <div v-if="showSuccess" class="modal-orderInit">
               <common-icons iconType="iconsuccess" size="118" color="#fff" />
@@ -287,7 +287,7 @@
           <view class="modal-header">
             <view class="modal-title">选择商品尺码</view>
           </view>
-          <view class="modal-horizontal-divider"></view>
+          <view class="page-horizontal-divider"></view>
           <div class="size-modal-content">
             <div class="size-box">
               <div class="size-item" :class="{ 'size-item-select': selectSizeIdx == index }"
@@ -307,7 +307,7 @@
           <view class="modal-header">
             <view class="modal-title">温馨提示</view>
           </view>
-          <view class="modal-horizontal-divider"></view>
+          <view class="page-horizontal-divider"></view>
           <div class="common-modal-content">
             <text style="color: #35fffa">须知：由于审批和拣货时间，本次购物金额可能会结算到下个月的500元购物额度。</text>
           </div>
@@ -453,7 +453,7 @@ export default {
       return value.toFixed(2);
     },
   },
-  created() {
+  mounted() {
     // 购物跨月审批提示
     this.openCrossMonthModal();
     // 获取商品列表
@@ -464,6 +464,8 @@ export default {
     this.$parent.countTimer();
     // 获取备注类型列表
     this.getConfirmTypeList();
+    // 开启倒计时
+    this.$parent.countTimer();
   },
   destroyed() {
     // 暂存购物车列表
@@ -484,22 +486,27 @@ export default {
         null
       );
       if (res.state.code == 200) {
-        this.prisonerInfo = res.data;
-        let { money, name, rybh, roomno, roomSex } = this.prisonerInfo;
-        this.accountBalance = money
-          ? formatFloat(money, 2)
-          : 0;
-        this.regConfig.callName = name;
-        this.regConfig.rybh = rybh;
-        let params = { roomno, roomSex, rybh };
-        // 商品列表请求参数
-        let goodParams = {
-          data: {
-            ...params,
-          },
-        };
-        // 获取商品列表
-        this.getGoodsList(goodParams);
+        let flag = Reflect.has(res, "data") && (Object.keys(res.data).length) > 1;
+        if (flag) {
+          this.prisonerInfo = res.data;
+          let { money, name, rybh, roomno, roomSex } = this.prisonerInfo;
+          this.accountBalance = money
+            ? formatFloat(money, 2)
+            : 0;
+          this.regConfig.regName = name;
+          this.regConfig.rybh = rybh;
+          let params = { roomno, roomSex, rybh };
+          // 商品列表请求参数
+          let goodParams = {
+            data: {
+              ...params,
+            },
+          };
+          // 获取商品列表
+          this.getGoodsList(goodParams);
+        } else {
+          this.showTips(false, "未查询到该人员信息！");
+        }
       }
     },
     // 获取商品列表

@@ -24,7 +24,7 @@
               <text>预约记录</text>
             </div>
           </div>
-          <div class="talk-vertical-divider"></div>
+          <div class="page-vertical-divider"></div>
           <div v-if="currentPage == 1" class="talk-register-container">
             <div class="register-select register-item">
               <label>在押人员：</label>
@@ -167,7 +167,7 @@
               <image src="/static/images/common/close.png"></image>
             </div>
           </div>
-          <div class="modal-horizontal-divider"></div>
+          <div class="page-horizontal-divider"></div>
           <div class="talk-modal-content">
             <div v-if="showSuccess" class="modal-talkInit">
               <common-icons iconType="iconsuccess" size="100" color="#fff" />

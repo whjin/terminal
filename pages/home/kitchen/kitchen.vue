@@ -32,7 +32,7 @@
               <text>回族餐</text>
             </div>
           </div>
-          <div class="kitchen-vertical-divider"></div>
+          <div class="page-vertical-divider"></div>
           <div class="kitchen-table-container">
             <div class="table-box">
               <div class="table-head">

@@ -58,7 +58,7 @@ export default {
 	},
 	methods: {
 		async getBedsList () {
-			let roomId = uni.getStorageSync("terminalInfo").roomId;
+			let roomId = uni.getStorageSync('terminalInfo').roomId;
 			let params = {
 				roomId
 			};

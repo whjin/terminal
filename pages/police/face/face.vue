@@ -8,29 +8,35 @@
         <div class="face-box">
           <div class="face-menu-list">
             <div class="face-menu-item" :class="currentPage == 1 ? 'face-menu-active' : ''" @click="switchPage(1)">
+            <div class="face-menu-item" :class="currentPage == 1 ? 'face-menu-active' : ''" @click="switchPage(1)">
               <common-icons iconType="icondispose" size="38" color="#fff" />
               <text>面对面登记</text>
             </div>
+            <div class="face-menu-item" :class="currentPage == 2 ? 'face-menu-active' : ''" @click="switchPage(2)">
             <div class="face-menu-item" :class="currentPage == 2 ? 'face-menu-active' : ''" @click="switchPage(2)">
               <common-icons iconType="iconrecord" size="46" color="#fff" />
               <text>面对面记录</text>
             </div>
           </div>
-          <div class="face-vertical-divider"></div>
+          <div class="page-vertical-divider"></div>
           <div v-if="currentPage == 1" class="face-register-container">
             <div class="face-form-content">
               <div class="face-form-box">
                 <div class="face-select">
                   <label>监室名称：</label>
                   <input type="text" class="input-img" v-model="roomInfo.roomName" disabled />
+                  <input type="text" class="input-img" v-model="roomInfo.roomName" disabled />
                 </div>
                 <div class="face-select">
                   <label>面对面民警：</label>
                   <xfl-select :list="policeList" clearable :placeholder="'请选择面对面民警'" @change="selectPolice"
                     @clear="clearSelectPolice"></xfl-select>
+                  <xfl-select :list="policeList" clearable :placeholder="'请选择面对面民警'" @change="selectPolice"
+                    @clear="clearSelectPolice"></xfl-select>
                 </div>
                 <div class="face-select">
                   <label>登记时间：</label>
+                  <e-picker mode="dateTime" class="picker-img" @change="selectRegDate" :placeholder="'请选择登记时间'">
                   <e-picker mode="dateTime" class="picker-img" @change="selectRegDate" :placeholder="'请选择登记时间'">
                     <div class="face-date">{{ regDate }}</div>
                   </e-picker>
@@ -39,9 +45,12 @@
                   <label>面对面类型：</label>
                   <xfl-select :list="faceTypeList" clearable :placeholder="'请选择面对面类型'" @change="selectFaceType"
                     @clear="clearFaceType"></xfl-select>
+                  <xfl-select :list="faceTypeList" clearable :placeholder="'请选择面对面类型'" @change="selectFaceType"
+                    @clear="clearFaceType"></xfl-select>
                 </div>
                 <div class="face-select face-remark">
                   <label>情况记录：</label>
+                  <textarea :value="faceRemark" :maxlength="-1" @input="faceRemarkChange"></textarea>
                   <textarea :value="faceRemark" :maxlength="-1" @input="faceRemarkChange"></textarea>
                 </div>
                 <div class="face-select face-remark">
@@ -49,9 +58,14 @@
                   <div class="upload-image">
                     <div class="take-picture" @click.stop="startTakePicture">
                       <common-icons iconType="iconcamera" size="26" color="#fff" />
+                      <common-icons iconType="iconcamera" size="26" color="#fff" />
                       <text class="text">照片上传</text>
                     </div>
                     <div class="image-list">
+                      <div class="image-item" v-for="(item, index) in imageList" :key="item.uri">
+                        <image class="image" :src="item.uri" @click.stop="previewImg(item.uri)"></image>
+                        <common-icons iconType="icondelete" size="40" color="#fff" @click="deleteImg(index)"
+                          :iconStyle="iconStyle" />
                       <div class="image-item" v-for="(item, index) in imageList" :key="item.uri">
                         <image class="image" :src="item.uri" @click.stop="previewImg(item.uri)"></image>
                         <common-icons iconType="icondelete" size="40" color="#fff" @click="deleteImg(index)"
@@ -77,20 +91,26 @@
                 <div class="face-select">
                   <label>监室名称：</label>
                   <input type="text" class="input-img" v-model="roomInfo.roomName" disabled />
+                  <input type="text" class="input-img" v-model="roomInfo.roomName" disabled />
                 </div>
                 <div class="face-select">
                   <label>面对面民警：</label>
+                  <xfl-select :list="policeList" clearable :placeholder="'请选择面对面民警'" @change="selectPolice"
+                    @clear="clearSelectPolice"></xfl-select>
                   <xfl-select :list="policeList" clearable :placeholder="'请选择面对面民警'" @change="selectPolice"
                     @clear="clearSelectPolice"></xfl-select>
                 </div>
                 <div class="face-select">
                   <label>登记时间：</label>
                   <e-picker mode="date" class="picker-img" @change="selectRecordDate" clearable :placeholder="'请选择登记时间'">
+                  <e-picker mode="date" class="picker-img" @change="selectRecordDate" clearable :placeholder="'请选择登记时间'">
                     <div class="face-date">{{ recordDate }}</div>
                   </e-picker>
                 </div>
                 <div class="face-select">
                   <label>面对面类型：</label>
+                  <xfl-select :list="faceTypeList" clearable :placeholder="'请选择面对面类型'" @change="selectFaceType"
+                    @clear="clearFaceType"></xfl-select>
                   <xfl-select :list="faceTypeList" clearable :placeholder="'请选择面对面类型'" @change="selectFaceType"
                     @clear="clearFaceType"></xfl-select>
                 </div>
@@ -105,10 +125,13 @@
               <div class="table-head">
                 <div class="table-head-item" v-for="(item, index) in faceColumns" :key="index"
                   :style="{ flex: item.flex }">
+                <div class="table-head-item" v-for="(item, index) in faceColumns" :key="index"
+                  :style="{ flex: item.flex }">
                   {{ item.title }}
                 </div>
               </div>
               <scroll-view scroll-y="true" class="record-table-scroll">
+                <div class="table-content" v-for="(item, index) in faceRecordList" :key="index">
                 <div class="table-content" v-for="(item, index) in faceRecordList" :key="index">
                   <div class="record-table-item" style="flex: 1">
                     {{ item.roomNo }}
@@ -122,6 +145,7 @@
                   <div class="record-table-item" style="flex: 1">
                     {{ item.registerTime }}
                   </div>
+                  <div class="record-table-item" style="flex: 1" @click="getFaceDetailInfo(item)">
                   <div class="record-table-item" style="flex: 1" @click="getFaceDetailInfo(item)">
                     查看详情
                   </div>
@@ -141,33 +165,40 @@
               <image src="/static/images/common/close.png"></image>
             </div>
           </div>
-          <div class="modal-horizontal-divider"></div>
+          <div class="page-horizontal-divider"></div>
           <div class="face-modal-content">
             <div class="face-detail-box">
               <div class="face-detail">
                 <label style="width: 115upx">监室号：</label>
                 <input type="text" class="input-img" v-model="faceDetailInfo.roomNo" disabled />
+                <input type="text" class="input-img" v-model="faceDetailInfo.roomNo" disabled />
               </div>
               <div class="face-detail">
                 <label>面对面民警：</label>
+                <input type="text" class="input-img" v-model="faceDetailInfo.userName" disabled />
                 <input type="text" class="input-img" v-model="faceDetailInfo.userName" disabled />
               </div>
               <div class="face-detail">
                 <label style="width: 115upx">登记时间：</label>
                 <input type="text" class="input-img" v-model="faceDetailInfo.registerTime" disabled />
+                <input type="text" class="input-img" v-model="faceDetailInfo.registerTime" disabled />
               </div>
               <div class="face-detail">
                 <label>面对面类型：</label>
                 <input type="text" class="input-img" v-model="faceDetailInfo.fieldName" disabled />
+                <input type="text" class="input-img" v-model="faceDetailInfo.fieldName" disabled />
               </div>
               <div class="face-detail face-remark">
                 <label style="width: 115upx">情况记录：</label>
+                <textarea :value="faceDetailInfo.situationRecord" :maxlength="-1" disabled></textarea>
                 <textarea :value="faceDetailInfo.situationRecord" :maxlength="-1" disabled></textarea>
               </div>
               <div class="face-detail face-remark">
                 <label style="width: 115upx">现场截图：</label>
                 <div class="upload-image">
                   <div class="image-list">
+                    <div class="image-item" v-for="(url, index) in faceDetailInfo.urls" :key="index">
+                      <image class="image" :src="url" @click.stop="previewImg(url)"></image>
                     <div class="image-item" v-for="(url, index) in faceDetailInfo.urls" :key="index">
                       <image class="image" :src="url" @click.stop="previewImg(url)"></image>
                     </div>
@@ -180,26 +211,31 @@
       </neil-modal>
       <!-- 照片预览弹框 -->
       <neil-modal :show="showPreviewModal" :autoClose="true" @close="closeModal('PreviewModal')">
+      <neil-modal :show="showPreviewModal" :autoClose="true" @close="closeModal('PreviewModal')">
         <div class="preview-modal-box">
           <div class="modal-header">
             <div class="modal-title">照片预览</div>
             <div class="modal-close" @touchstart.stop="closeModal('PreviewModal')">
+            <div class="modal-close" @touchstart.stop="closeModal('PreviewModal')">
               <image src="/static/images/common/close.png"></image>
             </div>
           </div>
-          <div class="modal-horizontal-divider"></div>
+          <div class="page-horizontal-divider"></div>
           <div class="perview-modal-content">
-            <image class="preview-img" :src="previewImgUrl" @touchstart.stop="closeModal('PreviewModal')"></image>
+            <image class="preview-img" :src="previewImgUrl" @click="closeModal('PreviewModal')"></image>
           </div>
         </div>
       </neil-modal>
       <!-- 拍照弹框 -->
       <neil-modal :show="showTakePicture" :autoClose="true" @close="stopFacePreview">
+      <neil-modal :show="showTakePicture" :autoClose="true" @close="stopFacePreview">
         <div class="common-modal-container picture-modal-container">
           <div class="common-modal-content"></div>
           <div class="common-modal-button">
             <div class="btn-cancel" @click="stopFacePreview">取消</div>
-            <div class="btn-confirm" @click.stop="handleTakePicture">拍照</div>
+            <div class="btn-confirm" @click.stop="handleTakePicture">
+              拍照
+            </div>
           </div>
         </div>
       </neil-modal>
@@ -231,6 +267,7 @@ export default {
       // 面对面类型列表
       faceTypeList: [],
       // 登记时间
+      regDate: dateFormat("YYYY-MM-DD hh:mm:ss", new Date()),
       regDate: dateFormat("YYYY-MM-DD hh:mm:ss", new Date()),
       // 查询日期
       recordDate: dateFormat("YYYY-MM-DD", new Date()),
@@ -335,6 +372,7 @@ export default {
     // 选择登记时间
     selectRegDate(e) {
       this.regDate = dateFormat("YYYY-MM-DD hh:mm:ss", new Date(e));
+      this.regDate = dateFormat("YYYY-MM-DD hh:mm:ss", new Date(e));
     },
     // 情况记录
     faceRemarkChange(e) {
@@ -356,13 +394,13 @@ export default {
       this.$nextTick(() => {
         getApp().globalData.FloatUniModule.initFrame();
         getApp().globalData.FloatUniModule.setLocalVideoViewPosition(
-          420,
-          210,
-          440,
-          268
+          665,
+          300,
+          590,
+          360
         );
         getApp().globalData.FloatUniModule.hideLocalPreView(false);
-        getApp().globalData.FloatUniModule.setViewWidthHeight(440, 268);
+        getApp().globalData.FloatUniModule.setViewWidthHeight(590, 360);
         getApp().globalData.FloatUniModule.startTakeFrame();
         getApp().globalData.FloatUniModule.takePictureCallBack((res) => {
           let base64Str = res.bytes.replace(/[\r\n]/g, "");

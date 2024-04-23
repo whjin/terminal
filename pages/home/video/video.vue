@@ -36,7 +36,7 @@
             ></video>
           </div>
         </div>
-        <div class="video-vertical-divider"></div>
+        <div class="page-vertical-divider"></div>
         <div class="video-right">
           <div class="video-title">视频简介</div>
           <scroll-view class="video-right-scroll" scroll-y show-scrollbar>

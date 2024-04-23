@@ -1,8 +1,8 @@
 export default {
   // pro
-  // baseUrl: "http://192.168.20.214:8100/",
+  baseUrl: "http://68.155.232.65:8100/",
   // dev
-  baseUrl: "http://192.168.20.214:8100/",
+  // baseUrl: "http://192.168.20.214:8100/",
 
   terminalIP: "192.168.20.107",
 
