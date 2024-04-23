@@ -1,3 +1,3 @@
-# uniapp-terminal-app
+# terminal
 
 uniapp terminal app
