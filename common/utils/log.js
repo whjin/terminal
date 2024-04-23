@@ -127,7 +127,7 @@ function writeLog(params, encryption) {
 function uploadLogFile(fileDate) {
   let date = fileDate || getTimeStampDatetime("yyyy-MM-dd");
   const baseUrl = uni.getStorageSync("baseUrl");
-  const terCode = uni.getStorageSync("terminalInfo").code;
+  const { terminalCode: terCode } = uni.getStorageSync("terminalInfo");
   uni.uploadFile({
     url: baseUrl + "terminal/testing/uploadTer", // 后端api接口
     filePath: `file:///storage/emulated/0/Android/data/com.gksc.terminal/documents/app-log/${date}log.text`, // log文件路径

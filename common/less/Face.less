@@ -23,11 +23,11 @@
   }
   textarea {
     display: inline-block;
-    height: 185upx;
+    height: 80upx;
     box-sizing: border-box;
     display: flex;
     flex: 1;
-    border: #1b92ef 1px solid red solid;
+    border: 1px solid #1b92ef;
     background: rgba(27, 146, 239, 0.25);
     box-shadow: 0px 0px 6px 2px rgba(27, 146, 239, 0.45) inset;
     color: #fff;
@@ -35,6 +35,56 @@
     font-size: 17.36upx;
     text-align: justify;
     margin-left: 3.88upx;
+  }
+  .upload-image {
+    display: flex;
+    flex: 1;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: 160upx;
+    box-sizing: border-box;
+    padding: 6.88upx 13.88upx;
+    margin-left: 3.88upx;
+    background: rgba(27, 146, 239, 0.25);
+    box-shadow: 0px 0px 6px 2px rgba(27, 146, 239, 0.45) inset;
+    border: 1px solid #1b92ef;
+    border-radius: 3.88upx;
+    .take-picture {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 89upx;
+      height: 76.39upx;
+      border: 1px dashed #fff;
+      box-sizing: border-box;
+      .text {
+        margin-top: 5upx;
+        color: #fff;
+        font-size: 18.06upx;
+      }
+    }
+    .image-list {
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex: 1;
+      flex-wrap: wrap;
+      overflow: auto;
+      .image-item {
+        position: relative;
+        margin: 0 0 10.88upx 10.88upx;
+        width: 136upx;
+        height: 122upx;
+        box-sizing: border-box;
+        border: 1px solid #2a4273;
+        border-radius: 3.88upx;
+        .image {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
   }
   .face-wrapper {
     width: 100%;
@@ -136,7 +186,7 @@
                 margin-right: 82upx;
               }
               .face-remark {
-                width: 868upx;
+                width: 860upx;
                 margin-left: 6.88upx;
               }
             }
@@ -156,7 +206,7 @@
               margin-left: 24upx;
               margin-top: 60upx;
               color: #fff;
-              border: #3797ff 0.69upx solid;
+              border: 1upx solid #3797ff;
               background: #007aff;
             }
             .button-cancel {
@@ -211,7 +261,8 @@
     }
   }
   .neil-modal-container {
-    .face-modal-box {
+    .face-modal-box,
+    .preview-modal-box {
       width: 842upx;
       height: 400upx;
       box-sizing: border-box;
@@ -230,6 +281,7 @@
           color: #fff;
           font-size: 22.22upx;
           font-weight: 500;
+          color: #35fffa;
         }
         .modal-close {
           height: 100%;
@@ -268,7 +320,7 @@
               width: 240upx;
             }
             textarea {
-              height: 200upx;
+              height: 80upx;
             }
           }
           .face-remark {
@@ -276,6 +328,25 @@
           }
         }
       }
+      .perview-modal-content {
+        width: 100%;
+        height: 577.3upx;
+        margin-top: 16upx;
+        .preview-img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+    .face-modal-box {
+      height: 500upx;
+    }
+    .preview-modal-box {
+      width: 902.8upx;
+      height: 680upx;
+    }
+    .picture-modal-container {
+      height: 500upx;
     }
   }
 }

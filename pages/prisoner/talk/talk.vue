@@ -1,5 +1,5 @@
 <template>
-  <div class="talk-container" @touchstart.stop="initCountTimer">
+  <div class="talk-container">
     <div class="talk-wrapper">
       <div class="talk-content">
         <div class="talk-title">
@@ -7,11 +7,19 @@
         </div>
         <div class="talk-box">
           <div class="talk-menu-list">
-            <div class="talk-menu-item" :class="currentPage == 1 ? 'talk-menu-active' : ''" @click="switchPage(1)">
+            <div
+              class="talk-menu-item"
+              :class="currentPage == 1 ? 'talk-menu-active' : ''"
+              @click="switchPage(1)"
+            >
               <common-icons iconType="icondispose" size="38" color="#fff" />
               <text>预约登记</text>
             </div>
-            <div class="talk-menu-item" :class="currentPage == 2 ? 'talk-menu-active' : ''" @click="switchPage(2)">
+            <div
+              class="talk-menu-item"
+              :class="currentPage == 2 ? 'talk-menu-active' : ''"
+              @click="switchPage(2)"
+            >
               <common-icons iconType="iconrecord" size="46" color="#fff" />
               <text>预约记录</text>
             </div>
@@ -30,17 +38,30 @@
             </div>
             <div class="register-select">
               <label>最近外出类型：</label>
-              <div class="register-person">{{ outTypeInfo.name || '无' }}</div>
+              <div class="register-person">{{ outTypeInfo.name || "无" }}</div>
             </div>
             <div class="register-select register-item">
               <label>预约类型：</label>
-              <xfl-select :list="appointmentTypeList" :clearable="false" :placeholder="'请选择预约类型'" @change="selectAppointmentType"></xfl-select>
+              <xfl-select
+                :list="appointmentTypeList"
+                :clearable="false"
+                :placeholder="'请选择预约类型'"
+                @change="selectAppointmentType"
+              ></xfl-select>
             </div>
             <div class="register-mood register-item">
               <label>今日心情：</label>
-              <div class="today-mood" v-for="(item, index) in todayMoodList" :key="index">
+              <div
+                class="today-mood"
+                v-for="(item, index) in todayMoodList"
+                :key="index"
+              >
                 <div class="today-mood-item">
-                  <div class="mood-image mood-img" :class="{ 'mood-select-img': item.code == moodCode }" @click="selectTodayMood(item)">
+                  <div
+                    class="mood-image mood-img"
+                    :class="{ 'mood-select-img': item.code == moodCode }"
+                    @click="selectTodayMood(item)"
+                  >
                     <image :src="moodImgList[index]"></image>
                   </div>
                   <text>{{ item.value }}</text>
@@ -48,20 +69,28 @@
               </div>
             </div>
             <div class="register-button">
-              <div class="btn-submit" @click="handleRegSubmit">
-                预约登记
-              </div>
+              <div class="btn-submit" @click="handleRegSubmit">预约登记</div>
             </div>
           </div>
           <div v-if="currentPage == 2" class="talk-record-container">
             <div class="record-form-box">
               <div class="record-select">
                 <label>预约时间：</label>
-                <e-picker mode="date" class="picker-img" :showValue="startDate" @change="selectStartDate">
+                <e-picker
+                  mode="date"
+                  class="picker-img"
+                  :showValue="startDate"
+                  @change="selectStartDate"
+                >
                   <div class="talk-date">{{ startDate }}</div>
                 </e-picker>
                 <div class="divider-line">-</div>
-                <e-picker mode="date" class="picker-img" :showValue="endDate" @change="selectEndDate">
+                <e-picker
+                  mode="date"
+                  class="picker-img"
+                  :showValue="endDate"
+                  @change="selectEndDate"
+                >
                   <div class="talk-date">{{ endDate }}</div>
                 </e-picker>
               </div>
@@ -71,12 +100,25 @@
             </div>
             <div class="record-table-box">
               <div class="table-head">
-                <div class="table-head-item" v-for="(item, index) in talkColumns" :key="index" :style="{ flex: item.flex }">
+                <div
+                  class="table-head-item"
+                  v-for="(item, index) in talkColumns"
+                  :key="index"
+                  :style="{ flex: item.flex }"
+                >
                   {{ item.title }}
                 </div>
               </div>
-              <scroll-view scroll-y="true" class="record-table-scroll" @scrolltolower="handleRecorListScrolltolower">
-                <div class="table-content" v-for="(item, index) in talkRecordList" :key="index">
+              <scroll-view
+                scroll-y="true"
+                class="record-table-scroll"
+                @scrolltolower="handleRecorListScrolltolower"
+              >
+                <div
+                  class="table-content"
+                  v-for="(item, index) in talkRecordList"
+                  :key="index"
+                >
                   <div class="record-table-item" style="flex: 1">
                     {{ item.name }}
                   </div>
@@ -98,11 +140,15 @@
                   <div class="record-table-item" style="flex: 2">
                     {{ item.talkTime }}
                   </div>
-                  <div class="record-table-item" style="flex: 1" :class="{
+                  <div
+                    class="record-table-item"
+                    style="flex: 1"
+                    :class="{
                       'verify-status': item.statusCode == '01',
                       'success-status': item.statusCode == '02',
                       'refuse-status': item.statusCode == '03',
-                    }">
+                    }"
+                  >
                     {{ item.status }}
                   </div>
                 </div>
@@ -154,7 +200,7 @@ export default {
     ePicker,
     xflSelect,
   },
-  data () {
+  data() {
     return {
       currentPage: 1,
       // 预约时间
@@ -170,7 +216,7 @@ export default {
       // 外出类型
       outTypeInfo: {},
       // 预约类型
-      appointmentType: '',
+      appointmentType: "",
       // 今日心情ID
       moodCode: "",
       // 预约开始时间
@@ -188,10 +234,10 @@ export default {
       // 预约记录分页参数
       talkRecordPageParam: {
         pageIndex: 1,
-        pageSize: 10
+        pageSize: 10,
       },
       // 预约记录列表总数
-      talkRecordTotal: 999
+      talkRecordTotal: 999,
     };
   },
   computed: {
@@ -200,7 +246,7 @@ export default {
       personInfo: (state) => state.app.personInfo,
     }),
   },
-  created () {
+  created() {
     // 获取最近外出类型
     this.getRecentOutType();
     // 获取预约类型
@@ -211,16 +257,12 @@ export default {
     this.$parent.countTimer();
   },
   methods: {
-    // 重置倒计时
-    initCountTimer () {
-      // this.$parent.initCountTimeout();
-    },
     // 菜单切换
-    switchPage (index) {
+    switchPage(index) {
       this.currentPage = index;
       if (index == 2) {
-        this.outType = '';
-        this.appointmentType = '';
+        this.outType = "";
+        this.appointmentType = "";
         this.talkRecordList = [];
         this.setTalkRecordPageParam(1, 10);
         this.endDate = dateFormat("YYYY-MM-DD", new Date());
@@ -231,37 +273,47 @@ export default {
       }
     },
     // 获取最近外出类型
-    async getRecentOutType () {
-      let res = await Api.apiCall("get", Api.index.getRecentOutType + this.personInfo.rybh, null);
-      if (res.state.code == "200") {
+    async getRecentOutType() {
+      let res = await Api.apiCall(
+        "get",
+        Api.index.getRecentOutType + this.personInfo.rybh,
+        null
+      );
+      if (res.state.code == 200) {
         this.outTypeInfo = res.data || {};
-        this.regDate = res.date ? dateFormat("YYYY-MM-DD", new Date(res.date)) : dateFormat("YYYY-MM-DD", new Date());
+        this.regDate = res.date
+          ? dateFormat("YYYY-MM-DD", new Date(res.date))
+          : dateFormat("YYYY-MM-DD", new Date());
       }
     },
     // 获取预约类型
-    async getAppointmentTypeInfo () {
-      let res = await Api.apiCall("get", Api.index.getAppointmentTypeInfo, null);
-      if (res.state.code == "200") {
+    async getAppointmentTypeInfo() {
+      let res = await Api.apiCall(
+        "get",
+        Api.index.getAppointmentTypeInfo,
+        null
+      );
+      if (res.state.code == 200) {
         this.appointmentTypeList = (res.data && res.data.data) || [];
       }
     },
     // 获取今日心情信息
-    async getTodayMoodInfo () {
+    async getTodayMoodInfo() {
       let res = await Api.apiCall("get", Api.index.getTodayMoodInfo, null);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         this.todayMoodList = (res.data && res.data.data) || [];
       }
     },
     // 选择预约类型
-    selectAppointmentType (e) {
-      this.appointmentType = e.orignItem.code;
+    selectAppointmentType(e) {
+      this.appointmentType = e.originItem.code;
     },
     // 选择今日心情
-    selectTodayMood (item) {
+    selectTodayMood(item) {
       this.moodCode = item.code;
     },
     // 提交谈话预约
-    handleRegSubmit () {
+    handleRegSubmit() {
       let talkRegList = [this.regDate, this.moodCode, this.appointmentType];
       if (talkRegList.includes("")) {
         this.$parent.handleShowToast("选择内容不完整", "center");
@@ -272,14 +324,14 @@ export default {
         appointmentTime: this.regDate,
         outType: this.outTypeInfo.code,
         todayMood: this.moodCode,
-        appointmentType: this.appointmentType
+        appointmentType: this.appointmentType,
       };
       this.saveTalkInfo(params);
     },
     // 提交谈话预约
-    async saveTalkInfo (params) {
+    async saveTalkInfo(params) {
       let res = await Api.apiCall("post", Api.index.saveTalkInfo, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         this.showSuccess = true;
       } else {
         this.showSuccess = false;
@@ -287,15 +339,15 @@ export default {
       this.showTalkInit = true;
     },
     // 选择预约开始时间
-    selectStartDate (e) {
+    selectStartDate(e) {
       this.startDate = e;
     },
     // 选择预约结束时间
-    selectEndDate (e) {
+    selectEndDate(e) {
       this.endDate = e;
     },
     // 查询预约记录
-    handleRecordQuery () {
+    handleRecordQuery() {
       let selectDateList = [this.startDate, this.endDate];
       if (selectDateList.includes("")) {
         this.$parent.handleShowToast("请选择预约时间", "center");
@@ -305,8 +357,7 @@ export default {
       this.getTalkRecordInfo();
     },
     // 滑动到底部触发加载
-    handleRecorListScrolltolower () {
-      this.initCountTimer();
+    handleRecorListScrolltolower() {
       // 已获取所有数据
       if (this.talkRecordList.length >= this.talkRecordTotal) {
         return this.$parent.handleShowToast("暂无更多数据", "center");
@@ -315,17 +366,17 @@ export default {
       this.getTalkRecordInfo();
     },
     // 获取谈话记录信息
-    async getTalkRecordInfo () {
+    async getTalkRecordInfo() {
       let params = {
         data: {
           rybh: this.personInfo.rybh,
           startDate: this.startDate,
           endDate: this.endDate,
         },
-        pageParam: this.talkRecordPageParam
+        pageParam: this.talkRecordPageParam,
       };
       let res = await Api.apiCall("post", Api.index.getTalkRecordInfo, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         if (this.talkRecordPageParam.pageIndex == 1 && !res.data.length) {
           this.$parent.handleShowToast("暂无数据", "center");
         }
@@ -338,16 +389,16 @@ export default {
       }
     },
     // 设置预约记录列表分页参数
-    setTalkRecordPageParam (pageIndex, pageSize) {
+    setTalkRecordPageParam(pageIndex, pageSize) {
       this.talkRecordPageParam = {
         pageIndex,
-        pageSize
+        pageSize,
       };
     },
-    openModal (type) {
+    openModal(type) {
       this[`show${type}`] = true;
     },
-    closeModal (type) {
+    closeModal(type) {
       this[`show${type}`] = false;
     },
   },
@@ -355,5 +406,5 @@ export default {
 </script>
 
 <style lang="less">
-@import '../../../common/less/index.less';
+@import "../../../common/less/index.less";
 </style>

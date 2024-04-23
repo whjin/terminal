@@ -1,5 +1,5 @@
 <template>
-  <div class="shopping-container" @touchstart.stop="initCountTimer">
+  <div class="shopping-container">
     <div class="shopping-wrapper">
       <div class="shopping-header">
         <div class="shopping-header-left">
@@ -15,82 +15,29 @@
           <div class="cart" @touchstart.stop="openShoppingCart">
             <common-icons iconType="iconshoppingcart" size="48" color="#fff" />
             <div class="quantity">
-              <text :style="{ fontSize: fontSize + 'upx' }">{{ quantity }}</text>
+              <text :style="{ fontSize: fontSize + 'upx' }">{{
+                quantity
+              }}</text>
             </div>
           </div>
         </div>
       </div>
       <div class="shopping-content">
         <div class="shopping-menu">
-          <div class="shopping-menu-item" :class="currentPage == 1 ? 'shopping-menu-active' : ''" @touchstart.stop="switchPage(1)">
-            <common-icons iconType="iconfood" size="28" :style="{ color: currentPage == 1 ? '#35fffa' : '#fff' }" />
-            <text>食品类</text>
-          </div>
-          <div class="shopping-menu-item" :class="currentPage == 2 ? 'shopping-menu-active' : ''" @touchstart.stop="switchPage(2)">
-            <common-icons iconType="iconclothes" size="28" :style="{ color: currentPage == 2 ? '#35fffa' : '#fff' }" />
-            <text>生活类</text>
-          </div>
-          <div class="shopping-menu-item" :class="currentPage == 3 ? 'shopping-menu-active' : ''" @touchstart.stop="switchPage(3)">
-            <common-icons iconType="iconother" size="28" :style="{ color: currentPage == 3 ? '#35fffa' : '#fff' }" />
-            <text>其他类</text>
+          <div class="shopping-menu-item shopping-menu-active">
+            <common-icons iconType="iconother" size="28" style="color: 35fffa" />
+            <text>全部商品</text>
           </div>
         </div>
-        <div v-show="currentPage == 1" class="shopping-goods-container">
+        <div class="shopping-goods-container">
           <scroll-view scroll-y="true" class="shopping-goods-scroll">
             <div class="shopping-goods-box">
-              <div class="shopping-goods-item shopping-img" :class="{ 'shopping-select-img': item.id == goodsId }" v-for="(item, index) in foodGoodsList" :key="index" @click="handleSelectGoods(item)">
+              <div class="shopping-goods-item shopping-img" :class="{ 'shopping-select-img': item.goodsId == goodsId }"
+                v-for="item in commonGoodsList" :key="item.goodsId" @click="handleSelectGoods(item)">
                 <div class="goods-img">
-                  <image :src="item.image ? item.image : defaultUrl"></image>
+                  <image :src="item.imageUrl ? item.imageUrl : defaultUrl" lazy-load></image>
                 </div>
-                <div class="goods-name">{{ item.name }}</div>
-                <div class="purchase">
-                  <div class="price">￥{{ item.price }}</div>
-                  <div class="count">
-                    <div class="minus-btn" :class="{ 'minus-disabled': item.disabled }" @click="handleMinusGoods(item)">
-                      <common-icons iconType="iconminus" size="18" color="#fff" />
-                    </div>
-                    <div class="num">{{ item.selectNum }}</div>
-                    <div class="plus-btn" @touchstart.stop="handlePlusGoods(item)">
-                      <common-icons iconType="iconplus" size="18" color="#fff" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </scroll-view>
-        </div>
-        <div v-show="currentPage == 2" class="shopping-goods-container">
-          <scroll-view scroll-y="true" class="shopping-goods-scroll">
-            <div class="shopping-goods-box">
-              <div class="shopping-goods-item shopping-img" :class="{ 'shopping-select-img': item.id == goodsId }" v-for="(item, index) in dailyGoodsList" :key="index" @click="handleSelectGoods(item)">
-                <div class="goods-img">
-                  <image :src="item.image ? item.image : defaultUrl"></image>
-                </div>
-                <div class="goods-name">{{ item.name }}</div>
-                <div class="purchase">
-                  <div class="price">￥{{ item.price }}</div>
-                  <div class="count">
-                    <div class="minus-btn" :class="{ 'minus-disabled': item.disabled }" @click="handleMinusGoods(item)">
-                      <common-icons iconType="iconminus" size="18" color="#fff" />
-                    </div>
-                    <div class="num">{{ item.selectNum }}</div>
-                    <div class="plus-btn" @touchstart.stop="handlePlusGoods(item)">
-                      <common-icons iconType="iconplus" size="18" color="#fff" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </scroll-view>
-        </div>
-        <div v-show="currentPage == 3" class="shopping-goods-container">
-          <scroll-view scroll-y="true" class="shopping-goods-scroll">
-            <div class="shopping-goods-box">
-              <div class="shopping-goods-item shopping-img" :class="{ 'shopping-select-img': item.id == goodsId }" v-for="(item, index) in otherGoodsList" :key="index" @click="handleSelectGoods(item)">
-                <div class="goods-img">
-                  <image :src="item.image ? item.image : defaultUrl"></image>
-                </div>
-                <div class="goods-name">{{ item.name }}</div>
+                <div class="goods-name">{{ item.goodsName }}</div>
                 <div class="purchase">
                   <div class="price">￥{{ item.price }}</div>
                   <div class="count">
@@ -121,19 +68,23 @@
           <div class="cart-modal-content">
             <div class="cart-table-box">
               <div class="table-head">
-                <div class="table-head-item" v-for="(item, index) in cartColumns" :key="index" :style="{ flex: item.flex }">
+                <div class="table-head-item" v-for="(item, index) in cartColumns" :key="index"
+                  :style="{ flex: item.flex }">
                   {{ item.title }}
                 </div>
               </div>
               <scroll-view scroll-y="true" class="cart-table-scroll">
                 <div class="table-content" v-for="(item, index) in cartGoodsList" :key="index">
                   <div class="cart-table-item" style="flex: 2">
-                    {{ item.name }}
+                    {{ item.goodsName }}
                   </div>
-                  <div class="cart-table-item" style="flex: 1; color: #fd0404">￥{{ item.price }}</div>
+                  <div class="cart-table-item" style="flex: 1; color: #fd0404">
+                    ￥{{ item.price }}
+                  </div>
                   <div class="cart-table-item" style="flex: 2">
                     <div class="count">
-                      <div class="minus-btn" :class="{ 'minus-disabled': item.disabled }" @click="handleMinusCart(item, index)">
+                      <div class="minus-btn" :class="{ 'minus-disabled': item.disabled }"
+                        @click="handleMinusCart(item, index)">
                         <common-icons iconType="iconminus" size="18" color="#fff" />
                       </div>
                       <div class="num">{{ item.selectNum }}</div>
@@ -145,7 +96,9 @@
                   <div class="cart-table-item" style="flex: 1">
                     {{ item.selectSize }}
                   </div>
-                  <div class="cart-table-item" style="flex: 1">￥{{ (item.price * item.selectNum).toFixed(2) }}</div>
+                  <div class="cart-table-item" style="flex: 1">
+                    ￥{{ (item.price * item.selectNum).toFixed(2) }}
+                  </div>
                   <div class="cart-table-item" style="flex: 2" @click="handleDeleteGoods(item, index)">
                     <div class="delete-btn">删除</div>
                   </div>
@@ -158,7 +111,9 @@
               商品合计：<text>{{ cartTotal }}</text>元
             </div>
             <div class="cart-settlement">
-              <div class="clearup-btn" @click="handleClearCart">清空所有商品</div>
+              <div class="clearup-btn" @click="handleClearCart">
+                清空所有商品
+              </div>
               <div class="settlement-btn" @click="handleSettleCart">结算</div>
             </div>
           </div>
@@ -175,11 +130,13 @@
           <div class="record-modal-content">
             <div class="record-form-box">
               <div class="record-select">
-                <e-picker mode="date" class="picker-img" :isInFullPage="false" :showValue="startDate" @change="selectStartDate">
+                <e-picker mode="date" class="picker-img" :isInFullPage="false" :showValue="startDate"
+                  @change="selectStartDate">
                   <div class="record-date">{{ startDate }}</div>
                 </e-picker>
                 <div class="divider-line">-</div>
-                <e-picker mode="date" class="picker-img" :isInFullPage="false" :showValue="endDate" @change="selectEndDate">
+                <e-picker mode="date" class="picker-img" :isInFullPage="false" :showValue="endDate"
+                  @change="selectEndDate">
                   <div class="record-date">{{ endDate }}</div>
                 </e-picker>
               </div>
@@ -189,7 +146,8 @@
             </div>
             <div class="record-table-box">
               <div class="table-head">
-                <div class="table-head-item" v-for="(item, index) in orderColumns" :key="index" :style="{ flex: item.flex }">
+                <div class="table-head-item" v-for="(item, index) in orderColumns" :key="index"
+                  :style="{ flex: item.flex }">
                   {{ item.title }}
                 </div>
               </div>
@@ -198,28 +156,32 @@
                   <div class="record-table-item" style="flex: 2">
                     {{ item.orderNo }}
                   </div>
-                  <div class="record-table-item" style="flex: 1">￥{{ item.monetary }}</div>
+                  <div class="record-table-item" style="flex: 1">
+                    ￥{{ item.monetary }}
+                  </div>
                   <div class="record-table-item" style="flex: 2">
                     {{ item.gmtCreate | dateFormatFilter }}
                   </div>
                   <div class="record-table-item" :class="{
-                      green: item.statusColor == 'green',
-                      blue: item.statusColor == 'blue',
-                      red: item.statusColor == 'red',
-                    }" style="flex: 2">
+                    green: item.statusColor == 'green',
+                    blue: item.statusColor == 'blue',
+                    red: item.statusColor == 'red',
+                  }" style="flex: 2">
                     {{ item.statusName }}
                   </div>
                   <div class="record-table-item" style="flex: 2">
                     <div class="confirm-btn" :class="{
-                        disable: !item.canConfirm || item.finishConfirm == 1,
-                      }" @click="openRecordDetails(item, index)">
+                      disable: !item.canConfirm || item.finishConfirm == 1,
+                    }" @click="openRecordDetails(item, index)">
                       {{ item.finishConfirm == 1 ? "已确认" : "确认收货" }}
                     </div>
                   </div>
                   <div class="record-table-item" style="flex: 2">
-                    <div class="check-btn" @click="openRecordDetails(item, index)">查看详情</div>
+                    <div class="check-btn" @click="openRecordDetails(item, index)">
+                      查看详情
+                    </div>
                   </div>
-                  <div class="record-table-item" style="flex: 2;">
+                  <div class="record-table-item" style="flex: 2">
                     <scroll-view scroll-x>
                       {{ item.commisRemark }}
                     </scroll-view>
@@ -241,19 +203,22 @@
           <div class="record-modal-content">
             <div class="record-table-box">
               <div class="table-head">
-                <div class="table-head-item" v-for="(item, index) in detailsColumns" :key="index" :style="{ flex: item.flex }">
+                <div class="table-head-item" v-for="(item, index) in detailsColumns" :key="index"
+                  :style="{ flex: item.flex }">
                   {{ item.title }}
                 </div>
               </div>
               <scroll-view scroll-y="true" class="record-table-scroll">
-                <div class="table-content" v-for="(item, index) in recordDetailsList" :key="item.id">
+                <div class="table-content" v-for="(item, index) in recordDetailsList" :key="item.goodsId">
                   <div class="record-table-item" style="flex: 2">
                     {{ item.goodsName }}
                   </div>
                   <div class="record-table-item" style="flex: 1">
                     {{ item.saleCount }}
                   </div>
-                  <div class="record-table-item" style="flex: 1">￥{{ item.salePrice }}</div>
+                  <div class="record-table-item" style="flex: 1">
+                    ￥{{ item.salePrice }}
+                  </div>
                   <div class="record-table-item" style="flex: 1">
                     ￥{{ (item.saleCount * item.salePrice) | keepTwoDecimal }}
                   </div>
@@ -265,41 +230,34 @@
                   </div>
                   <div class="record-table-item" style="flex: 2">
                     <div class="confirm-btn" :class="{
-                        disable:
-                          !curRecordDetails.canConfirm ||
-                          curRecordDetails.finishConfirm == 1 ||
-                          item.confirmStatus == 1 ||
-                          item.bookStatus == 1,
-                      }" @click="handleConfirmGoods(item)">
+                      disable:
+                        !curRecordDetails.canConfirm ||
+                        curRecordDetails.finishConfirm == 1 ||
+                        item.confirmStatus == 1 ||
+                        item.bookStatus == 1,
+                    }" @click="handleConfirmGoods(item)">
                       {{ item.confirmStatus == 1 ? "已确认" : "确认收货" }}
                     </div>
                   </div>
                   <div class="record-table-item" style="flex: 2; position: relative; overflow: unset">
-                    <xfl-select :list="confirmTypeList" :clearable="false" :placeholder="'请选择备注类型'" widthStyle="160" :rowIndex="index" :disabled="
-                        !curRecordDetails.canConfirm ||
+                    <xfl-select :list="confirmTypeList" :clearable="false" :placeholder="'请选择备注类型'" widthStyle="160"
+                      :rowIndex="index" :disabled="!curRecordDetails.canConfirm ||
                         curRecordDetails.finishConfirm == 1 ||
                         item.confirmStatus == 1 ||
                         item.bookStatus == 1
-                      " @change="selectConfirmType"></xfl-select>
+                        " @change="selectConfirmType"></xfl-select>
                   </div>
                   <div class="record-table-item" style="flex: 2">
-                    <input v-model="item.remarks" type="text" class="tips-input" placeholder="请输入备注" :disabled="
-                        !curRecordDetails.canConfirm ||
-                        curRecordDetails.finishConfirm == 1 ||
-                        item.confirmStatus == 1 ||
-                        item.bookStatus == 1
+                    <input v-model="item.remarks" type="text" class="tips-input" placeholder="请输入备注" :disabled="!curRecordDetails.canConfirm ||
+                      curRecordDetails.finishConfirm == 1 ||
+                      item.confirmStatus == 1 ||
+                      item.bookStatus == 1
                       " />
                   </div>
                 </div>
               </scroll-view>
             </div>
           </div>
-          <view class="record-modal-footer">
-            <button type="primary" class="shortcut-btn" :disabled="confirming || !curRecordDetails.canConfirm || curRecordDetails.finishConfirm == 1" :loading="confirming" @click.stop="handleShortcutConfirm">
-              一键确认收货
-            </button>
-            <text class="shortcut-tips">请核对收到的商品，确认无误后点击“一键确认收货”，如商品存在疑问需逐一进行确认收货并备注！</text>
-          </view>
         </div>
       </neil-modal>
       <neil-modal :show="showOrderInit" @close="closeModal('OrderInit')">
@@ -332,11 +290,14 @@
           <view class="modal-horizontal-divider"></view>
           <div class="size-modal-content">
             <div class="size-box">
-              <div class="size-item" :class="{ 'size-item-select': selectSizeIdx === index }" v-for="(size, index) in goodsSizeInfo.size" :key="size" @click="selectGoodsSize(size, index)">
+              <div class="size-item" :class="{ 'size-item-select': selectSizeIdx == index }"
+                v-for="(size, index) in goodsSizeInfo.size" :key="size" @click="selectGoodsSize(size, index)">
                 {{ size }}
               </div>
             </div>
-            <div class="size-tips">温馨提示：如果需要修改尺码，请重新添加该商品！</div>
+            <div class="size-tips">
+              温馨提示：如果需要修改尺码，请重新添加该商品！
+            </div>
           </div>
         </div>
       </neil-modal>
@@ -351,11 +312,15 @@
             <text style="color: #35fffa">须知：由于审批和拣货时间，本次购物金额可能会结算到下个月的500元购物额度。</text>
           </div>
           <div class="common-modal-button">
-            <div class="btn-confirm" @touchstart.stop="closeModal('CrossMonthModal')">确定</div>
+            <div class="btn-confirm" @touchstart.stop="closeModal('CrossMonthModal')">
+              确定
+            </div>
           </div>
         </div>
       </neil-modal>
-      <recognition-dialogs ref="recognitionDialogs" useFor="shopping" :callConfig="callConfig" :isShow="showRecognitionDialogs" @fingerRecognitionSuccess="fingerRecognitionSuccess" @faceRecognitionSuccess="faceRecognitionSuccess" @recognitionFail="recognitionFail" @close="closeRecognitionDialogs"></recognition-dialogs>
+      <recognition-dialogs ref="recognitionDialogs" useFor="shopping" :regConfig="regConfig"
+        :isShow="showRecognitionDialogs" @fingerRecognitionSuccess="fingerRecognitionSuccess"
+        @faceRecognitionSuccess="faceRecognitionSuccess" @close="closeRecognitionDialogs"></recognition-dialogs>
     </div>
   </div>
 </template>
@@ -363,7 +328,12 @@
 <script>
 import Api from "@/common/api.js";
 import { mapState } from "vuex";
-import { isNullStr, unique, formatFloat, dateFormat } from "@/common/utils/util.js";
+import {
+  isNullStr,
+  unique,
+  formatFloat,
+  dateFormat,
+} from "@/common/utils/util.js";
 import neilModal from "@/components/neil-modal/neil-modal.vue";
 import bottomBar from "@/components/bottom-bar/bottom-bar.vue";
 import xflSelect from "@/components/xfl-select/xfl-select.vue";
@@ -377,7 +347,7 @@ export default {
     bottomBar,
     xflSelect,
   },
-  data () {
+  data() {
     return {
       // 错误提示
       errTips: "",
@@ -385,16 +355,13 @@ export default {
       accountBalance: 0,
       // 商品数量
       quantity: 0,
-      // 菜单索引
-      currentPage: 1,
       // 人员档案信息
       prisonerInfo: {},
-      // 食品类商品列表
-      foodGoodsList: [],
-      // 生活类商品列表
-      dailyGoodsList: [],
-      // 其他类商品列表
-      otherGoodsList: [],
+      // 所有商品信息
+      allGoodsList: [],
+      // 当前商品列表
+      commonGoodsList: [],
+      pageSize: 15,
       // 默认商品图片
       defaultUrl: "/static/images/shopping/default.png",
       // 购物车弹框
@@ -451,16 +418,14 @@ export default {
       // 购物车暂存信息
       saveCartItem: {},
       // 购物验证信息
-      callConfig: {
-        callName: "",
+      regConfig: {
+        regName: "",
         rybh: "",
       },
       // 显示验证弹框
       showRecognitionDialogs: false,
       // 是否在购物时间
       isShoppingTime: true,
-      // 正在一键确认收货
-      confirming: false,
       // 购物跨月审批弹框
       showCrossMonthModal: false,
       // 禁止重复提交
@@ -473,155 +438,106 @@ export default {
       personInfo: (state) => state.app.personInfo,
     }),
     // 数量字体
-    fontSize () {
+    fontSize() {
       return this.count > 99 ? 16 : this.count > 9 ? 20 : 24;
     },
   },
   filters: {
-    dateFormatFilter (val) {
+    dateFormatFilter(val) {
       if (!val) return "无";
       return dateFormat("YYYY-MM-DD", new Date(val));
     },
-    keepTwoDecimal (val) {
+    keepTwoDecimal(val) {
       let value = Number(val);
       if (!value) return "-";
       return value.toFixed(2);
     },
   },
-  created () {
+  created() {
     // 购物跨月审批提示
     this.openCrossMonthModal();
     // 获取商品列表
-    this.getPrisonInfo(this.personInfo.dabh);
+    this.getPrisonInfo(this.personInfo.rybh);
   },
-  mounted () {
+  mounted() {
     // 开启倒计时
     this.$parent.countTimer();
     // 获取备注类型列表
     this.getConfirmTypeList();
   },
-  destroyed () {
+  destroyed() {
     // 暂存购物车列表
     // this.saveCartInfo();
   },
   methods: {
-    // 重置倒计时
-    initCountTimer () {
-      // this.$parent.initCountTimeout();
-    },
-    // 切换菜单
-    switchPage (index) {
-      // this.$parent.initCountTimeout();
-      this.currentPage = index;
-    },
     // 购物跨月审批提示
-    openCrossMonthModal () {
+    openCrossMonthModal() {
       if (this.personInfo.hasOwnProperty("dayOfMonth")) {
         this.showCrossMonthModal = true;
       }
     },
     // 获取人员信息
-    async getPrisonInfo (code) {
-      let res = await Api.apiCall("get", Api.index.getPrisonInfoByCode + `${code}`, null);
+    async getPrisonInfo(code) {
+      let res = await Api.apiCall(
+        "get",
+        Api.index.getPrisonInfoByCode + `${code}`,
+        null
+      );
       if (res.state.code == 200) {
-        this.accountBalance = formatFloat(res.data.money, 2);
         this.prisonerInfo = res.data;
-        this.callConfig.callName = this.prisonerInfo.name;
-        this.callConfig.rybh = this.prisonerInfo.rybh;
-        let params = {
-          roomno: res.data.roomno,
-          roomSex: res.data.roomSex,
-          rybh: this.prisonerInfo.rybh,
-        };
-        let pageParam = {
-          pageIndex: 1,
-          pageSize: 100,
-        };
-        // 获取食品类商品列表
-        let foodParams = {
+        let { money, name, rybh, roomno, roomSex } = this.prisonerInfo;
+        this.accountBalance = money
+          ? formatFloat(money, 2)
+          : 0;
+        this.regConfig.callName = name;
+        this.regConfig.rybh = rybh;
+        let params = { roomno, roomSex, rybh };
+        // 商品列表请求参数
+        let goodParams = {
           data: {
-            ...{ id: "01" },
             ...params,
           },
-          pageParam,
         };
-        this.getFoodGoodsInfo(foodParams);
-        // 获取生活类商品列表
-        let dailyParams = {
-          data: {
-            ...{ id: "02" },
-            ...params,
-          },
-          pageParam,
-        };
-        this.getDailyGoodsInfo(dailyParams);
-        // 获取其它类商品列表
-        let otherParams = {
-          data: {
-            ...{ id: "03" },
-            ...params,
-          },
-          pageParam,
-        };
-        this.getOtherGoodsInfo(otherParams);
+        // 获取商品列表
+        this.getGoodsList(goodParams);
       }
     },
-    // 获取食品类商品列表
-    async getFoodGoodsInfo (params) {
-      let res = await Api.apiCall("post", Api.index.getShoppingGoodsInfo, params, true);
+    // 获取商品列表
+    async getGoodsList(params) {
+      let res = await Api.apiCall(
+        "post",
+        Api.index.getShoppingGoodsInfo,
+        params,
+        true
+      );
       if (res.state.code == 200) {
         if (res.data == "NoShopping") {
-          this.foodGoodsList = [];
-          return;
-        }
-        this.foodGoodsList = res.data;
-      }
-    },
-    // 获取生活类商品列表
-    async getDailyGoodsInfo (params) {
-      let res = await Api.apiCall("post", Api.index.getShoppingGoodsInfo, params, true);
-      if (res.state.code == 200) {
-        if (res.data == "NoShopping") {
-          this.dailyGoodsList = [];
           this.isShoppingTime = false;
           this.showTips(false, "未到开放购物时间！");
           return;
         }
-        this.dailyGoodsList = res.data;
-      }
-    },
-    // 获取其他类商品列表
-    async getOtherGoodsInfo (params) {
-      let res = await Api.apiCall("post", Api.index.getShoppingGoodsInfo, params, true);
-      if (res.state.code == 200) {
-        if (res.data == "NoShopping") {
-          this.otherGoodsList = [];
-          return;
+        if (Array.isArray(res.data) && res.data.length) {
+          this.commonGoodsList = res.data;
         }
-        this.otherGoodsList = res.data;
-        // 获取暂存购物车列表
-        // this.getCartInfo();
       }
     },
     // 选择商品
-    handleSelectGoods (item) {
-      // this.$parent.initCountTimeout();
-      this.goodsId = item.id;
+    handleSelectGoods(item) {
+      this.goodsId = item.goodsId;
     },
     // 减少商品数量
-    handleMinusGoods (item) {
-      // this.$parent.initCountTimeout();
+    handleMinusGoods(item) {
       if (item.selectNum > 0) {
         item.disabled = false;
         item.selectNum--;
         this.quantity--;
         this.cartGoodsList.map((list, index) => {
-          if (list.id == item.id) {
+          if (list.goodsId == item.goodsId) {
             list.selectNum = item.selectNum;
             if (!list.selectNum) {
               this.cartGoodsList.splice(index, 1);
               if (list.hasOwnProperty("selectSize")) {
-                this.resetGoodsSize(list.id);
+                this.resetGoodsSize(list.goodsId);
               }
             }
           }
@@ -631,42 +547,31 @@ export default {
       }
     },
     // 重置商品尺码信息
-    resetGoodsSize (id) {
-      this.foodGoodsList.map((list) => {
-        if (list.id == id) {
-          delete list.selectSize;
-        }
-      });
-      this.dailyGoodsList.map((list) => {
-        if (list.id == id) {
-          delete list.selectSize;
-        }
-      });
-      this.otherGoodsList.map((list) => {
-        if (list.id == id) {
+    resetGoodsSize(id) {
+      this.commonGoodsList.map((list) => {
+        if (list.goodsId == id) {
           delete list.selectSize;
         }
       });
     },
     // 增加商品数量
-    handlePlusGoods (item) {
-      // this.$parent.initCountTimeout();
+    handlePlusGoods(item) {
       item.disabled = false;
-      if (!item.upperLimit) {
+      if (!item.goodsUpperLimit) {
         // 不限购商品
         this.plusGoodsHandler(item);
       } else {
-        if (item.selectNum < item.upperLimit) {
+        if (item.selectNum < item.goodsUpperLimit) {
           // 限购商品
           this.plusGoodsHandler(item);
         } else {
-          this.showTips(false, `该商品限购${item.upperLimit}件`);
+          this.showTips(false, `该商品限购${item.goodsUpperLimit}件`);
           return;
         }
       }
     },
     // 增加商品数据公共方法
-    plusGoodsHandler (item) {
+    plusGoodsHandler(item) {
       item.selectNum++;
       this.quantity++;
       this.goodsSizeInfo = {};
@@ -680,7 +585,7 @@ export default {
       }
     },
     // 选择商品尺码
-    selectGoodsSize (size, index) {
+    selectGoodsSize(size, index) {
       this.selectSize = size;
       this.selectSizeIdx = index;
       this.goodsSizeInfo.selectSize = this.selectSize;
@@ -688,10 +593,10 @@ export default {
       this.showGoodsSizeModal = false;
     },
     // 增加商品购物车公共方法
-    plusGoodsCartHandler (item) {
+    plusGoodsCartHandler(item) {
       if (this.cartGoodsList.length) {
         this.cartGoodsList.map((list, index) => {
-          if (list.id == item.id) {
+          if (list.goodsId == item.goodsId) {
             this.cartGoodsList.splice(index, 1, item);
           } else {
             this.cartGoodsList.push(item);
@@ -703,8 +608,7 @@ export default {
       this.cartGoodsList = unique(this.cartGoodsList);
     },
     // 减少购物车商品数量
-    handleMinusCart (item, index) {
-      // this.$parent.initCountTimeout();
+    handleMinusCart(item, index) {
       if (item.selectNum > 1) {
         item.disabled = false;
         item.selectNum--;
@@ -719,34 +623,32 @@ export default {
       }
     },
     // 增加购物车商品数量
-    handlePlusCart (item, index) {
-      // this.$parent.initCountTimeout();
+    handlePlusCart(item, index) {
       item.disabled = false;
-      if (!item.upperLimit) {
+      if (!item.goodsUpperLimit) {
         // 不限购商品
         this.plusCartHandler(item, index);
       } else {
-        if (item.selectNum < item.upperLimit) {
+        if (item.selectNum < item.goodsUpperLimit) {
           // 限购商品
           this.plusCartHandler(item, index);
         } else {
-          this.showTips(false, `该商品限购${item.upperLimit}件`);
+          this.showTips(false, `该商品限购${item.goodsUpperLimit}件`);
           return;
         }
       }
     },
     // 增加购物车商品数量公共方法
-    plusCartHandler (item, index) {
+    plusCartHandler(item, index) {
       item.selectNum++;
       this.quantity++;
-      let plusGoods = this.cartTotal + this.cartGoodsList[index].price;
+      let plusGoods = this.cartTotal + Number(this.cartGoodsList[index].price);
       this.cartTotal = formatFloat(plusGoods, 2);
       // 增加购物车商品数量
       this.modifyCartQuantity(item);
     },
     // 打开购物车
-    openShoppingCart () {
-      // this.$parent.initCountTimeout();
+    openShoppingCart() {
       if (!this.isShoppingTime) {
         this.showTips(false, "未到开放购物时间！");
         return;
@@ -760,32 +662,16 @@ export default {
       this.cartTotal = formatFloat(this.cartTotal, 2);
     },
     // 删除商品
-    handleDeleteGoods (item, index) {
-      // this.$parent.initCountTimeout();
+    handleDeleteGoods(item, index) {
       this.quantity = this.quantity - this.cartGoodsList[index].selectNum;
-      let minusPrice = this.cartGoodsList[index].price * this.cartGoodsList[index].selectNum;
+      let minusPrice =
+        this.cartGoodsList[index].price * this.cartGoodsList[index].selectNum;
       let minusGoods = this.cartTotal - minusPrice;
       this.cartTotal = formatFloat(minusGoods, 2);
       this.cartGoodsList[index].selectNum = 0;
       this.cartGoodsList.splice(index, 1);
-      this.foodGoodsList.map((list) => {
-        if (list.id == item.id) {
-          list.selectNum = 0;
-          if (list.hasOwnProperty("selectSize")) {
-            delete list.selectSize;
-          }
-        }
-      });
-      this.dailyGoodsList.map((list) => {
-        if (list.id == item.id) {
-          list.selectNum = 0;
-          if (list.hasOwnProperty("selectSize")) {
-            delete list.selectSize;
-          }
-        }
-      });
-      this.otherGoodsList.map((list) => {
-        if (list.id == item.id) {
+      this.commonGoodsList.map((list) => {
+        if (list.goodsId == item.goodsId) {
           list.selectNum = 0;
           if (list.hasOwnProperty("selectSize")) {
             delete list.selectSize;
@@ -794,8 +680,7 @@ export default {
       });
     },
     // 清空购物车
-    handleClearCart () {
-      // this.$parent.initCountTimeout();
+    handleClearCart() {
       if (!this.cartGoodsList.length) {
         this.$parent.handleShowToast("购物车为空", "center");
         return;
@@ -806,20 +691,8 @@ export default {
       uni.removeStorageSync("saveCartList");
     },
     // 初始化商品信息
-    initGoodsInfo () {
-      this.foodGoodsList.map((list) => {
-        list.selectNum = 0;
-        if (list.hasOwnProperty("selectSize")) {
-          delete list.selectSize;
-        }
-      });
-      this.dailyGoodsList.map((list) => {
-        list.selectNum = 0;
-        if (list.hasOwnProperty("selectSize")) {
-          delete list.selectSize;
-        }
-      });
-      this.otherGoodsList.map((list) => {
+    initGoodsInfo() {
+      this.commonGoodsList.map((list) => {
         list.selectNum = 0;
         if (list.hasOwnProperty("selectSize")) {
           delete list.selectSize;
@@ -830,66 +703,36 @@ export default {
       this.quantity = 0;
     },
     // 增加减少购物车商品数量
-    modifyCartQuantity (item) {
-      this.foodGoodsList.map((list, index) => {
-        if (list.id == item.id) {
-          this.foodGoodsList.splice(index, 1, item);
-        }
-      });
-      this.dailyGoodsList.map((list, index) => {
-        if (list.id == item.id) {
-          this.dailyGoodsList.splice(index, 1, item);
-        }
-      });
-      this.otherGoodsList.map((list, index) => {
-        if (list.id == item.id) {
-          this.otherGoodsList.splice(index, 1, item);
+    modifyCartQuantity(item) {
+      this.commonGoodsList.map((list, index) => {
+        if (list.goodsId == item.goodsId) {
+          this.commonGoodsList.splice(index, 1, item);
         }
       });
     },
     // 获取暂存购物车列表
-    getCartInfo () {
+    getCartInfo() {
       // 购物车缓存不为空
       if (!isNullStr(uni.getStorageSync("saveCartList"))) {
         let saveCartList = uni.getStorageSync("saveCartList");
-        let allGoodsList = [...this.foodGoodsList, ...this.dailyGoodsList, ...this.otherGoodsList];
+        let allGoodsList = [...this.commonGoodsList];
         // 所有商品不为空
         if (allGoodsList.length) {
           saveCartList.map((list) => {
-            if (list.id == this.prisonerInfo.rybh) {
+            if (list.goodsId == this.prisonerInfo.rybh) {
               this.cartGoodsList = list.cartList;
-              let goodsIdList = allGoodsList.map((goods) => goods.id);
+              let goodsIdList = allGoodsList.map((goods) => goods.goodsId);
               this.cartGoodsList.map((item, index) => {
-                if (!goodsIdList.includes(item.id)) {
+                if (!goodsIdList.includes(item.goodsId)) {
                   this.cartGoodsList.splice(index, 1);
                 }
               });
               this.cartGoodsList.map((item) => {
                 this.quantity += item.selectNum;
               });
-              this.foodGoodsList.map((list) => {
+              this.commonGoodsList.map((list) => {
                 this.cartGoodsList.map((item) => {
-                  if (list.id == item.id) {
-                    list.selectNum = item.selectNum;
-                    if (item.hasOwnProperty("selectSize")) {
-                      list.selectSize = item.selectSize;
-                    }
-                  }
-                });
-              });
-              this.dailyGoodsList.map((list) => {
-                this.cartGoodsList.map((item) => {
-                  if (list.id == item.id) {
-                    list.selectNum = item.selectNum;
-                    if (item.hasOwnProperty("selectSize")) {
-                      list.selectSize = item.selectSize;
-                    }
-                  }
-                });
-              });
-              this.otherGoodsList.map((list) => {
-                this.cartGoodsList.map((item) => {
-                  if (list.id == item.id) {
+                  if (list.goodsId == item.goodsId) {
                     list.selectNum = item.selectNum;
                     if (item.hasOwnProperty("selectSize")) {
                       list.selectSize = item.selectSize;
@@ -907,7 +750,7 @@ export default {
       }
     },
     // 暂存购物车列表
-    saveCartInfo () {
+    saveCartInfo() {
       // 购物车缓存为空
       if (isNullStr(uni.getStorageSync("saveCartList"))) {
         // 购物车不为空
@@ -930,9 +773,9 @@ export default {
             id: this.prisonerInfo.rybh,
             cartList: this.cartGoodsList,
           };
-          let cardIdList = this.saveCartList.map((item) => item.id);
+          let cardIdList = this.saveCartList.map((item) => item.goodsId);
           this.saveCartList.map((list, index) => {
-            if (list.id == this.prisonerInfo.rybh) {
+            if (list.goodsId == this.prisonerInfo.rybh) {
               // 替换该人员缓存
               this.saveCartList.splice(index, 1, this.saveCartItem);
             } else {
@@ -945,7 +788,7 @@ export default {
         } else {
           // 购物车为空，删除该人员缓存
           this.saveCartList.map((list, index) => {
-            if (list.id == this.prisonerInfo.rybh) {
+            if (list.goodsId == this.prisonerInfo.rybh) {
               this.saveCartList.splice(index, 1);
             }
           });
@@ -954,41 +797,40 @@ export default {
       uni.setStorageSync("saveCartList", this.saveCartList);
     },
     // 购物车结算
-    handleSettleCart () {
+    handleSettleCart() {
       if (!this.isRepeatState) {
         this.isRepeatState = true;
         setTimeout(() => {
           this.isRepeatState = false;
         }, 3000);
-        // this.$parent.initCountTimeout();
         if (!this.cartGoodsList.length) {
           this.$parent.handleShowToast("购物车为空", "center");
           return;
         }
-        if (this.accountBalance < this.cartTotal) {
-          this.showTips(false, "余额不足，购买失败");
+        if (this.prisonerInfo.rybh == "0999") {
+          this.saveCartOrderInfo();
         } else {
-          if (this.prisonerInfo.rybh === "0999") {
-            this.saveCartOrderInfo();
-          } else {
-            this.openModal("RecognitionDialogs");
-            this.$nextTick(() => {
-              this.$refs.recognitionDialogs &&
-                this.$refs.recognitionDialogs.startRecognition(8);
-            });
-          }
+          this.openModal("RecognitionDialogs");
+          this.$nextTick(() => {
+            this.$refs.recognitionDialogs &&
+              this.$refs.recognitionDialogs.startRecognition();
+          });
         }
       }
     },
     // 生成购买订单
-    async saveCartOrderInfo () {
+    async saveCartOrderInfo() {
       // 结算商品列表
       let orderGoodsList = [];
       this.cartGoodsList.map((item) => {
         if (item.selectNum > 0) {
           let goods = {
-            goodsId: item.id,
+            goodsId: item.goodsId,
             buyNum: item.selectNum,
+            price: item.price,
+            goodsUnit: item.goodsUnit,
+            goodsNo: item.goodsNo,
+            goodsName: item.goodsName,
           };
           if (item.hasOwnProperty("selectSize")) {
             goods.size = item.selectSize;
@@ -1001,10 +843,14 @@ export default {
         prisonInfo: this.prisonerInfo,
         totalPrice: this.cartTotal,
       };
-      let res = await Api.apiCall("post", Api.index.saveCartOrderInfo, params, true);
+      let res = await Api.apiCall(
+        "post",
+        Api.index.saveCartOrderInfo,
+        params,
+        true
+      );
       if (res.state.code == 200) {
         this.showTips(true, "购买成功");
-        this.accountBalance = formatFloat(this.accountBalance - this.cartTotal, 2);
         // 初始化商品信息
         this.initGoodsInfo();
         this.showShoppingCart = false;
@@ -1013,8 +859,7 @@ export default {
       }
     },
     // 打开消费记录
-    openShoppingRecord () {
-      // this.$parent.initCountTimeout();
+    openShoppingRecord() {
       this.endDate = dateFormat("YYYY-MM-DD", new Date());
       let date = new Date(this.endDate);
       let lastMonthDate = date.setMonth(date.getMonth() - 1);
@@ -1024,18 +869,15 @@ export default {
       this.showShoppingRecord = true;
     },
     // 选择开始时间
-    selectStartDate (e) {
-      // this.$parent.initCountTimeout();
+    selectStartDate(e) {
       this.startDate = e;
     },
     // 选择结束时间
-    selectEndDate (e) {
-      // this.$parent.initCountTimeout();
+    selectEndDate(e) {
       this.endDate = e;
     },
     // 消费记录滑动到底部触发加载
-    handleRecorListScrolltolower () {
-      // this.$parent.initCountTimeout();
+    handleRecorListScrolltolower() {
       // 已获取所有数据
       if (this.orderRecordList.length >= this.orderRecordTotal) {
         return this.$parent.handleShowToast("暂无更多数据", "center");
@@ -1044,14 +886,13 @@ export default {
       this.getOrderHistoryInfo();
     },
     // 查询购物记录
-    handleRecordQuery () {
-      // this.$parent.initCountTimeout();
+    handleRecordQuery() {
       this.orderRecordList = [];
       this.setOrderPageParams(1, 10);
       this.getOrderHistoryInfo();
     },
     // 获取消费记录
-    async getOrderHistoryInfo () {
+    async getOrderHistoryInfo() {
       let selectDateList = [this.startDate, this.endDate];
       if (selectDateList.includes("")) {
         this.$parent.handleShowToast("请选择订单日期", "center");
@@ -1059,18 +900,24 @@ export default {
       }
       let params = {
         data: {
-          dabh: this.prisonerInfo.dabh,
+          rybh: this.prisonerInfo.rybh,
           startDate: this.startDate,
           endDate: this.endDate,
         },
         pageParam: this.orderPageParams,
       };
-      let res = await Api.apiCall("post", Api.index.getOrderHistoryInfo, params);
+      let res = await Api.apiCall(
+        "post",
+        Api.index.getOrderHistoryInfo,
+        params
+      );
       if (res.state.code == 200) {
         let list =
           (res.data &&
             res.data.map((item) => {
-              let status = item.approvalStatus ? Number(item.approvalStatus) : 0;
+              let status = item.approvalStatus
+                ? Number(item.approvalStatus)
+                : 0;
               switch (status) {
                 case 0:
                   item.statusName = "待审批";
@@ -1116,7 +963,7 @@ export default {
               return item;
             })) ||
           [];
-        if (this.orderPageParams.pageIndex === 1) {
+        if (this.orderPageParams.pageIndex == 1) {
           this.orderRecordList = list;
         } else {
           this.orderRecordList = this.orderRecordList.concat(list);
@@ -1128,8 +975,7 @@ export default {
       }
     },
     // 打开消费记录详情
-    openRecordDetails (details, index) {
-      // this.$parent.initCountTimeout();
+    openRecordDetails(details, index) {
       this.recordDetailsList = [];
       this.curRecordDetails = Object.assign({}, details, {
         index,
@@ -1137,7 +983,7 @@ export default {
       this.getOrderDetail(details.detailNo);
     },
     // 获取消费记录详情
-    async getOrderDetail (detailNo) {
+    async getOrderDetail(detailNo) {
       let res = await Api.apiCall("post", Api.index.getOrderDetail, {
         data: {
           detailNo,
@@ -1151,33 +997,39 @@ export default {
       }
     },
     // 关闭消费记录详情
-    closeRecordDetailsModal () {
-      // this.$parent.initCountTimeout();
-      this.recordDetailsList.forEach((item) => {
+    closeRecordDetailsModal() {
+      this.recordDetailsList.map((item) => {
         item.remarks = "";
       });
       this.setOrderPageParams(1, 10);
       this.getOrderHistoryInfo();
       this.showRecordDetails = false;
     },
-    handleConfirmGoods (goods) {
-      // this.$parent.initCountTimeout();
+    handleConfirmGoods(goods) {
       this.confirmGoods(goods);
     },
     // 选择备注类型
-    selectConfirmType (item) {
-      // this.$parent.initCountTimeout();
-      this.$set(this.recordDetailsList[item.rowIndex], "remarks", `${item.newVal}；`);
+    selectConfirmType(item) {
+      this.$set(
+        this.recordDetailsList[item.rowIndex],
+        "remarks",
+        `${item.newVal}；`
+      );
     },
     // 获取备注类型列表
-    async getConfirmTypeList () {
-      let res = await Api.apiCall("get", Api.index.getConfirmTypeList, null, true);
+    async getConfirmTypeList() {
+      let res = await Api.apiCall(
+        "get",
+        Api.index.getConfirmTypeList,
+        null,
+        true
+      );
       if (res.state.code == 200) {
         this.confirmTypeList = (res.data && res.data.data) || [];
       }
     },
     // 确认收货
-    async confirmGoods (goods) {
+    async confirmGoods(goods) {
       let res = await Api.apiCall("post", Api.index.confirmGoods, {
         data: {
           id: goods.id,
@@ -1185,8 +1037,8 @@ export default {
         },
       });
       if (res.state.code == 200) {
-        this.recordDetailsList.forEach((item) => {
-          if (item.id === goods.id) {
+        this.recordDetailsList.map((item) => {
+          if (item.id == goods.id) {
             item.confirmStatus = 1;
           }
         });
@@ -1196,36 +1048,15 @@ export default {
         this.$parent.handleShowToast("确认失败", "center");
       }
     },
-    handleShortcutConfirm () {
-      this.confirming = true;
-      this.shortcutConfirm();
-    },
-    // 一键确认收货
-    async shortcutConfirm () {
-      let res = await Api.apiCall("get", Api.index.shortcutConfirm, {
-        orderNo: this.curRecordDetails.orderNo,
-      });
-      this.confirming = false;
-      if (res.state.code == 200) {
-        this.curRecordDetails.finishConfirm = 1;
-        this.recordDetailsList.forEach((item) => {
-          item.confirmStatus = 1;
-        });
-        this.$forceUpdate();
-        this.$parent.handleShowToast("一键确认成功", "center");
-      } else {
-        this.$parent.handleShowToast("一键确认失败", "center");
-      }
-    },
     // 设置消费记录分页参数
-    setOrderPageParams (pageIndex, pageSize) {
+    setOrderPageParams(pageIndex, pageSize) {
       this.orderPageParams = {
         pageIndex,
         pageSize,
       };
     },
     // 指纹验证成功回调
-    fingerRecognitionSuccess (res) {
+    fingerRecognitionSuccess(res) {
       if (this.prisonerInfo.mkeys.includes(String(res.mKey))) {
         this.verifySuccess();
       } else {
@@ -1233,31 +1064,27 @@ export default {
       }
     },
     // 人脸验证成功回调
-    faceRecognitionSuccess (res) {
+    faceRecognitionSuccess(res) {
       this.verifySuccess();
     },
     // 验证成功
-    verifySuccess () {
+    verifySuccess() {
       this.voiceBroadcast("验证通过");
       this.closeModal("RecognitionDialogs");
       this.saveCartOrderInfo();
     },
-    // 验证失败回调
-    recognitionFail () {
-      this.closeRecognitionDialogs();
-    },
     // 登录弹框关闭回调
-    closeRecognitionDialogs () {
+    closeRecognitionDialogs() {
       this.closeModal("RecognitionDialogs");
     },
     // 弹出提示框
-    showTips (isSuccess, tips) {
+    showTips(isSuccess, tips) {
       this.errTips = tips;
       this.showSuccess = isSuccess;
       this.openModal("OrderInit");
     },
     // 语音播放
-    voiceBroadcast (voiceText) {
+    voiceBroadcast(voiceText) {
       // 语音播放时段
       let messagePlayTime =
         uni.getStorageSync("messagePlayTime") || "05:00,22:00";
@@ -1267,18 +1094,13 @@ export default {
         let options = {
           content: voiceText,
         };
-        let res = getApp().globalData.Base.speech(options);
-        if (res.code == 0) {
-          // console.log("播报成功");
-        } else {
-          console.log("播报失败");
-        }
+        getApp().globalData.Base.speech(options);
       }
     },
-    openModal (type) {
+    openModal(type) {
       this[`show${type}`] = true;
     },
-    closeModal (type) {
+    closeModal(type) {
       this[`show${type}`] = false;
     },
   },
@@ -1286,5 +1108,5 @@ export default {
 </script>
 
 <style lang="less">
-@import '../../../common/less/index.less';
+@import "../../../common/less/index.less";
 </style>

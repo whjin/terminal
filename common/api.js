@@ -1,20 +1,5 @@
-const getDateTime = (time) => {
-  if (!time) return 0;
-  return new Date(time).getTime() + 8 * 60 * 60 * 1000;
-};
-
 export default {
-  BASEURL: "",
-  ESURI: "http://localhost:8081/api/",
-
-  /**
-   * 接口名称
-   */
-  /* 共有接口 得到 民警  名称，职务、监室号、等、字段，自行在接口中添加需要的字段*/
-  mutual: {
-    upload: "terminal/pacFile/upload",
-  },
-  // 主页|在押人员
+  // 主页
   index: {
     // 获取APP配置菜单
     getAppModuleConf: "terminal/terAppModuleConf/getAppModuleConf",
@@ -50,8 +35,6 @@ export default {
     saveFingerState: "terminal/terLog/saveLog",
     // 获取在线点名人员信息
     getRollCallRyList: "terminal/pacRollCall/getRollCallRyList",
-    // 获取临时点名人员信息
-    getTempRollCallRyList: "terminal/pacRollCall/getTempRollCallRyList",
     // 获取一周菜谱信息
     getWeekMenuInfo: "terminal/pacKitchenWeekMenu/getWeekMenuList",
     // 获取伙食供应标准信息
@@ -88,15 +71,11 @@ export default {
     // 在线购物结算
     saveCartOrderInfo: "terminal/financeShop/order",
     // 获取在线购物消费记录
-    getOrderHistoryInfo_old: "terminal/financeShop/listOrderHistory",
-    // 获取在线购物消费记录
     getOrderHistoryInfo: "terminal/financeShop/getConsumptionRecord",
     // 获取在线购物消费记录详情
     getOrderDetail: "terminal/odsFinanceOrderDetail/getOrderDetail",
     // 确认收货
     confirmGoods: "terminal/odsFinanceOrderDetail/confirmGoods",
-    // 一键确认收货
-    shortcutConfirm: "terminal/financeShop/updateOrderConfirmStatus",
     // 获取备注类型列表
     getConfirmTypeList: "terminal/common/getDictionaryType/CONFIR_RECEPTE_TYPE",
     // 获取应急报警信息
@@ -117,6 +96,16 @@ export default {
     sendMsgToControl: "websocket/msgFilterSend",
     // 回传监听电教状态
     updateEduTaskStatus: "external/external/updateEduTaskStatus?devNo=",
+    // 获取智能谈话信息
+    getTalkInfo: "terminal/odsTalkQuestionnaire/getTalkInfo",
+    // 获取智能谈话题目
+    getAnswerDetails: "terminal/odsAnswerQuestion/getAnswerDetails?type=0&id=",
+    // 保存谈话答题信息
+    saveAnswerInfo: "terminal/odsAnswerQuestion/saveAnswerInfo",
+    // 上传图片
+    upload: "terminal/check/api/upload",
+    // 保存按键报警拍照信息
+    addAlarmPhoto: "terminal/alarm/addAlarmPhoto",
   },
   // 在押人员
   prisoner: {
@@ -125,7 +114,7 @@ export default {
     // 1:1人脸比对，用于点名
     faceRecognition11: "terminal/faceRecognition/prisonerImageOneToOne",
     // 物品报修
-    repairClaim: {
+    repair: {
       // 获取物品列表
       getList: "terminal/terRoomInfoManage/list",
       // 申领/报修
@@ -160,33 +149,44 @@ export default {
       saveRollCall: "terminal/terTemperatureRecords/saveRollCall",
     },
     // 服药管理
-    medicationTips: {
+    medication: {
       // 服药计划列表
-      medicationPlanList: "terminal/terMedicineRecords/getMedicationPlan",
-      // 服药记录列表
-      medicationRecordList: "terminal/terMedicineRecords/getMedicineRecords",
-      // 开始录像
-      startRecord: "terminal/terMedicineRecords/startRecord",
-      // 结束录像
-      endRecord: "terminal/terMedicineRecords/endRecord",
+      getMedicationPlan: "terminal/terMedicineRecords/getMedicationPlan",
       // 保存服药记录
       saveMedicineRecord: "terminal/terMedicineRecords/saveMedicineRecord",
+      // 服药记录列表
+      getMedicineRecords: "terminal/terMedicineRecords/getMedicineRecords",
     },
     // 值班签到
-    dutyCall: {
+    rotation: {
+      // 获取值班信息
+      checkDutyPermissions: "terminal/pacRoomDutyData/checkDutyPermissions",
       // 获取值班计划详情
       getDutyWeekPlan: "terminal/pacRoomDutyData/getDutyWeekPlan",
+      // 保存签到记录
+      saveSignRecord: "terminal/pacRoomDutyData/saveSignRecord",
       // 提交值班登记
       updateSituation: "terminal/pacRoomDutyData/updateSituation",
       // 查询值班记录
       findSignRecord: "terminal/pacRoomDutyData/findSignRecord",
-      // 保存签到记录
-      saveSignRecord: "terminal/pacRoomDutyData/saveSignRecord",
     },
+    // 保存投诉建议
+    saveSuggestion: "terminal/terComplain/save",
+    // 获取家属通信列表
+    getCommunication:
+      "terminal/pacFamilyCommunication/selectFamilyCommunication",
   },
   police: {
+    // 获取民警指纹录入信息
+    getPoliceFingerInfo: "terminal/odsFinger/getPoliceFingerInfo",
+    // 获取民警可用指纹mKey
+    getPoliceFingerKey: "terminal/odsFinger/getPoliceFingerKey",
+    // 保存民警录入指纹信息
+    savePoliceFingerInfo: "terminal/odsFinger/savePolice",
     // 人脸识别民警登录
     policeFaceOneToMany: "terminal/faceRecognition/policeFaceOneToMany",
+    // 人脸识别指纹管理登录
+    policeFaceOneToManyForSupervisor: "terminal/faceRecognition/policeFaceOneToManyForSupervisor",
     // 获取面对面民警
     getRoomPoliceInfo: "terminal/pacRoomInfo/getRoomPoliceInfo/",
     // 获取面对面类型
@@ -211,10 +211,10 @@ export default {
     saveCheck: "terminal/check/api/saveCheck",
     // 获取检查记录
     getCheckRecord: "terminal/check/api/getCheckRecord",
-    // 上传图片
-    upload: "terminal/check/api/upload",
     // 获取检查类型、内容
     getCheckTypeAndContent: "terminal/check/api/getCheckTypeAndContent",
+    // 刷卡（卡号）获取民警信息
+    getUserByCardNum: "terminal/sysUser/getUserByCardNum?cardNum=",
   },
 
   /**
@@ -239,8 +239,8 @@ export default {
       if (endpoint == "permission/terminalCertification") {
         let [error, res] = await uni.request({
           url: fullUrl,
-          data: data,
-          method: method,
+          data,
+          method,
           dataType: "json",
           header: {
             client_id: "app",
@@ -256,8 +256,8 @@ export default {
       } else {
         let [error, res] = await uni.request({
           url: fullUrl,
-          data: data,
-          method: method,
+          data,
+          method,
           dataType: "json",
           header: {
             client_id: "app",
@@ -277,7 +277,6 @@ export default {
         return result;
       }
     } else {
-      console.log("请先设置基础baseUrl！");
       this.handleShowToast("请先设置基础baseUrl！");
     }
   },
@@ -346,40 +345,8 @@ export default {
         return res;
       }
     } else {
-      console.log("请先设置基础baseUrl！");
       this.handleShowToast("请先设置基础baseUrl！");
     }
-  },
-
-  /**
-   * 封装请求（async await 封装uni.request）
-   * method		post/get
-   * endpoint		接口方法名
-   * data			所需传递参数
-   * load			是否需要loading
-   */
-  async apiEsCall(method, endpoint, data, load) {
-    if (!load) {
-      uni.showLoading({
-        title: "请稍候",
-        mask: true,
-      });
-      uni.hideLoading();
-    }
-
-    let fullUrl = this.ESURI + endpoint;
-    let Authorization = "";
-    let [error, res] = await uni.request({
-      url: fullUrl,
-      data: data,
-      method: method,
-      dataType: "json",
-      header: {
-        "content-Type": "application/x-www-form-urlencoded",
-        Authorization: Authorization || "",
-      },
-    });
-    return res.data;
   },
 
   // 消息提示

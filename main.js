@@ -10,11 +10,6 @@ Vue.prototype.$config = config;
 
 App.mpType = "app";
 
-// 替换 uni-app 内置的 websocket API
-// #ifdef APP-PLUS
-// Object.assign(uni, socket);
-// #endif
-
 const app = new Vue({
   store,
   ...App,

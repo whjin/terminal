@@ -1,18 +1,11 @@
 export default {
   // pro
-  baseUrl: "http://192.168.20.201:8100/",
+  // baseUrl: "http://192.168.20.214:8100/",
   // dev
-  // baseUrl: "http://192.168.20.189:8100/",
+  baseUrl: "http://192.168.20.214:8100/",
 
-  terminalIP: "192.168.20.105",
+  terminalIP: "192.168.20.107",
 
-  /*
-   * websocket自动重连时间（毫秒）
-   */
-  websocketTime: 8000,
-  /*
-   * 控制模块类型
-   */
   controlType: {
     HEARTBEAT: "000",
     INTERCOM: "100",
@@ -23,6 +16,8 @@ export default {
     ROLLCALL: "600",
     DEVICE: "700",
     DUTY: "800",
+    CONVERSATION: "900",
+    EVALUATION: "1000",
   },
   // 管理员账号
   admin: {

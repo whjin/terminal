@@ -1,5 +1,5 @@
 <template>
-  <div class="fingerprint-container" @touchstart.stop="initCountTimer">
+  <div class="fingerprint-container">
     <div class="fingerprint-wrapper">
       <div class="fingerprint-header">
         <div class="fingerprint-title">在押人员指纹录入</div>
@@ -10,33 +10,17 @@
         </div>
       </div>
       <div class="fingerprint-box">
-        <div
-          class="fingerprint-list"
-          v-for="(item, index) in fingerList"
-          :key="index"
-        >
-          <div
-            class="fingerprint-item"
-            :class="{ disabledClick: item.fingerNum >= 6 }"
-            @click="handleCheckChange(item)"
-          >
-            <checkbox
-              class="checkbox"
-              :checked="
-                item.fingerNum >= 6
-                  ? true
-                  : item.rybh == checkedId
+        <div class="fingerprint-list" v-for="(item, index) in fingerList" :key="index">
+          <div class="fingerprint-item" :class="{ disabledClick: item.fingerNum >= 6 }" @click="handleCheckChange(item)">
+            <checkbox class="checkbox" :checked="item.fingerNum >= 6
+                ? true
+                : item.rybh == checkedId
                   ? true
                   : false
-              "
-              :disabled="item.fingerNum >= 6"
-              :class="{ disabledCheck: item.fingerNum >= 6 }"
-            >
+              " :disabled="item.fingerNum >= 6" :class="{ disabledCheck: item.fingerNum >= 6 }">
               <text>{{ item.name }}</text>
-              <text
-                :class="{ mark: item.fingerNum > 0 && item.fingerNum <= 6 }"
-                >{{ item.fingerNum > 0 ? item.fingerNum : "" }}</text
-              >
+              <text :class="{ mark: item.fingerNum > 0 && item.fingerNum <= 6 }">{{ item.fingerNum > 0 ? item.fingerNum :
+                "" }}</text>
             </checkbox>
           </div>
           <div class="page-horizontal-divider"></div>
@@ -56,14 +40,9 @@
             </div>
           </div>
           <view class="page-horizontal-divider"></view>
-          <view
-            class="uni-flex uni-flex-item uni-column"
-            style="justify-content: center; align-items: center"
-          >
+          <view class="uni-flex uni-flex-item uni-column" style="justify-content: center; align-items: center">
             <common-icons iconType="iconzhiwen" size="100" color="#FFFFFF" />
-            <text style="font-size: 20.83upx; font-weight: 400"
-              >验证指纹，进行登录...</text
-            >
+            <text style="font-size: 20.83upx; font-weight: 400">验证指纹，进行登录...</text>
           </view>
         </div>
       </neil-modal>
@@ -93,8 +72,7 @@ export default {
       paramInt: 1,
       // 指纹开启状态
       isOpen: false,
-      // 禁止重复操作
-      isRepeatState: false,
+      isFingerRepeat: false,
     };
   },
   mounted() {
@@ -110,9 +88,14 @@ export default {
     this.closeFingerPrint();
   },
   methods: {
-    // 重置倒计时
-    initCountTimer() {
-      this.$parent.initCountTimeout();
+    // 指纹识别
+    handleFingerprint(res) {
+      if (res.code == "0") {
+        this.closeModal("Finger");
+        this.$parent.voiceBroadcast("当前指纹已存在");
+      } else {
+        getApp().globalData.FloatUniModule.fingerprintCollect(this.paramInt);
+      }
     },
     // 指纹录入监听
     setFingerCallBack() {
@@ -120,38 +103,40 @@ export default {
       getApp().globalData.FloatUniModule.setFingerprintFeatureLeftNumCallBack(
         (e) => {
           if (e.code == "0") {
-            if (e.leftCounts == "0") {
-              console.log("指纹采集成功");
-            }
+            console.log("指纹采集成功");
           }
         }
       );
       // 指纹入库
       getApp().globalData.FloatUniModule.setFingerprintFeatureCallBack((e) => {
         if (e.code == "0") {
-          if (!this.isRepeatState) {
-            this.isRepeatState = true;
+          if (!this.isFingerRepeat) {
+            this.isFingerRepeat = true;
             setTimeout(() => {
-              this.isRepeatState = false;
+              this.isFingerRepeat = false;
             }, 1500);
-            this.savePersonFingerInfo(e.id, e.feature);
-            getApp().globalData.FloatUniModule.fingerprintFeatureInput(
-              e.id,
-              e.feature
-            );
+            if (!!e.feature) {
+              this.savePersonFingerInfo(e.id, e.feature);
+              getApp().globalData.FloatUniModule.fingerprintFeatureInput(
+                e.id,
+                e.feature
+              );
+              this.$parent.voiceBroadcast("指纹录入成功");
+            } else {
+              this.$parent.voiceBroadcast("指纹录入失败，当前特征值为空");
+            }
             this.closeModal("Finger");
-            this.$parent.voiceBroadcast("指纹录入成功");
           }
         }
       });
     },
     // 在押人员指纹录入信息
     async getPersonFingerInfo() {
-      let params = {
-        roomNo: uni.getStorageSync("terminalInfo").roomNo,
-      };
-      let res = await Api.apiCall("get", Api.index.getPersonFingerInfo, params);
-      if (res.state.code == "200") {
+      const { roomNo } = uni.getStorageSync("terminalInfo");
+      let res = await Api.apiCall("get", Api.index.getPersonFingerInfo, {
+        roomNo,
+      });
+      if (res.state.code == 200) {
         this.fingerList = res.data;
       }
     },
@@ -188,7 +173,7 @@ export default {
           if (e.code == 0) {
             this.isOpen = true;
             this.openModal("Finger");
-            console.log("指纹设备已打开");
+            console.log("打开指纹");
             // 获取建档ID
             this.getFingerKey();
           } else {
@@ -202,15 +187,15 @@ export default {
     },
     // 获取建档ID
     async getFingerKey() {
-      let roomNo = uni.getStorageSync("terminalInfo").roomNo;
+      const { roomNo } = uni.getStorageSync("terminalInfo");
       let rybh = this.checkedInfo.rybh;
       let params = { roomNo, rybh };
       let res = await Api.apiCall("get", Api.index.getPersonFingerKey, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         if (res.data.mKey != -1) {
           this.paramInt = res.data.mKey;
-          getApp().globalData.FloatUniModule.fingerprintCollect(this.paramInt);
           this.$parent.voiceBroadcast("建档成功，请按压指纹");
+          getApp().globalData.FloatUniModule.fingerprintRecognition();
         }
       }
     },
@@ -226,7 +211,7 @@ export default {
         Api.index.savePersonFingerInfo,
         params
       );
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         // 更新人员指纹信息
         this.getPersonFingerInfo();
         this.$parent.handleShowToast("指纹保存成功");
@@ -237,7 +222,7 @@ export default {
       this.isOpen = false;
       getApp().globalData.FloatUniModule.syncStopFinger((e) => {
         if (e.code == 0) {
-          console.log("指纹设备已关闭");
+          console.log("关闭指纹");
           getApp().globalData.FloatUniModule.fingerModuleStop();
         }
       });

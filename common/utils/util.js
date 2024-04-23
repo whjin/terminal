@@ -1,42 +1,13 @@
-/**
- * @description 清除空格
- * @param {str} 要处理的字符串
- */
-
 export const clear = (str) => {
   str = str.replace(/,/g, "");
   return str;
 };
 
-/**
- * 	isEmpty(""), // true
-	isEmpty(33), // true (arguably could be a TypeError)
-	isEmpty([]), // true
-	isEmpty({}), // true
-	isEmpty({length: 0, custom_property: []}), // true
-
-	isEmpty("Hello"), // false
-	isEmpty([1,2,3]), // false
-	isEmpty({test: 1}), // false
-	isEmpty({length: 3, custom_property: [1,2,3]}) // false
- */
 export const isEmpty = (obj) => {
-  // null and undefined are "empty"
   if (obj == null) return true;
-
-  // Assume if it has a length property with a non-zero value
-  // that that property is correct.
   if (obj.length > 0) return false;
   if (obj.length == 0) return true;
-
-  // If it isn't an object at this point
-  // it is empty, but it can't be anything *but* empty
-  // Is it empty?  Depends on your application.
   if (typeof obj !== "object") return true;
-
-  // Otherwise, does it have any properties of its own?
-  // Note that this doesn't handle
-  // toString and valueOf enumeration bugs in IE < 9
   for (var key in obj) {
     if (hasOwnProperty.call(obj, key)) return false;
   }
@@ -52,6 +23,7 @@ export const isNullStr = (str) => {
   if (str == "") return true;
   if (str == null) return true;
   if (str == undefined) return true;
+  if (str == {}) return true;
   var regu = "^[ ]+$";
   var re = new RegExp(regu);
   return re.test(str);
@@ -114,6 +86,20 @@ export const timeFormat = (sec) => {
   }
 };
 
+// 时钟倒计时
+export const countDown = (sec) => {
+  let hour = Math.floor((parseInt(sec) / 3600) % 24)
+    .toString()
+    .padStart(2, "0");
+  let minute = Math.floor((parseInt(sec) / 60) % 60)
+    .toString()
+    .padStart(2, "0");
+  let second = Math.floor(parseInt(sec) % 60)
+    .toString()
+    .padStart(2, "0");
+  return `${hour}:${minute}:${second}`;
+};
+
 // 获取本周所有日期
 export const getWeekDate = () => {
   let weekDateList = [];
@@ -129,6 +115,58 @@ export const getWeekDate = () => {
   return weekDateList;
 };
 
+// 获取星期
+export const getWeek = () => {
+  let weeks = [
+    "星期日",
+    "星期一",
+    "星期二",
+    "星期三",
+    "星期四",
+    "星期五",
+    "星期六",
+  ];
+  let now = new Date();
+  let day = now.getDay();
+  let week = weeks[day];
+  return week;
+};
+
+// 计时
+export const timing = () => {
+  let hour = dateFormat("hh", new Date());
+  let minute = dateFormat("mm", new Date());
+  let second = dateFormat("ss", new Date());
+  return `${hour}:${minute}:${second}`;
+};
+
+export const getDate = (timeStamp, startType) => {
+  if (timeStamp) {
+    return format(new Date(timeStamp), startType);
+  }
+};
+
+const getHandledValue = num => {
+  return num < 10 ? '0' + num : num;
+};
+
+export const format = (d, startType) => {
+  const year = d.getFullYear();
+  const month = getHandledValue(d.getMonth() + 1);
+  const date = getHandledValue(d.getDate());
+  const hours = getHandledValue(d.getHours());
+  const minutes = getHandledValue(d.getMinutes());
+  const second = getHandledValue(d.getSeconds());
+  let resStr = '';
+  if (startType === 'year') resStr = year + '-' + month + '-' + date + ' ' + hours + ':' + minutes + ':' + second;
+  else if (startType === 'date') resStr = year + '-' + month + '-' + date;
+  else if (startType === 'time') resStr = year + '-' + month + '-' + date + 'T' + hours + ':' + minutes + ':' + second + '.000+08:00';
+  else if (startType === 'mouth-day') resStr = month + '-' + date;
+  else if (startType === 'minutes') resStr = year + '-' + month + '-' + date + ' ' + hours + ':' + minutes;
+  else resStr = month + '-' + date + ' ' + hours + ':' + minutes;
+  return resStr;
+};
+
 // 数组去重
 export const unique = (arr) => {
   if (!Array.isArray(arr)) {
@@ -141,6 +179,20 @@ export const unique = (arr) => {
     }
   }
   return result;
+};
+
+// 数组对象去重
+export const uniqueArr = (arr, key) => {
+  if (!Array.isArray(arr)) {
+    return;
+  }
+  let map = new Map();
+  for (let i = 0, len = arr.length; i < len; i++) {
+    if (!map.has(arr[i][key])) {
+      map.set(arr[i][key], arr[i]);
+    }
+  }
+  return [...map.values()];
 };
 
 // 浮点数四舍五入保留2位小数
@@ -216,14 +268,11 @@ export const removePrivateDoc = () => {
     (fs) => {
       // 创建或打开文件, fs.root是根目录操作对象,直接fs表示当前操作对象
       fs.root.removeRecursively(
-        () => {},
+        () => { },
         (e) => {
           console.log(`删除应用私有文档目录失败，${JSON.stringify(e)}`);
         }
       );
-    },
-    (e) => {
-      console.log(e.message);
     }
   );
   // #endif

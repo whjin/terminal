@@ -1,5 +1,5 @@
 <template>
-  <div class="kitchen-container" @touchstart.stop="initCountTimer">
+  <div class="kitchen-container">
     <div class="kitchen-wrapper">
       <div class="kitchen-content">
         <div class="kitchen-title">
@@ -7,15 +7,27 @@
         </div>
         <div class="kitchen-box">
           <div class="kitchen-menu-list">
-            <div class="kitchen-menu-item" :class="currentPage == 1 ? 'kitchen-menu-active' : ''" @click="switchPage(1)">
+            <div
+              class="kitchen-menu-item"
+              :class="currentPage == 1 ? 'kitchen-menu-active' : ''"
+              @click="switchPage(1)"
+            >
               <common-icons iconType="iconmenu" size="38" color="#fff" />
               <text>普通餐</text>
             </div>
-            <div class="kitchen-menu-item" :class="currentPage == 2 ? 'kitchen-menu-active' : ''" @click="switchPage(2)">
+            <div
+              class="kitchen-menu-item"
+              :class="currentPage == 2 ? 'kitchen-menu-active' : ''"
+              @click="switchPage(2)"
+            >
               <common-icons iconType="iconmenu" size="38" color="#fff" />
               <text>病号餐</text>
             </div>
-            <div class="kitchen-menu-item" :class="currentPage == 3 ? 'kitchen-menu-active' : ''" @click="switchPage(3)">
+            <div
+              class="kitchen-menu-item"
+              :class="currentPage == 3 ? 'kitchen-menu-active' : ''"
+              @click="switchPage(3)"
+            >
               <common-icons iconType="iconmenu" size="38" color="#fff" />
               <text>回族餐</text>
             </div>
@@ -24,26 +36,46 @@
           <div class="kitchen-table-container">
             <div class="table-box">
               <div class="table-head">
-                <div class="weekmenu-head-item" v-for="(item, index) in weekDateColumns" :key="index" :class="{ 'current-date': item == currentDate }">
+                <div
+                  class="weekmenu-head-item"
+                  v-for="(item, index) in weekDateColumns"
+                  :key="index"
+                  :class="{ 'current-date': item == currentDate }"
+                >
                   {{ item }}
                 </div>
               </div>
               <scroll-view scroll-y="true" class="kitchen-table-scroll">
                 <div class="weekmenu-table-content">
                   <div class="weekmenu-table-item">上午</div>
-                  <div class="weekmenu-table-item kitchen-img" v-for="(item, index) in morningMenuList" :key="index" :class="{ 'current-date': item.weekDate == currentDate }">
+                  <div
+                    class="weekmenu-table-item kitchen-img"
+                    v-for="(item, index) in morningMenuList"
+                    :key="index"
+                    :class="{ 'current-date': item.weekDate == currentDate }"
+                  >
                     <span class="item-text">{{ item.breakfast }}</span>
                   </div>
                 </div>
                 <div class="weekmenu-table-content">
                   <div class="weekmenu-table-item">中午</div>
-                  <div class="weekmenu-table-item kitchen-img" v-for="(item, index) in noonMenuList" :key="index" :class="{ 'current-date': item.weekDate == currentDate }">
+                  <div
+                    class="weekmenu-table-item kitchen-img"
+                    v-for="(item, index) in noonMenuList"
+                    :key="index"
+                    :class="{ 'current-date': item.weekDate == currentDate }"
+                  >
                     <span class="item-text">{{ item.lunch }}</span>
                   </div>
                 </div>
                 <div class="weekmenu-table-content">
                   <div class="weekmenu-table-item">晚上</div>
-                  <div class="weekmenu-table-item kitchen-img" v-for="(item, index) in nightMenuList" :key="index" :class="{ 'current-date': item.weekDate == currentDate }">
+                  <div
+                    class="weekmenu-table-item kitchen-img"
+                    v-for="(item, index) in nightMenuList"
+                    :key="index"
+                    :class="{ 'current-date': item.weekDate == currentDate }"
+                  >
                     <span class="item-text">{{ item.dinner }}</span>
                   </div>
                 </div>
@@ -51,7 +83,9 @@
             </div>
           </div>
         </div>
-        <div class="kitchen-tips">温馨提示：菜谱因季节、市场供应等特殊情况而临时变动，以实际菜谱为准。</div>
+        <div class="kitchen-tips">
+          温馨提示：菜谱因季节、市场供应等特殊情况而临时变动，以实际菜谱为准。
+        </div>
       </div>
     </div>
   </div>
@@ -60,16 +94,13 @@
 <script>
 import Api from "@/common/api.js";
 import { dateFormat, formatFloat } from "@/common/utils/util.js";
-import foodColumns from "@/static/mock/foodColumns.json";
 
 export default {
-  data () {
+  data() {
     return {
       currentPage: 1,
-      // 一周值班表头
+      // 一周表头
       weekDateColumns: [],
-      // 伙食供应表头
-      foodColumns: foodColumns,
       // 一周菜谱列表
       weekMenuList: [],
       // 伙食供应标准列表
@@ -106,7 +137,7 @@ export default {
   },
   computed: {
     // 当前日期
-    currentDate () {
+    currentDate() {
       let weeks = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
       let date = new Date(this.nowTimestamp);
       let index = date.getDay();
@@ -116,7 +147,7 @@ export default {
       return nowDate;
     },
     // 早餐列表
-    morningMenuList () {
+    morningMenuList() {
       switch (this.currentPage) {
         case 1:
           return this.morningMenuList1;
@@ -127,7 +158,7 @@ export default {
       }
     },
     // 午餐列表
-    noonMenuList () {
+    noonMenuList() {
       switch (this.currentPage) {
         case 1:
           return this.noonMenuList1;
@@ -138,7 +169,7 @@ export default {
       }
     },
     // 晚餐列表
-    nightMenuList () {
+    nightMenuList() {
       switch (this.currentPage) {
         case 1:
           return this.nightMenuList1;
@@ -147,9 +178,9 @@ export default {
         case 3:
           return this.nightMenuList3;
       }
-    }
+    },
   },
-  created () {
+  created() {
     // 获取服务器时间
     this.getCurrentTime();
     // 获取伙食供应标准
@@ -159,7 +190,7 @@ export default {
   },
   methods: {
     // 切换菜单
-    switchPage (index) {
+    switchPage(index) {
       this.currentPage = index;
       switch (index) {
         case 1:
@@ -176,12 +207,8 @@ export default {
           break;
       }
     },
-    // 重置倒计时
-    initCountTimer () {
-      // this.$parent.initCountTimeout();
-    },
     // 获取服务器时间
-    async getCurrentTime () {
+    async getCurrentTime() {
       let params = {
         data: {
           type: 1,
@@ -192,12 +219,12 @@ export default {
       let res = await Api.apiCall("post", Api.index.getWeekMenuInfo, params);
       if (res.state.code == 200) {
         this.nowTimestamp = res.date || new Date().getTime();
-        // 获取一周值班日期
+        // 获取一周日期
         this.getTableColumns();
       }
     },
     // 获取一周日期
-    getTableColumns () {
+    getTableColumns() {
       this.weekDateColumns = [];
       let weekDateList = [];
       let weeks = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
@@ -219,7 +246,7 @@ export default {
       this.getWeekMenuList(1);
     },
     // 获取一周菜谱信息
-    async getWeekMenuList (type) {
+    async getWeekMenuList(type) {
       let params = {
         data: {
           type,
@@ -249,7 +276,7 @@ export default {
       }
     },
     // 获取伙食供应标准信息
-    async getFoodStandardInfo () {
+    async getFoodStandardInfo() {
       let res = await Api.apiCall("get", Api.index.getFoodStandardInfo, null);
       if (res.state.code == 200) {
         this.foodTableList = res.data;
@@ -264,5 +291,5 @@ export default {
 </script>
 
 <style lang="less">
-@import '../../../common/less/index.less';
+@import "../../../common/less/index.less";
 </style>
