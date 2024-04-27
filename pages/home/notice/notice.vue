@@ -1,10 +1,9 @@
 <template>
-  <div class="notice-container" @touchstart.stop="initCountTimer">
-    <div class="notice-wrapper">
+  <div class="notice-container">
+    <div class="notice-wrapper" v-if="noticeList.length">
       <div class="notice-left">
         <scroll-view scroll-y="true" class="notice-left-scroll" @scrolltolower="scrollToLower">
-          <div v-for="(item, index) in noticeList" :key="index" class="notice-menu-item" :class="
-              selectInfo.id == item.id ? 'notice-selected-img' : 'notice-img'
+          <div v-for="(item, index) in noticeList" :key="index" class="notice-menu-item" :class="selectInfo.id == item.id ? 'notice-selected-img' : 'notice-img'
             " @click="selectMenuItem(item)">
             <text :class="selectInfo.id == item.id ? 'select-item' : ''">{{
               item.title
@@ -12,28 +11,32 @@
           </div>
         </scroll-view>
       </div>
-      <div class="notice-vertical-divider" v-if="noticeList.length"></div>
+      <div class="notice-vertical-divider"></div>
       <div class="notice-right">
         <div class="notice-head">
           <div class="notice-title">{{ selectInfo.title }}</div>
-          <div class="notice-date" v-if="noticeList.length">
+          <div class="notice-date">
             发布时间：<span>{{ selectInfo.date }}</span>
           </div>
         </div>
         <scroll-view scroll-y="true" class="notice-right-scroll">
-          <div class="notice-content" v-html="content"></div>
+          <div class="ql-container ql-snow">
+            <rich-text class="ql-editor rich-text" :data-nodes="content" :nodes="content"
+              @dblclick.stop="showPreviewImg"></rich-text>
+          </div>
         </scroll-view>
       </div>
     </div>
   </div>
 </template>
-
+  
 <script>
 import Api from "@/common/api.js";
 import { isNullStr, dateFormat } from "@/common/utils/util.js";
 
 export default {
-  data () {
+  name: "notice",
+  data() {
     return {
       // 通知公告列表
       noticeList: [],
@@ -47,37 +50,30 @@ export default {
   },
   computed: {
     // 通知公告详情
-    content () {
-      if (this.selectInfo.details != undefined) {
-        return String(this.selectInfo.details).replace(
-          /\s+/g,
-          "&nbsp;&nbsp;&nbsp;&nbsp;"
-        );
-      }
+    content() {
+      return this.selectInfo.details != undefined
+        ? this.selectInfo.details
+        : "";
     },
   },
-  created () {
+  created() {
     // 获取通知公告信息
     this.getNoticeInfo(this.pageIndex);
     // 开启倒计时
     this.$parent.countTimer();
   },
   methods: {
-    // 重置倒计时
-    initCountTimer () {
-      // this.$parent.initCountTimeout();
-    },
     // 选择菜单
-    selectMenuItem (item) {
+    selectMenuItem(item) {
       this.selectInfo = item;
     },
     // 获取仓内通知公告信息
-    async getNoticeInfo (index) {
-      let roomNo = uni.getStorageSync("terminalInfo").roomNo;
+    async getNoticeInfo(index) {
+      const { roomNo } = uni.getStorageSync("terminalInfo");
       let params = {
         data: {
-          roomNo,
           type: 6,
+          roomNo
         },
         pageParam: {
           pageIndex: index,
@@ -85,7 +81,7 @@ export default {
         },
       };
       let res = await Api.apiCall("post", Api.index.getAllNotice, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         if (!isNullStr(res.data)) {
           this.totalPage = res.page.totalPage;
           let result = res.data;
@@ -97,9 +93,24 @@ export default {
         }
       }
     },
+    // 点击预览图片
+    showPreviewImg(e) {
+      let nodes = e.target.dataset.nodes;
+      let imgNode = nodes.match(/<img[^>]+>/g);
+      if (!!imgNode) {
+        let imgList = [];
+        for (let i = 0; i < imgNode.length; i++) {
+          imgNode[i].replace(/<img[^>]*src=['"]([^'"]+)[^>]*>/gi, (match, capture) => {
+            imgList.push(capture);
+          });
+        }
+        uni.previewImage({
+          urls: imgList,
+        });
+      }
+    },
     // 下拉刷新
-    scrollToLower (e) {
-      // this.$parent.initCountTimeout();
+    scrollToLower(e) {
       if (this.pageIndex < this.totalPage) {
         this.pageIndex++;
         this.getNoticeInfo(this.pageIndex);
@@ -108,7 +119,12 @@ export default {
   },
 };
 </script>
-
-<style lang="less">
-@import '../../../common/less/index.less';
+  
+<style lang="less" scoped>
+@import "@/static/quill/quill.core.css";
+@import "@/static/quill/quill.snow.css";
+@import "@/static/quill/quill.bubble.css";
+@import "@/static/quill/quill.font.css";
+@import "../../../common/less/index.less";
 </style>
+  

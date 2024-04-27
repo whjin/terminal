@@ -54,9 +54,18 @@
         "index": 18
     },
     {
-        "name": "一周值班",
-        "image": "/static/images/index/prisoner/zxdm.png",
-        "url": "",
-        "index": 20
+        "name": "",
+        "image": "",
+        "url": ""
+    },
+    {
+        "name": "",
+        "image": "",
+        "url": ""
+    },
+    {
+        "name": "",
+        "image": "",
+        "url": ""
     }
 ]

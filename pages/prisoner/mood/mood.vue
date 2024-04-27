@@ -1,16 +1,14 @@
 <template>
-  <view @touchstart.stop="initCountTimer">
+  <view>
     <view class="main-area">
-      <view class="uni-flex page-title">
+      <view class="mood-title">
         <text>心情记录</text>
-        <view>
-          <button type="primary" class="button" @click="openMoodStatusModal">
-            登记
-          </button>
-        </view>
+        <button type="primary" class="button" @click="openMoodStatusModal">
+          登记
+        </button>
       </view>
       <view class="uni-flex uni-row">
-        <view class="flex-item uni-column" style="margin-top: 46upx; font-size: 25upx;">
+        <view class="flex-item uni-column" style="font-size: 25upx;">
           <view class="flex-item flex-item-V flex-item-view">
             <view>第一周</view>
           </view>
@@ -27,7 +25,7 @@
             <view>第五周</view>
           </view>
         </view>
-        <view class="flex-item" style="margin-left: 25upx; width: 1200upx;">
+        <view class="flex-item" style="width: 1200upx;padding-right: 27.77upx;">
           <view class="uni-flex" style="text-align: center;" id="weekList">
             <view class="uni-flex-item table-th">
               <view>星期一</view>
@@ -51,10 +49,12 @@
               <view>星期日</view>
             </view>
           </view>
-          <view v-if="isDataLoading" style="width: 100%; height: 100%; text-align: center; line-height: 500upx;">数据加载中...</view>
+          <view v-if="isDataLoading" style="width: 100%; height: 100%; text-align: center; line-height: 500upx;">数据加载中...
+          </view>
           <view class="uni-flex table-td-divider" v-for="(week, index) in calendar" :key="index" v-else>
             <view class="uni-flex-item table-td" v-for="(day, index2) in week" :key="index2">
-              <view style="height: 90%;" class="item-day" :class="{'item-today': compareIsSameDate(day.timestamp, new Date().getTime())}">
+              <view style="height: 90%;" class="item-day"
+                :class="{ 'item-today': compareIsSameDate(day.timestamp, new Date().getTime()) }">
                 <view v-if="moodStatusList[day.moodId]" class="status-view">{{ moodStatusList[day.moodId].value }}</view>
                 <view style="
                     text-align: center;
@@ -71,14 +71,16 @@
     </view>
     <neil-modal :show="showMoonStatus" @close="closeMoodStatusModal" :autoClose="true">
       <view class="uni-flex uni-row">
-        <view v-for="(item, index) in moodStatusList" :key="index" @click="changeMoodStatus(item)" style="margin-left: 13.88upx;" class="flex-item">
+        <view v-for="(item, index) in moodStatusList" :key="index" @click="changeMoodStatus(item)"
+          style="margin-left: 13.88upx;" class="flex-item">
           <view class="uni-flex">
-            <image :src="item.path" style="width: 70upx; height: 70upx;" :class="item.id === selectedMoodId ? 'symptoms-select' : 'symptoms'"></image>
+            <image :src="item.path" style="width: 70upx; height: 70upx;"
+              :class="item.id === selectedMoodId ? 'symptoms-select' : 'symptoms'"></image>
           </view>
           <view class="info" style="text-align: center;">{{ item.value }}</view>
         </view>
       </view>
-      <button type="primary" @click="confirm()" style="width: 130upx; line-height: 50upx;">
+      <button type="primary" @click="confirm()" style="width: 130upx; line-height: 50upx;font-size: 18upx;">
         确认
       </button>
     </neil-modal>
@@ -88,14 +90,14 @@
 <script>
 import Api from '@/common/api.js';
 import { mapState } from "vuex";
-import { getDate } from '@/common/utils/tools.js';
+import { getDate } from '@/common/utils/util.js';
 import neilModal from "@/components/neil-modal/neil-modal.vue";
 
 export default {
   components: {
     neilModal
   },
-  data () {
+  data() {
     return {
       isDataLoading: true,
       selectedMoodId: "",
@@ -158,22 +160,18 @@ export default {
       personInfo: state => state.app.personInfo
     }),
     // 监室ID
-    roomId () {
+    roomId() {
       return uni.getStorageSync('terminalInfo').roomId;
     }
   },
   methods: {
-    // 重置倒计时
-    initCountTimer () {
-      // this.$parent.initCountTimeout();
-    },
     // 设置日历偏移量
-    setCalendarOffset () {
+    setCalendarOffset() {
       let day = new Date();
       this.calendarOffset = day.getDate() - 14 - ((day.getDay() || 7) - 1);
     },
     // 设置获取列表参数
-    setMoodListParams () {
+    setMoodListParams() {
       let day = new Date();
       this.saveParams.recordTime = day.getTime();
       this.getMoodListParams.endTime = day.getTime();
@@ -181,7 +179,7 @@ export default {
       this.getMoodListParams.startTime = day.getTime();
     },
     // 获取心情列表
-    async getMoodList () {
+    async getMoodList() {
       let params = Object.assign({}, {
         rybh: this.personInfo.rybh
       }, this.getMoodListParams);
@@ -195,7 +193,7 @@ export default {
       }
     },
     // 设置日历
-    setCalendar () {
+    setCalendar() {
       let it = new Date();
       it.setDate(this.calendarOffset); //偏移量
       let aWeek = [];
@@ -209,7 +207,7 @@ export default {
         aWeek.push(aDay);
       }
     },
-    setMood (it) {
+    setMood(it) {
       let aDay = {};
       let day = new Date(it);
       aDay['date'] = day.getDate();
@@ -223,7 +221,7 @@ export default {
       return aDay;
     },
     // 判断两个时间戳是否同一天
-    compareIsSameDate (timestamp1, timestamp2) {
+    compareIsSameDate(timestamp1, timestamp2) {
       if (getDate(timestamp1, 'date') === getDate(timestamp2, 'date')) {
         return true;
       } else {
@@ -231,7 +229,7 @@ export default {
       }
     },
     // 登记心情
-    async saveMood () {
+    async saveMood() {
       let params = Object.assign({}, {
         rybh: this.personInfo.rybh,
         roomId: this.roomId
@@ -244,25 +242,25 @@ export default {
       }
     },
     // 登记确认
-    confirm () {
+    confirm() {
       this.calendar[2].forEach(item => {
         if (this.compareIsSameDate(item.timestamp, new Date().getTime())) {
           item.moodId = this.selectedMoodId;
         }
-      })
+      });
       this.saveParams.moodField = this.selectedMoodId;
       this.selectedMoodId = "";
       this.closeMoodStatusModal();
       this.saveMood();
     },
     // 打开心情登记窗口
-    openMoodStatusModal () {
+    openMoodStatusModal() {
       let todayMoodId = 0;
       this.calendar[2].forEach(item => {
         if (this.compareIsSameDate(item.timestamp, new Date().getTime())) {
           todayMoodId = item.moodId;
         }
-      })
+      });
       if (todayMoodId === 0 || todayMoodId) {
         return uni.showToast({
           title: '今日已登记'
@@ -271,15 +269,15 @@ export default {
       this.showMoonStatus = true;
     },
     // 关闭心情登记窗口
-    closeMoodStatusModal () {
+    closeMoodStatusModal() {
       this.showMoonStatus = false;
     },
     // 选择心情
-    changeMoodStatus (item) {
+    changeMoodStatus(item) {
       this.selectedMoodId = item.id;
     }
   },
-  mounted () {
+  mounted() {
     try {
       this.setCalendarOffset();
       this.setMoodListParams();
@@ -289,53 +287,77 @@ export default {
     // 开启倒计时
     this.$parent.countTimer();
   },
-  destroyed () {
+  destroyed() {
   }
 };
 </script>
 
 <style scoped>
+.mood-title {
+  width: 100%;
+  box-sizing: border-box;
+  height: 83.33upx;
+  padding: 0 27.77upx;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.mood-title text {
+  white-space: nowrap;
+  color: #35fffa;
+  font-size: 27.77upx;
+  font-weight: bold;
+}
+
 .table-td-divider .table-td {
   height: 86upx;
 }
+
 .flex-item .table-td-divider {
   border: rgba(17, 62, 141, 0) 1px solid;
 }
+
 .flex-item-view {
   margin-bottom: 9upx;
-  margin-left: 50upx;
+  margin-left: 27.77upx;
   height: 83upx;
-  width: 190upx;
+  width: 168upx;
   text-align: center;
   background: rgba(19, 42, 78, 0.4);
 }
+
 .flex-item-view view {
   padding-top: 23upx;
 }
+
 .uni-flex .table-th {
   background: rgb(17, 62, 141, 0);
 }
+
 .button {
   width: 84upx;
   height: 42upx;
-  margin-top: 30upx;
-  margin-left: 1080upx;
-  float: right;
   font-size: 20upx;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  line-height: 40upx;
-  text-align: center;
-  padding: 0 0 0 0;
+  position: absolute;
+  right: 27.77upx;
 }
+
 .uni-flex .table-th {
   text-align: center;
 }
+
 .item-day {
   border-top: rgba(255, 255, 255, 0.3) 0.5upx solid;
 }
+
 .item-today {
   background: rgba(85, 170, 255, 0.3);
 }
+
 .symptoms {
   background-image: url('data:image/png;base64,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');
   background-size: 100% 100%;
@@ -355,6 +377,7 @@ export default {
   text-align: center;
   line-height: 62.5upx;
 }
+
 .status-view {
   text-align: center;
   line-height: 20upx;

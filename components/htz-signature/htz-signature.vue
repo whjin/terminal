@@ -20,7 +20,7 @@
 					<text>清空</text>
 				</view>
 			</view>
-			<view class="htz-signature-fixed-bottom-item submit" @click="submit">提交</view>
+			<view class="htz-signature-fixed-bottom-item submit" @click="submit">{{ btnText }}</view>
 		</view>
 
 		<!-- #ifdef APP-PLUS -->
@@ -83,6 +83,10 @@ export default {
 			type: String,
 			default: "",
 		},
+		btnText: {
+			type: String,
+			default: "提交"
+		}
 	},
 	data() {
 		return {

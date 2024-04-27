@@ -1,27 +1,10 @@
 const state = {
   // 当前页面
-  currentTab: 1,
-  // 点名类型
-  rollType: "",
-  // 在线点名ID
-  rollId: "",
-  // 临时点名信息
+  currentTab: 25,
+  // 点名信息
   rollInfo: {},
-  // 登录人员信息
-  personInfo: {
-    name: "",
-    rybh: "",
-    dabh: "",
-    date: "",
-  },
-  // 播放组件显隐
-  showPlayer: false,
-  // 媒体播放组件显隐
-  showMediaPlayer: false,
-  // 视频流地址
-  playerUrl: "",
-  // 媒体流地址
-  mediaPlayerUrl: "",
+  // 人脸|指纹认证人员信息
+  personInfo: {},
   // 首页状态栏显隐
   showBottomBar: true,
   // 返回首页状态
@@ -38,94 +21,76 @@ const state = {
   dutyList: [],
   // 是否对讲等待接听中
   isWaitingIntercom: false,
-  // 电教视频信息
-  educationVideoInfo: {},
-  // nodePlayer组件静音状态
-  isMuted: false,
-  // 媒体组件静音状态
-  isMediaMuted: false,
+  // 谈话|测评任务ID
+  taskId: "",
+  // 正在智能谈话
+  isConversation: false,
+  // 正在心理测评
+  isEvaluation: false,
+  // 来邦服务状态
+  IPCState: false,
 };
 
 const mutations = {
   // 当前页面
-  SET_CURRENTTAB (state, num) {
+  SET_CURRENTTAB(state, num) {
     state.currentTab = num;
   },
-  // 点名类型
-  SET_ROLLTYPE (state, type) {
-    state.rollType = type;
-  },
-  // 在线点名ID
-  SET_ROLLID (state, info) {
-    state.rollId = info;
-  },
   // 临时点名信息
-  SET_ROLLINFO (state, info) {
+  SET_ROLLINFO(state, info) {
     state.rollInfo = info;
   },
-  // 登录人员信息
-  SET_PERSONINFO (state, info) {
+  // 指纹认证人员信息
+  SET_PERSONINFO(state, info) {
     state.personInfo = info;
   },
-  // 播放组件显隐
-  SET_SHOWPLAYER (state, bool) {
-    state.showPlayer = bool;
-  },
-  // 媒体播放组件显隐
-  SET_SHOWMEDIAPLAYER (state, bool) {
-    state.showMediaPlayer = bool;
-  },
-  // 视频流地址
-  SET_PLAYERURL (state, info) {
-    state.playerUrl = info;
-  },
-  // 媒体流地址
-  SET_MEDIAPLAYERURL (state, info) {
-    state.mediaPlayerUrl = info;
-  },
   // 设置状态栏显隐
-  SET_BOTTOMBAR (state, bool) {
+  SET_BOTTOMBAR(state, bool) {
     state.showBottomBar = bool;
   },
   // 设置返回首页状态
-  SET_HOMESTATE (state, bool) {
+  SET_HOMESTATE(state, bool) {
     state.homeState = bool;
   },
   // 设置后退状态
-  SET_BACKSTATE (state, bool) {
+  SET_BACKSTATE(state, bool) {
     state.backState = bool;
   },
   // 设置登录状态
-  SET_LOGINSTATE (state, bool) {
+  SET_LOGINSTATE(state, bool) {
     state.loginState = bool;
   },
   // 设置是否正在点名
-  SET_ISCALLING (state, bool) {
+  SET_ISCALLING(state, bool) {
     state.isCalling = bool;
   },
   // 设置是否正在对讲
-  SET_ISINTERCOM (state, bool) {
+  SET_ISINTERCOM(state, bool) {
     state.isIntercom = bool;
   },
   // 值班人员列表
-  SET_DUTYLIST (state, info) {
+  SET_DUTYLIST(state, info) {
     state.dutyList = info;
   },
   // 设置是否对讲等待接听中
-  SET_ISWAITINGINTERCOM (state, bool) {
+  SET_ISWAITINGINTERCOM(state, bool) {
     state.isWaitingIntercom = bool;
   },
-  // 设置管教视频信息
-  SET_EDUCATIONVIDEOINFO (state, info) {
-    state.educationVideoInfo = info;
+  // 设置谈话|测评ID
+  SET_TASKID(state, id) {
+    state.taskId = id;
   },
-  // 设置nodePlayer组件静音状态
-  SET_ISMUTED (state, bool) {
-    state.isMuted = bool;
+  // 设置智能谈话状态
+  SET_ISCONVERSATION(state, bool) {
+    state.isConversation = bool;
   },
-  // 设置媒体组件静音状态
-  SET_ISMEDIAMUTED (state, bool) {
-    state.isMediaMuted = bool;
+  // 设置心理测评状态
+  SET_ISEVALUATION(state, bool) {
+    state.isEvaluation = bool;
+  },
+  // 来邦服务状态
+  SET_IPCSTATE(state, bool) {
+    state.IPCState = bool;
   },
 };
 

@@ -1,79 +1,30 @@
 <template>
-  <div
-    class="show-box"
-    :class="{ disabled: disabled, active: isShowList }"
-    :style="style_Container"
-  >
+  <div class="show-box" :class="{disabled: disabled, active: isShowList}" :style="style_Container">
     <!-- 输入框，仅在可输入模式下使用 -->
-    <input
-      v-if="showInput"
-      class="input"
-      placeholder-style="color: #bbb;"
-      type="text"
-      v-model="selectText"
-      :placeholder="placeholder"
-      @focus="onFocus"
-      @blur="onBlur"
-      @input="onInput"
-      @confirm="$emit('confirm', $event)"
-      :style="'width:' + widthStyle + 'upx;'"
-    />
+    <input v-if="showInput" class="input" placeholder-style="color: #bbb;" type="text" v-model="selectText" :placeholder="placeholder" @focus="onFocus" @blur="onBlur" @input="onInput" @confirm="$emit('confirm', $event)" :style="'width:' + widthStyle + 'upx;'">
     <!-- 显示框 -->
-    <div
-      v-else
-      :style="'width:' + widthStyle + 'upx;'"
-      class="input"
-      :class="{ placeholder: selectText === placeholder }"
-      @click="onUpperClick"
-    >
-      {{ selectText }}
-    </div>
+    <div v-else :style="'width:' + widthStyle + 'upx;'" class="input" :class="{placeholder: selectText === placeholder}" @click="onUpperClick">{{selectText}}</div>
 
     <!-- 右侧的小三角图标 -->
-    <span
-      @click="onUpperClick"
-      class="iconfont iconarrowBottom-fill right-arrow"
-      :class="{ isRotate: isRotate }"
-    ></span>
+    <span @click="onUpperClick" class="iconfont iconarrowBottom-fill right-arrow" :class="{isRotate: isRotate}"></span>
 
     <!-- 清除按钮图标 -->
-    <span
-      v-if="clearable && selectText && selectText != placeholder"
-      class="right-arrow"
-      @click="onClear"
-    >
+    <span v-if="clearable && selectText && selectText != placeholder" class="right-arrow" @click="onClear">
       <span class="iconfont iconshanchu1 clear"></span>
     </span>
 
     <!-- 列表框 -->
-    <div
-      class="list-container"
-      @click.stop="onListClick"
-      :style="'top:' + listTop__ + 'px;width:' + widthStyle + 'upx;'"
-      v-show="isShowList"
-    >
-      <span class="popper__arrow"></span>
-      <!-- 列表框左上角的空心小三角 -->
-      <scroll-view
-        class="list"
-        style="background-color: rgba(42, 66, 115, 0.95)"
-        :style="'max-height: ' + listBoxHeight__ + 'em;'"
-        scroll-y="true"
-        scroll-x="true"
-      >
-        <div
-          class="item"
-          @click="onClickItem(index, item.value)"
-          v-for="(item, index) in innerList"
-          :key="index"
-          :class="{ active: activeIndex == index, disabled: item.disabled }"
-        >
-          <div>{{ item.value }}</div>
+    <div class="list-container" @click.stop="onListClick" :style="'top:' + listTop__ + 'px;width:' + widthStyle + 'upx;'" v-show="isShowList">
+      <span class="popper__arrow"></span> <!-- 列表框左上角的空心小三角 -->
+      <scroll-view class="list" style="background-color: rgba(42,66,115,0.95);" :style="'max-height: ' + listBoxHeight__ +'em;'" scroll-y=true scroll-x=true>
+        <div class="item" @click="onClickItem(index, item.value)" v-for="(item, index) in innerList" :key="index" :class="{active: activeIndex == index, disabled: item.disabled}">
+          <div>{{item.value}}</div>
         </div>
-        <div v-show="innerList.length == 0" class="data-state item">无数据</div>
+        <div v-show="innerList.length==0" class="data-state item">无数据</div>
         <!-- <slot></slot> -->
       </scroll-view>
     </div>
+
   </div>
 </template>
 
@@ -83,90 +34,79 @@
  * 最后修改: 2019.7.29
  * 创建: 2019.6.27
  */
-import Vue from "vue";
-Vue.__xfl_select = Vue.__xfl_select || new Vue(); // 这个实例专门用来做xfl-select多个实例之间的通信中间站
+import Vue from 'vue';
+Vue.__xfl_select = Vue.__xfl_select || new Vue();  // 这个实例专门用来做xfl-select多个实例之间的通信中间站
 export default {
-  name: "xfl-select",
+  name: 'xfl-select',
   props: {
-    list: {
-      // 原始数据
+    list: {            // 原始数据
       type: Array,
       default: function () {
         return [];
-      },
+      }
     },
     focusShowList: null, // 当input获取焦点时，是否自动弹出列表框
-    initValue: null, // 选择框的初始值
-    isCanInput: {
-      // 选择框是否可以输入值
+    initValue: null,   // 选择框的初始值
+    isCanInput: {      // 选择框是否可以输入值
       type: Boolean,
       default: false,
     },
-    selectHideType: {
-      // 本选择框与其它选择框之间的关系
+    selectHideType: {     // 本选择框与其它选择框之间的关系
       type: String,
-      default: "hideAll", // 'independent' - 是独立的，与其它选择框互不影响  'hideAll' - 任何一个选择框展开时，隐藏所有其它选择框
-      // 'hideOthers'- 当本选择框展开时，隐藏其它的选择框。  当其它选择框展开时，不隐藏本选择框。
+      default: 'hideAll', // 'independent' - 是独立的，与其它选择框互不影响  'hideAll' - 任何一个选择框展开时，隐藏所有其它选择框
+      // 'hideOthers'- 当本选择框展开时，隐藏其它的选择框。  当其它选择框展开时，不隐藏本选择框。 
       // 'hideSelf' -  当本选择框展开时，不隐藏其它的选择框。当其它选择框展开时，隐藏本选择框。
     },
-    placeholder: {
-      // 选择框的placeholder
+    placeholder: {     // 选择框的placeholder
       type: String,
-      default: "请选择",
+      default: '请选择',
     },
-    style_Container: {
-      // 最外层的样式
+    style_Container: { // 最外层的样式
       type: String,
-      default: "",
+      default: ''
     },
-    disabled: {
-      // 是否禁用整个选择框
+    disabled: {        // 是否禁用整个选择框
       type: Boolean,
       default: false,
     },
-    showItemNum: {
-      // 显示列表框的窗口高度，数字表示能显示几个列表项
+    showItemNum: {     // 显示列表框的窗口高度，数字表示能显示几个列表项
       type: Number,
-      default: 5,
+      default: 5
     },
-    listShow: {
-      // 是否显示列表框
+    listShow: {        // 是否显示列表框
       type: Boolean,
-      default: false,
+      default: false
     },
-    clearable: {
-      // 是否显示右侧的清除按钮
+    clearable: {       // 是否显示右侧的清除按钮
       type: Boolean,
-      default: true,
+      default: true
     },
     widthStyle: {
       type: [Number, String],
-      default: 235,
+      default: 235
     },
     rowIndex: {
       type: [Number, String],
-      default: 0,
-    },
+      default: 0
+    }
   },
-  data() {
+  data () {
     return {
       isShowList: false, // 是否显示列表框
-      selectText: "", // 已经选择的内容
-      activeIndex: -1, // 列表中当前活动的索引号
-      isRotate: false, // 右侧的小三角是否旋转
-      listTop__: 50, // 列表框的top位置，在初始时，根据input节点的高度来调整
+      selectText: '',    // 已经选择的内容
+      activeIndex: -1,   // 列表中当前活动的索引号
+      isRotate: false,   // 右侧的小三角是否旋转
+      listTop__: 50,       // 列表框的top位置，在初始时，根据input节点的高度来调整
     };
   },
   // 进行监听的话，在组件外改变这个值，组件内就能响应变化
-  watch: {
-    // 监听变化 ，注意，初始的值是不会被监听到的，只有在mounted回调中手动赋值
-    listShow(newVal, oldVal) {
+  watch: { // 监听变化 ，注意，初始的值是不会被监听到的，只有在mounted回调中手动赋值
+    listShow (newVal, oldVal) {
       this.onDataChange_listShow(newVal, oldVal);
     },
   },
   computed: {
-    focusShowList__() {
-      // 是否在输入框获得焦点时，自动弹出列表框
+    focusShowList__ () { // 是否在输入框获得焦点时，自动弹出列表框
       if (this.focusShowList == null) {
         // 应该是判断在 pc端还是移动端
         // #ifdef H5
@@ -179,22 +119,18 @@ export default {
         return this.focusShowList;
       }
     },
-    listBoxHeight__() {
-      // 列表框的总高度
+    listBoxHeight__ () { // 列表框的总高度
       const itemHeight = 2; // 每个列表项的高度(em), 默认为2个文字高
       return this.showItemNum * itemHeight;
     },
-    showInput() {
-      // 是否显示输入框
+    showInput () {    // 是否显示输入框
       return this.isCanInput && !this.disabled;
     },
-    innerList() {
-      // 转换列表的数据格式
-      const arr = [],
-        orginArr = this.list;
+    innerList () {    // 转换列表的数据格式
+      const arr = [], orginArr = this.list;
       orginArr.forEach((val, index) => {
-        let value = typeof val === "object" && "value" in val ? val.value : val;
-        let isDisabled = typeof val === "object" && val.disabled == true;
+        let value = typeof val === 'object' && 'value' in val ? val.value : val;
+        let isDisabled = typeof val === 'object' && val.disabled == true;
         arr.push({
           isActive: false,
           value: value,
@@ -204,42 +140,38 @@ export default {
       return arr;
     },
   },
-  mounted() {
-    Vue.__xfl_select.$on("open", this.onOtherXflSelectOpen);
-    this.switchMgr = new Switch(this.onListShow, this.onListHide); // 创建开关对象
+  mounted () {
+    Vue.__xfl_select.$on('open', this.onOtherXflSelectOpen);
+    this.switchMgr = new Switch(this.onListShow, this.onListHide);  // 创建开关对象
     this.onDataChange_listShow(this.listShow, null); // 由于 watch 不到初始值，所以需要在这里手动调用一次
     this.init(); //进行初始化
   },
-  beforeDestroy() {
-    Vue.__xfl_select.$off("open", this.onOtherXflSelectOpen);
+  beforeDestroy () {
+    Vue.__xfl_select.$off('open', this.onOtherXflSelectOpen);
   },
   methods: {
-    onOtherXflSelectOpen(component) {
-      //当本组件的其它实例展开时的回调
-      if (
-        this.selectHideType === "independent" ||
-        this.selectHideType === "hideOthers"
-      ) {
+    onOtherXflSelectOpen (component) { //当本组件的其它实例展开时的回调
+      if (this.selectHideType === 'independent' || this.selectHideType === 'hideOthers') {
         return;
       }
       component !== this && this.switchMgr.close(100);
     },
     /************************** 初始化函数 ****************************/
     //进行初始化
-    init() {
-      this.clearInput(); // 清空输入框中的显示，主要是设置placeholder
+    init () {
+      this.clearInput();  // 清空输入框中的显示，主要是设置placeholder
       this.setInput(this.initValue); // 在输入框中显示初始值
       this.changeActiveIndex(this.initValue); // 根据初始值设置列表框中的活动项
       this.getInputBoxHeight(); // 初始化列表框的top值
     },
 
     // 获取输入框的总高度 px
-    getInputBoxHeight() {
+    getInputBoxHeight () {
       let component = this;
       // #ifdef H5
-      component = undefined; // 在h5中传入了component反而拿不到数据
+      component = undefined;  // 在h5中传入了component反而拿不到数据
       // #endif
-      getNodeInfo(".show-box", component, (data) => {
+      getNodeInfo('.show-box', component, (data) => {
         if (data) {
           const trangleHeight = 6; //列表框左上角的小的空心三角形的高度(px)
           this.listTop__ = data[0].height + trangleHeight;
@@ -249,71 +181,70 @@ export default {
     /************************** 初始化函数 ****************************/
 
     /************************** 数据 ****************************/
-    getIndex(value) {
-      // 将值转换为索引
-      let activeIndex = searchIndex(this.innerList, value, "value");
-      return activeIndex; // 转换失败，则返回-1
+    getIndex (value) {  // 将值转换为索引
+      let activeIndex = searchIndex(
+        this.innerList, value, 'value');
+      return activeIndex;  // 转换失败，则返回-1
     },
-    itemIsDisabled(index) {
-      // 某个列表项是否已经被禁用了
+    itemIsDisabled (index) { // 某个列表项是否已经被禁用了
       return this.innerList[index].disabled;
     },
 
-    itemIsActive(index) {
-      // 某个列表项是否是被选中的(活动的)
+    itemIsActive (index) { // 某个列表项是否是被选中的(活动的)
       return index === this.activeIndex;
     },
 
     // listShow 这个字段的值变化时的回调
-    onDataChange_listShow(newVal = false, oldVal) {
+    onDataChange_listShow (newVal = false, oldVal) {
       newVal ? this.switchMgr.open() : this.switchMgr.close(100);
     },
     /************************** 数据 ****************************/
 
+
     /************************** “输入框”的操作 ****************************/
     // 输入框获得焦点时
-    onFocus(event) {
+    onFocus (event) {
       this.focusShowList__ && this.switchMgr.open();
-      this.$emit("focus", event);
+      this.$emit('focus', event);
     },
 
     // 输入框失去焦点时
-    onBlur(event) {
+    onBlur (event) {
       // 失去焦点时隐藏，在电脑上很好，但在移动端体验不好，因为会弹出数字键盘，然后隐藏键盘时会失去焦点
       this.focusShowList__ && this.switchMgr.close(100);
-      this.$emit("blur", event);
+      this.$emit('blur', event);
     },
 
     //当显示的不是输入框时，上面的点击事件
-    onUpperClick() {
+    onUpperClick () {
       if (this.disabled) {
         return;
       }
-      this.switchMgr.toggle("auto", -1, 100);
-      this.$emit("input-click");
+      this.switchMgr.toggle('auto', -1, 100);
+      this.$emit('input-click');
     },
 
     //清空已经选择的内容
-    onClear() {
+    onClear () {
       this.clearItemActive(); // 清空列表框中的所有活动项
       this.clearInput(); // 清空输入框中的显示
-      this.$emit("clear");
+      this.$emit('clear');
     },
 
     // 输入框的值变化时
-    onInput(event) {
+    onInput (event) {
       const inputVal = event.detail.value;
       this.changeActiveIndex(inputVal);
-      this.$emit("input", event);
+      this.$emit('input', event);
     },
 
     // 清空input中显示的内容
-    clearInput(placeholder = null) {
+    clearInput (placeholder = null) {
       this.placeholder = placeholder == null ? this.placeholder : placeholder;
-      this.selectText = this.showInput ? "" : this.placeholder;
+      this.selectText = this.showInput ? '' : this.placeholder;
     },
     // 设置input中显示的内容
-    setInput(text = null) {
+    setInput (text = null) {
       if (text == null) {
         return;
       }
@@ -321,45 +252,39 @@ export default {
     },
     /************************** “输入框”的操作 ****************************/
 
+
     /************************** 列表的操作(显示/隐藏/点击) ****************************/
 
     /**
      * 传入数字表示索引，其它值表示value, 会自动去搜索对应的索引
-     * 注意：
-     * 1. 如果没有找到对应的索引，则什么也不会做
-     * 2. 如果找到了，只会把对应项设置为活动的，并不会清除其它的活动项
+     * 注意： 
+     * 1. 如果没有找到对应的索引，则什么也不会做  
+     * 2. 如果找到了，只会把对应项设置为活动的，并不会清除其它的活动项  
      */
-    changeActiveIndex(value_index) {
-      //改变列表中的活动项
+    changeActiveIndex (value_index) { //改变列表中的活动项
       if (value_index == null) {
         return;
       }
-      let activeIndex = value_index,
-        value = value_index;
-      if (typeof value_index !== "number") {
-        //认为是值，否则就是索引
+      let activeIndex = value_index, value = value_index;
+      if (typeof value_index !== 'number') { //认为是值，否则就是索引
         activeIndex = this.getIndex(value); // 搜索对应的值所在的索引
       } else {
         value = this.innerList[activeIndex].value;
       }
       if (activeIndex > -1) {
-        !this.itemIsActive(activeIndex) &&
-          this.setItemActive(activeIndex, value);
+        !this.itemIsActive(activeIndex) && this.setItemActive(activeIndex, value);
       } else {
         this.clearItemActive();
       }
-      this.setInput(value); // 更改输入框的值
+      this.setInput(value);  // 更改输入框的值
     },
 
-    clearItemActive(index = -1) {
-      // 设置为不选中
-      if (index < 0) {
-        // 清空全部
+    clearItemActive (index = -1) {  // 设置为不选中
+      if (index < 0) { // 清空全部
         this.activeIndex = -1;
       }
     },
-    setItemActive(index, value) {
-      //选中某一项，必须传入索引和对应的值
+    setItemActive (index, value) { //选中某一项，必须传入索引和对应的值
       if (this.itemIsDisabled(index)) {
         return;
       }
@@ -367,59 +292,49 @@ export default {
     },
 
     // 整个列表框上的点击事件
-    onListClick() {},
-    onClickItem(index, value) {
-      // 列表项上的点击事件
+    onListClick () {
+
+    },
+    onClickItem (index, value) {  // 列表项上的点击事件
       if (this.itemIsDisabled(index)) {
         this.switchMgr.open(); // 点在禁用项上，就不隐藏
         return;
       }
-      this.switchMgr.close(100); // 开始隐藏，因为会延迟隐藏，所以可以写在这里
-      if (this.disabled) {
-        //如果本项被禁用 或 整个列表框被禁用
+      this.switchMgr.close(100);   // 开始隐藏，因为会延迟隐藏，所以可以写在这里
+      if (this.disabled) { //如果本项被禁用 或 整个列表框被禁用
         return;
       }
-      if (!this.itemIsActive(index)) {
-        //如果点在非选中项上
+      if (!this.itemIsActive(index)) {  //如果点在非选中项上
         this.clearItemActive(); // 清空其它的选中的列表项
         this.setItemActive(index, value); // 将这一项设置为选中项
-        this.$emit("change", {
+        this.$emit('change', {
           newVal: value,
           oldVal: this.selectText,
           index: index,
-          orignItem: this.list[index],
-          rowIndex: this.rowIndex,
+          originItem: this.list[index],
+          rowIndex: this.rowIndex
         });
 
-        this.setInput(value); // 更改输入框的值
-      } else {
-        this.$emit("delete", this.list[index]);
-        this.clearItemActive(); // 清空列表框中的所有活动项
-        this.clearInput(); // 清空输入框中的显示
+        this.setInput(value);   // 更改输入框的值
       }
     },
-    onListHide() {
-      //列表隐藏时的回调
+    onListHide () { //列表隐藏时的回调
       this.isRotate = false;
       this.isShowList = false;
-      this.$emit("visible-change", false);
+      this.$emit('visible-change', false);
     },
-    onListShow() {
-      //列表显示时的回调
+    onListShow () {  //列表显示时的回调
       this.isShowList = true;
       this.isRotate = true;
-      this.$emit("visible-change", true);
+      this.$emit('visible-change', true);
 
-      if (
-        this.selectHideType === "independent" ||
-        this.selectHideType === "hideSelf"
-      ) {
+      if (this.selectHideType === 'independent' || this.selectHideType === 'hideSelf') {
         return;
       }
-      Vue.__xfl_select.$emit("open", this);
-    },
+      Vue.__xfl_select.$emit('open', this);
+    }
     /************************** 列表的操作(显示/隐藏/点击) ****************************/
-  },
+  }
 };
 
 /************************** uniapp libs ****************************/
@@ -429,11 +344,9 @@ export default {
  * @public
  * @returns {boolean} true表示当前环境是web，并且是移动端，false表示非web或是pc端
  */
-function isMobile() {
-  try {
-    // 可能不存在window对象
-    let reg =
-      /iPhone|iPad|iPod|iOS|Android|SymbianOS|Windows Phone|coolpad|mmp|smartphone|midp|wap|xoom|symbian|j2me|blackberry|wince/i;
+function isMobile () {
+  try {  // 可能不存在window对象
+    let reg = /iPhone|iPad|iPod|iOS|Android|SymbianOS|Windows Phone|coolpad|mmp|smartphone|midp|wap|xoom|symbian|j2me|blackberry|wince/i;
     return reg.test(navigator.userAgent);
   } catch (e) {
     return false;
@@ -444,11 +357,9 @@ function isMobile() {
  * @public
  * @returns {boolean} true表示当前环境是web，并且是pc端，false表示非web或是移动端
  */
-function isPC() {
-  try {
-    // 可能不存在window对象
-    let reg =
-      /iPhone|iPad|iPod|iOS|Android|SymbianOS|Windows Phone|coolpad|mmp|smartphone|midp|wap|xoom|symbian|j2me|blackberry|wince/i;
+function isPC () {
+  try {  // 可能不存在window对象
+    let reg = /iPhone|iPad|iPod|iOS|Android|SymbianOS|Windows Phone|coolpad|mmp|smartphone|midp|wap|xoom|symbian|j2me|blackberry|wince/i;
     return !reg.test(navigator.userAgent);
   } catch (e) {
     return false;
@@ -499,75 +410,53 @@ function isPC() {
  * 
  * 4. 传入配置对象和callback, 返回undefined
  */
-function getNodeInfo(
-  {
-    selector = "selector", // 选择器
-    component = null, // 选择器所在的组件，不传入的话，相当于是在整个当前页面中选择
-    attemptSpaceTime = 16, // 尝试获取节点信息的时间间隔(ms): 16 24 36 54 81 122 183 275 413
-    attemptSpaceRate = 1.5, // 时间间隔的增长系数
-    totalAttemptNum = 8, // 如果获取信息失败，再次进行尝试获的最大次数
-    // 以下为获取到的结果字段的配置
-    id = true, // Boolean	是否返回节点 id
-    dataset = true, // Boolean	是否返回节点 dataset
-    rect = true, // Boolean	是否返回节点布局位置（left right top bottom）
-    size = true, // Boolean 是否返回节点尺寸（width height）
-    scrollOffset = true, //Boolean 是否返回节点的 scrollLeft scrollTop
-    // 以下三个 仅 App 和微信小程序支持
-    properties = [], // Array＜string＞ 指定属性名列表，返回节点对应属性名的当前属性值
-    // 只能获得组件文档中标注的常规属性值，
-    // id class style 和事件绑定的属性值不可获取
-    computedStyle = [], //Array＜string＞指定样式名列表，返回节点对应样式名的当前值
-    context = true, // Boolean 是否返回节点对应的 Context 对象
-  } = {},
-  callback = null,
-  thisObj = null
-) {
+function getNodeInfo ({
+  selector = 'selector', // 选择器
+  component = null, // 选择器所在的组件，不传入的话，相当于是在整个当前页面中选择
+  attemptSpaceTime = 16,  // 尝试获取节点信息的时间间隔(ms): 16 24 36 54 81 122 183 275 413 
+  attemptSpaceRate = 1.5, // 时间间隔的增长系数
+  totalAttemptNum = 8,    // 如果获取信息失败，再次进行尝试获的最大次数
+  // 以下为获取到的结果字段的配置
+  id = true,        // Boolean	是否返回节点 id	
+  dataset = true,   // Boolean	是否返回节点 dataset	
+  rect = true,      // Boolean	是否返回节点布局位置（left right top bottom）	
+  size = true,      // Boolean 是否返回节点尺寸（width height）	
+  scrollOffset = true, //Boolean 是否返回节点的 scrollLeft scrollTop
+  // 以下三个 仅 App 和微信小程序支持
+  properties = [],  // Array＜string＞ 指定属性名列表，返回节点对应属性名的当前属性值   
+  // 只能获得组件文档中标注的常规属性值，
+  // id class style 和事件绑定的属性值不可获取
+  computedStyle = [],  //Array＜string＞指定样式名列表，返回节点对应样式名的当前值
+  context = true,  // Boolean 是否返回节点对应的 Context 对象	
+} = {}, callback = null, thisObj = null) {
   // arguments 始终会记录最原始的传进来的参数，而不管这些默认值会怎么转换
   // 因为传入一个对象或非字符串会报错，强制转换为字符串
   const args = arguments;
-  selector = typeof args[0] === "string" ? args[0] : String(selector);
-  if (typeof args[1] !== "function") {
-    component = args[1];
-    callback = args[2];
-    thisObj = args[3];
+  selector = typeof args[0] === 'string' ? args[0] : String(selector);
+  if (typeof args[1] !== 'function') {
+    component = args[1]; callback = args[2]; thisObj = args[3];
   }
-  !component instanceof Vue && (component = null); //传入非组件对象，会报错
+  !component instanceof Vue && (component = null);  //传入非组件对象，会报错
 
   // 不能把 component 字符添加到这个对象上，否则在wx中会报循环引用的错误
   const options = {
-    selector,
-    attemptSpaceTime,
-    totalAttemptNum,
-    attemptSpaceRate,
-    id,
-    dataset,
-    rect,
-    size,
-    scrollOffset,
-    properties,
-    computedStyle,
-    context,
+    selector, attemptSpaceTime, totalAttemptNum, attemptSpaceRate,
+    id, dataset, rect, size, scrollOffset, properties, computedStyle, context
   };
 
   const selectorQuery = uni.createSelectorQuery();
   component && selectorQuery.in(component);
-  const nodesRef =
-    selector === "viewport"
-      ? selectorQuery.selectViewport()
-      : selectorQuery.selectAll(selector);
+  const nodesRef = selector === 'viewport' ? selectorQuery.selectViewport() : selectorQuery.selectAll(selector);
   nodesRef.fields(options); // 注意，只注册了这一个命令
 
   let result; // 必须把创建promise的代码放在前面，否则在h5端会出现exec先执行完成的情况
-  if (typeof callback !== "function") {
-    result = new Promise((resolve) => (callback = resolve));
+  if (typeof callback !== 'function') {
+    result = new Promise(resolve => callback = resolve);
   }
   stepRunFunc((next, currNum) => {
-    selectorQuery.exec(([data]) => {
-      // 开始查询页面中的节点
+    selectorQuery.exec(([data]) => { // 开始查询页面中的节点
       data && data.length === 0 && (data = null);
-      data || totalAttemptNum <= currNum
-        ? typeof callback === "function" && callback.call(thisObj, data)
-        : next(attemptSpaceTime);
+      data || totalAttemptNum <= currNum ? typeof callback === 'function' && callback.call(thisObj, data) : next(attemptSpaceTime);
       attemptSpaceTime = Math.round(attemptSpaceTime * attemptSpaceRate);
     });
   })(); // 立即执行一次
@@ -583,111 +472,88 @@ function getNodeInfo(
  * @class
  */
 class Switch {
-  constructor(onopen = null, onclose = null) {
-    this.onopen = onopen; // 打开后的回调
-    this.onclose = onclose; // 关闭后的回调
-    this.isOpen = false; // 初始时状态是关闭的
+  constructor (onopen = null, onclose = null) {
+    this.onopen = onopen;  // 打开后的回调
+    this.onclose = onclose;  // 关闭后的回调
+    this.isOpen = false;  // 初始时状态是关闭的
   }
-  toggle(toState = "auto", ...args) {
-    //切换开关的状态
-    if (!(toState === "close" || toState === "open")) {
-      toState = this.isOpen ? "close" : "open";
+  toggle (toState = 'auto', ...args) { //切换开关的状态
+    if (!(toState === 'close' || toState === 'open')) {
+      toState = this.isOpen ? 'close' : 'open';
     }
     let delayTime_open, delayTime_close, cancelType_open, cancelType_close;
     for (let i = 0, arg; i < args.length; i++) {
       arg = args[i];
       switch (typeof arg) {
-        case "number":
-          delayTime_open == null
-            ? (delayTime_open = arg)
-            : (delayTime_close = arg);
-          break;
-        case "string":
-          cancelType_open == null
-            ? (cancelType_open = arg)
-            : (cancelType_close = arg);
-          break;
+        case 'number': delayTime_open == null ? (delayTime_open = arg) : (delayTime_close = arg); break;
+        case 'string': cancelType_open == null ? (cancelType_open = arg) : (cancelType_close = arg); break;
       }
     }
-    const delayTime = toState === "open" ? delayTime_open : delayTime_close;
-    const cancelType = toState === "open" ? cancelType_open : cancelType_close;
-    this.change(
-      toState,
-      delayTime == null ? -1 : delayTime,
-      cancelType == null ? "both" : cancelType
-    );
+    const delayTime = toState === 'open' ? delayTime_open : delayTime_close;
+    const cancelType = toState === 'open' ? cancelType_open : cancelType_close;
+    this.change(toState, delayTime == null ? -1 : delayTime, cancelType == null ? 'both' : cancelType);
   }
-  open(delayTime = -1, cancelType = "both") {
-    // 打开
-    this.change("open", delayTime, cancelType);
+  open (delayTime = -1, cancelType = 'both') { // 打开
+    this.change('open', delayTime, cancelType);
   }
-  close(delayTime = -1, cancelType = "both") {
-    // 关闭
-    this.change("close", delayTime, cancelType);
+  close (delayTime = -1, cancelType = 'both') {  // 关闭
+    this.change('close', delayTime, cancelType);
   }
-  cancel(type = "both") {
-    // 取消定时器
-    if (type === "open") {
-      clearTimeout(this.openTimer);
-      this.openTimer = null;
-    } else if (type === "close") {
-      clearTimeout(this.closeTimer);
-      this.closeTimer = null;
-    } else if (type === "both") {
-      clearTimeout(this.closeTimer);
-      this.closeTimer = null;
-      clearTimeout(this.openTimer);
-      this.openTimer = null;
+  cancel (type = 'both') {  // 取消定时器
+    if (type === 'open') {
+      clearTimeout(this.openTimer); this.openTimer = null;
+    } else if (type === 'close') {
+      clearTimeout(this.closeTimer); this.closeTimer = null;
+    } else if (type === 'both') {
+      clearTimeout(this.closeTimer); this.closeTimer = null;
+      clearTimeout(this.openTimer); this.openTimer = null;
     }
   }
-  change(toState, delayTime = -1, cancelType = "both") {
-    // 改变到指定的状态
+  change (toState, delayTime = -1, cancelType = 'both') { // 改变到指定的状态
     this.cancel(cancelType); // 取消定时器
-    if (
-      (this.isOpen && toState === "open") ||
-      (!this.isOpen && toState === "close")
-    ) {
+    if (this.isOpen && toState === 'open' || !this.isOpen && toState === 'close') {
       return;
     }
-    const funcName = "on" + toState;
+    const funcName = 'on' + toState;
     if (delayTime < 0) {
-      this.isOpen = toState === "open";
-      typeof this[funcName] === "function" && this[funcName]();
+      this.isOpen = toState === 'open';
+      typeof this[funcName] === 'function' && this[funcName]();
     } else {
-      this[toState + "Timer"] = setTimeout(() => {
-        this.isOpen = toState === "open";
-        typeof this[funcName] === "function" && this[funcName]();
+      this[toState + 'Timer'] = setTimeout(() => {
+        this.isOpen = toState === 'open';
+        typeof this[funcName] === 'function' && this[funcName]();
       }, delayTime);
     }
   }
 }
+
 
 /**
  * 从一个数组中进行搜索，返回一个索引, 主要特点是可以深层搜索
  * 依赖: forEach  props 这两个函数
  * @public
  * @param {Array} arr - 要搜索的数组或类数组或普通对象
- * @param {any} searchVal - 要搜索的值
+ * @param {any} searchVal - 要搜索的值 
  * @param {string|Array} [propPath=''] - 要搜索的值的路径， 如 'aa.bb.cc' 或 ['aa', 'bb', 'cc']
  * @param {function} [compareFunc=null] - 比较函数 compareFunc(val, searchVal, arrElem, index, orignArr)
  *                                        省略时，表示进行全等比较。
  * @example
  * 1. 简单的使用
  * searchIndex([1, 2, 3], 2); // => 1
- *
+ * 
  * 2. 使用自定义的比较函数
  * searchIndex([1, 2, 3], '2', '', (val, searchVal)=>val==searchVal); // => 1
- *
+ * 
  * 3. 指定用值的路径
  * searchIndex([1, {aa: 3}, {aa: {bb: 3}}, {aa: {bb: 4}], 3, 'aa.bb'); // => 1
  */
-function searchIndex(arr, searchVal, propPath = "", compareFunc = null) {
+function searchIndex (arr, searchVal, propPath = '', compareFunc = null) {
   let result_index = -1;
   if (propPath) {
-    if (typeof propPath === "string") {
+    if (typeof propPath === 'string') {
       propPath = propPath.split(/\s*[\,\.]\s*/);
     } else if (!Array.isArray(propPath)) {
-      propPath = "";
+      propPath = '';
     }
   }
   forEach(arr, (val, index, orignArr) => {
@@ -695,7 +561,7 @@ function searchIndex(arr, searchVal, propPath = "", compareFunc = null) {
       val = props(val, propPath);
     }
     if (
-      typeof compareFunc === "function"
+      typeof compareFunc === 'function'
         ? compareFunc(val, searchVal, arrElem, index, orignArr)
         : val === searchVal
     ) {
@@ -718,17 +584,17 @@ function searchIndex(arr, searchVal, propPath = "", compareFunc = null) {
  * 1. forEach({a: 3, b: 4}, (val, prop, obj)=>{ // 遍历普通对象
  *     return false; //返回false 表示退出循环
  * });
- *
+ * 
  * 2. forEach([3, 4], (val, index, obj)=>{ // 遍历数组
  *     return false; //返回false 表示退出循环
  * });
- *
+ * 
  * 3. forEach({1: 3, 5: 10, a: 'aa', length: 20}, (val, index, obj)=>{ // 遍历类数组
  *     return false; //返回false 表示退出循环
  * });
  */
-function forEach(obj, func, thisObj = null) {
-  if (obj == null || typeof obj === "function" || typeof func !== "function") {
+function forEach (obj, func, thisObj = null) {
+  if (obj == null || typeof obj === 'function' || typeof func !== 'function') {
     return obj;
   }
 
@@ -736,11 +602,7 @@ function forEach(obj, func, thisObj = null) {
   let keys = Object.keys(obj);
 
   const length = obj.length;
-  const isArrayLike =
-    typeof length == "number" &&
-    length > -1 &&
-    length % 1 == 0 &&
-    length <= 9007199254740991;
+  const isArrayLike = typeof length == 'number' && length > -1 && length % 1 == 0 && length <= 9007199254740991;
 
   //如果是类数组或数组，只遍历其中的数字属性
   if (isArrayLike) {
@@ -758,9 +620,7 @@ function forEach(obj, func, thisObj = null) {
 
   // 开始遍历所有的数字属性
   for (let i = 0; i < keys.length; i++) {
-    if (func.call(thisObj, obj[keys[i]], keys[i], obj) === false) {
-      break;
-    }
+    if (func.call(thisObj, obj[keys[i]], keys[i], obj) === false) { break; }
   }
   return obj;
 }
@@ -782,9 +642,9 @@ function forEach(obj, func, thisObj = null) {
  * 6. props({aa: 3}, ['aa'], 5);  // => undefined  设置了 aa 的值为5
  * 7. props({aa: 3}, [], 5);  // => undefined 什么也没做
  */
-function props(obj, propArr, val = undefined, fource = false) {
+function props (obj, propArr, val = undefined, fource = false) {
   for (let i = 0, subObj = obj, len = propArr.length, propName; i < len; i++) {
-    if (!subObj || typeof subObj !== "object") {
+    if (!subObj || typeof subObj !== 'object') {
       return;
     }
     propName = propArr[i];
@@ -795,7 +655,7 @@ function props(obj, propArr, val = undefined, fource = false) {
         subObj[propName] = val;
       }
     } else {
-      if (!(subObj[propName] && typeof subObj[propName] === "object")) {
+      if (!(subObj[propName] && typeof subObj[propName] === 'object')) {
         if (fource && val !== undefined) {
           subObj[propName] = {};
         } else {
@@ -807,38 +667,38 @@ function props(obj, propArr, val = undefined, fource = false) {
   }
 }
 
+
 /**
- * 分次执行某个函数
- * 使用场景: 异步执行某个操作，这个操作可能会失败，所以当失败时，需要再尝试几次，直到成功或尝试次数用完
- * @public
- * @param {function} callback - 要执行的函数 callback.call(thisObj, next, currCount, timers)
- * @param {any} [thisObj=null] - callback中的this
- * @returns {function} 返回next函数，next函数可以传入以下两个参数
- * 					  {any} [delayTime=-1] - 延迟多久(ms)再执行下一次callback回调
- * 											 负数、NaN、Infinite表示立即同步调用，其它值表示延迟执行
- * 					  {string} [type='both'] - 当调用next时，如果其它地方也调用了next并且还没有完成，此时该保留哪次调用
- * 						   				'new' - 保留本次的，清除所有原来的
- * 						   				'old' - 保留所有原来的，舍弃本次的
- * 						   				'both' - 两个都保留
- * @example
- * 1. 最简单的使用
- * stepRunFunc((next, currCount, timers)=>{
- *      currCount <= 2 && next(2000);
- * })();
- * // => 会立即执行第一次，然后2s后再执行第二次
- *
- * 2. next()函数的第二个参数，是考虑到，用户可能会在短时间内连续调用多次，此时应该怎么处理这些next调用之间的关系
- * stepRunFunc((next, currCount, timers)=>{
- *      if(currCount <= 2 ){
- *          next(3000);
- *          setTimeout(()=>{next(1000, 'old')}, 1000); // 这一次next调用将不起作用
- *      }
- * })();
- * // => 会立即执行第一次，然后3s后再执行第二次
- */
-function stepRunFunc(callback, thisObj = null) {
-  const getDelayTime = (delayTime) => {
-    // 转换delayTime的格式
+* 分次执行某个函数
+* 使用场景: 异步执行某个操作，这个操作可能会失败，所以当失败时，需要再尝试几次，直到成功或尝试次数用完
+* @public
+* @param {function} callback - 要执行的函数 callback.call(thisObj, next, currCount, timers)
+* @param {any} [thisObj=null] - callback中的this
+* @returns {function} 返回next函数，next函数可以传入以下两个参数   
+* 					  {any} [delayTime=-1] - 延迟多久(ms)再执行下一次callback回调
+* 											 负数、NaN、Infinite表示立即同步调用，其它值表示延迟执行
+* 					  {string} [type='both'] - 当调用next时，如果其它地方也调用了next并且还没有完成，此时该保留哪次调用
+* 						   				'new' - 保留本次的，清除所有原来的
+* 						   				'old' - 保留所有原来的，舍弃本次的
+* 						   				'both' - 两个都保留
+* @example
+* 1. 最简单的使用
+* stepRunFunc((next, currCount, timers)=>{
+*      currCount <= 2 && next(2000);
+* })();
+* // => 会立即执行第一次，然后2s后再执行第二次
+* 
+* 2. next()函数的第二个参数，是考虑到，用户可能会在短时间内连续调用多次，此时应该怎么处理这些next调用之间的关系
+* stepRunFunc((next, currCount, timers)=>{
+*      if(currCount <= 2 ){
+*          next(3000);
+*          setTimeout(()=>{next(1000, 'old')}, 1000); // 这一次next调用将不起作用
+*      }
+* })();
+* // => 会立即执行第一次，然后3s后再执行第二次
+*/
+function stepRunFunc (callback, thisObj = null) {
+  const getDelayTime = (delayTime) => { // 转换delayTime的格式
     delayTime = parseInt(delayTime);
     if (isNaN(delayTime) || !isFinite(delayTime)) {
       delayTime = -1;
@@ -846,8 +706,7 @@ function stepRunFunc(callback, thisObj = null) {
     return delayTime;
   };
   const timers = []; // 记录所有正在执行的计时器
-  const clearTimer = (oneTimer) => {
-    // 清除定时器
+  const clearTimer = (oneTimer) => {  // 清除定时器
     if (oneTimer == null) {
       for (let i = 0; i < timers.length; i++) {
         clearTimeout(timers[i]);
@@ -862,12 +721,10 @@ function stepRunFunc(callback, thisObj = null) {
     }
   };
   let currCount = 0; // 记录callback当前已经执行了的次数
-  const next = function (delayTime = -1, type = "both") {
-    if (type === "new") {
-      // 如果只保留最新的next回调
+  const next = function (delayTime = -1, type = 'both') {
+    if (type === 'new') { // 如果只保留最新的next回调
       clearTimer();
-    } else if (type === "old" && timers.length > 0) {
-      // 保留以前的next回调，忽略本次next回调
+    } else if (type === 'old' && timers.length > 0) { // 保留以前的next回调，忽略本次next回调
       return;
     }
     delayTime = getDelayTime(delayTime);
@@ -894,6 +751,10 @@ function stepRunFunc(callback, thisObj = null) {
 @padding-left: 5%; //两侧的边距
 @arrowWidth: 12%; //右边的小三角按钮区域的宽度
 
+.placeholder11 {
+  color: red;
+  top: 6.94upx;
+}
 .show-box {
   &.active {
     border-color: @active-color;
@@ -922,8 +783,6 @@ function stepRunFunc(callback, thisObj = null) {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    white-space: nowrap;
-    overflow: auto;
   }
   .placeholder {
     color: #bbb;
@@ -981,7 +840,7 @@ function stepRunFunc(callback, thisObj = null) {
       border-bottom-color: #dcdfe6;
       top: -3.47upx;
       &:after {
-        content: " ";
+        content: ' ';
         border-width: 4.16upx;
         position: absolute;
         display: block;
@@ -1022,8 +881,6 @@ function stepRunFunc(callback, thisObj = null) {
         }
         padding: 0 @padding-left;
         line-height: 2;
-        white-space: nowrap;
-        overflow: auto;
       }
       .data-state {
         color: @hover-color;
@@ -1034,15 +891,15 @@ function stepRunFunc(callback, thisObj = null) {
 
 //**************************************  以下为字体  ****************************************
 @font-face {
-  font-family: "iconfont";
-  src: url("data:application/x-font-woff2;charset=utf-8;base64,d09GMgABAAAAAAM8AAsAAAAAB1gAAALvAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDHAqCEIFsATYCJAMQCwoABCAFhG0HSxthBhEVlKdkPwvsmHgLNqmwEc2pDxvYjI1gkX0f4uFrv9dz3+772RAqQJV8FbKANj5RiB1f1q0ioyorK1THs2Qj0gAJVYn///3mxT27TKyJJ63gD/KkYhr/9woe4ghtLxKJk5AWd7icc+CiJuQLU5SVQ48+ST+l0H2/pM2sm89zOb2VZYHMb1luYy3a0496AWYLKLA9sQ0UaAEFxC2yi7gTF3GaQJtRTbFxcfcIRYYmBeKyjDJQCiFZNrJFaDSszOI11Ep1IQZeRd+P/zAXcip1gmbuHJ/nYeWX9redqtuqPU6AYj4vjHUkNJGJ08bUviQMXtL2m2wJRVHxS/sz/N1+2CZOdizDemP/eBXRgCo7wIKcTvzSUnlmGMoSgt/tChX8EEOBlNvCLsQdpgv8HuNG8wuia9YA1Tfni5TZR1QthTxh8ZM2VCAHtiBtzfWtz1RtObA8IXowr5rzRK4/sRYpfjm1FBA9nrPl/qNAJRZLKJNsUumMKdb3dkIlkqjEtt8VrbNjZgnB48fG1XqNHax98/uI4xs768DFXVceFql2do6594N/t9vl/tw+ZlhKP6ngFjorHQq/AOmpcAlI98L7Pz/KG7P0OqU7+SuqQ7d8OXhYRvZsnLHcTCD4zwpgXfZVyJGzq6byIJiNgyZUaNOGv5ujz885jIPgWkIxOCLYYiRDUkyTmdNErd0CGopltJm1vb5dv3tJ5DDjpYTQ4wMqXT4h6fGZzJwfqA2R/SGlDxGUnsO0o4onyuKUUDLWoDbodPCGuFjE1U9sJispr4r4X6Sxi0IRiZWzD/RIc8wZ56ZkNmAoOLhL56G1ASKFHjWnLXOssmix6UWpDm4nnCJIYqgGlA3oaIFneHMmKp9/Qo2JJVEHqyf9hcio6x0UUjmAfOg9iHUvl4xmjRJjBjBI4IC7NAxZVgBi87Ae0liqHZGIKhluZKD6dH2j+8Jd0AY9MUcVKXLU5I9a6XU7FUcUppMkCss5MAeXmM7a3Q4A")
-      format("woff2"),
-    url("data:application/x-font-woff;charset=utf-8;base64,d09GMgABAAAAAAM8AAsAAAAAB1gAAALvAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDHAqCEIFsATYCJAMQCwoABCAFhG0HSxthBhEVlKdkPwvsmHgLNqmwEc2pDxvYjI1gkX0f4uFrv9dz3+772RAqQJV8FbKANj5RiB1f1q0ioyorK1THs2Qj0gAJVYn///3mxT27TKyJJ63gD/KkYhr/9woe4ghtLxKJk5AWd7icc+CiJuQLU5SVQ48+ST+l0H2/pM2sm89zOb2VZYHMb1luYy3a0496AWYLKLA9sQ0UaAEFxC2yi7gTF3GaQJtRTbFxcfcIRYYmBeKyjDJQCiFZNrJFaDSszOI11Ep1IQZeRd+P/zAXcip1gmbuHJ/nYeWX9redqtuqPU6AYj4vjHUkNJGJ08bUviQMXtL2m2wJRVHxS/sz/N1+2CZOdizDemP/eBXRgCo7wIKcTvzSUnlmGMoSgt/tChX8EEOBlNvCLsQdpgv8HuNG8wuia9YA1Tfni5TZR1QthTxh8ZM2VCAHtiBtzfWtz1RtObA8IXowr5rzRK4/sRYpfjm1FBA9nrPl/qNAJRZLKJNsUumMKdb3dkIlkqjEtt8VrbNjZgnB48fG1XqNHax98/uI4xs768DFXVceFql2do6594N/t9vl/tw+ZlhKP6ngFjorHQq/AOmpcAlI98L7Pz/KG7P0OqU7+SuqQ7d8OXhYRvZsnLHcTCD4zwpgXfZVyJGzq6byIJiNgyZUaNOGv5ujz885jIPgWkIxOCLYYiRDUkyTmdNErd0CGopltJm1vb5dv3tJ5DDjpYTQ4wMqXT4h6fGZzJwfqA2R/SGlDxGUnsO0o4onyuKUUDLWoDbodPCGuFjE1U9sJispr4r4X6Sxi0IRiZWzD/RIc8wZ56ZkNmAoOLhL56G1ASKFHjWnLXOssmix6UWpDm4nnCJIYqgGlA3oaIFneHMmKp9/Qo2JJVEHqyf9hcio6x0UUjmAfOg9iHUvl4xmjRJjBjBI4IC7NAxZVgBi87Ae0liqHZGIKhluZKD6dH2j+8Jd0AY9MUcVKXLU5I9a6XU7FUcUppMkCss5MAeXmM7a3Q4A")
-      format("woff");
+  font-family: 'iconfont';
+  src: url('data:application/x-font-woff2;charset=utf-8;base64,d09GMgABAAAAAAM8AAsAAAAAB1gAAALvAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDHAqCEIFsATYCJAMQCwoABCAFhG0HSxthBhEVlKdkPwvsmHgLNqmwEc2pDxvYjI1gkX0f4uFrv9dz3+772RAqQJV8FbKANj5RiB1f1q0ioyorK1THs2Qj0gAJVYn///3mxT27TKyJJ63gD/KkYhr/9woe4ghtLxKJk5AWd7icc+CiJuQLU5SVQ48+ST+l0H2/pM2sm89zOb2VZYHMb1luYy3a0496AWYLKLA9sQ0UaAEFxC2yi7gTF3GaQJtRTbFxcfcIRYYmBeKyjDJQCiFZNrJFaDSszOI11Ep1IQZeRd+P/zAXcip1gmbuHJ/nYeWX9redqtuqPU6AYj4vjHUkNJGJ08bUviQMXtL2m2wJRVHxS/sz/N1+2CZOdizDemP/eBXRgCo7wIKcTvzSUnlmGMoSgt/tChX8EEOBlNvCLsQdpgv8HuNG8wuia9YA1Tfni5TZR1QthTxh8ZM2VCAHtiBtzfWtz1RtObA8IXowr5rzRK4/sRYpfjm1FBA9nrPl/qNAJRZLKJNsUumMKdb3dkIlkqjEtt8VrbNjZgnB48fG1XqNHax98/uI4xs768DFXVceFql2do6594N/t9vl/tw+ZlhKP6ngFjorHQq/AOmpcAlI98L7Pz/KG7P0OqU7+SuqQ7d8OXhYRvZsnLHcTCD4zwpgXfZVyJGzq6byIJiNgyZUaNOGv5ujz885jIPgWkIxOCLYYiRDUkyTmdNErd0CGopltJm1vb5dv3tJ5DDjpYTQ4wMqXT4h6fGZzJwfqA2R/SGlDxGUnsO0o4onyuKUUDLWoDbodPCGuFjE1U9sJispr4r4X6Sxi0IRiZWzD/RIc8wZ56ZkNmAoOLhL56G1ASKFHjWnLXOssmix6UWpDm4nnCJIYqgGlA3oaIFneHMmKp9/Qo2JJVEHqyf9hcio6x0UUjmAfOg9iHUvl4xmjRJjBjBI4IC7NAxZVgBi87Ae0liqHZGIKhluZKD6dH2j+8Jd0AY9MUcVKXLU5I9a6XU7FUcUppMkCss5MAeXmM7a3Q4A')
+      format('woff2'),
+    url('data:application/x-font-woff;charset=utf-8;base64,d09GMgABAAAAAAM8AAsAAAAAB1gAAALvAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEIGVgCDHAqCEIFsATYCJAMQCwoABCAFhG0HSxthBhEVlKdkPwvsmHgLNqmwEc2pDxvYjI1gkX0f4uFrv9dz3+772RAqQJV8FbKANj5RiB1f1q0ioyorK1THs2Qj0gAJVYn///3mxT27TKyJJ63gD/KkYhr/9woe4ghtLxKJk5AWd7icc+CiJuQLU5SVQ48+ST+l0H2/pM2sm89zOb2VZYHMb1luYy3a0496AWYLKLA9sQ0UaAEFxC2yi7gTF3GaQJtRTbFxcfcIRYYmBeKyjDJQCiFZNrJFaDSszOI11Ep1IQZeRd+P/zAXcip1gmbuHJ/nYeWX9redqtuqPU6AYj4vjHUkNJGJ08bUviQMXtL2m2wJRVHxS/sz/N1+2CZOdizDemP/eBXRgCo7wIKcTvzSUnlmGMoSgt/tChX8EEOBlNvCLsQdpgv8HuNG8wuia9YA1Tfni5TZR1QthTxh8ZM2VCAHtiBtzfWtz1RtObA8IXowr5rzRK4/sRYpfjm1FBA9nrPl/qNAJRZLKJNsUumMKdb3dkIlkqjEtt8VrbNjZgnB48fG1XqNHax98/uI4xs768DFXVceFql2do6594N/t9vl/tw+ZlhKP6ngFjorHQq/AOmpcAlI98L7Pz/KG7P0OqU7+SuqQ7d8OXhYRvZsnLHcTCD4zwpgXfZVyJGzq6byIJiNgyZUaNOGv5ujz885jIPgWkIxOCLYYiRDUkyTmdNErd0CGopltJm1vb5dv3tJ5DDjpYTQ4wMqXT4h6fGZzJwfqA2R/SGlDxGUnsO0o4onyuKUUDLWoDbodPCGuFjE1U9sJispr4r4X6Sxi0IRiZWzD/RIc8wZ56ZkNmAoOLhL56G1ASKFHjWnLXOssmix6UWpDm4nnCJIYqgGlA3oaIFneHMmKp9/Qo2JJVEHqyf9hcio6x0UUjmAfOg9iHUvl4xmjRJjBjBI4IC7NAxZVgBi87Ae0liqHZGIKhluZKD6dH2j+8Jd0AY9MUcVKXLU5I9a6XU7FUcUppMkCss5MAeXmM7a3Q4A')
+      format('woff');
 }
 
 .iconfont {
-  font-family: "iconfont" !important;
+  font-family: 'iconfont' !important;
   font-size: 18.05upx;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
@@ -1050,14 +907,14 @@ function stepRunFunc(callback, thisObj = null) {
 }
 
 .iconshanchu1:before {
-  content: "\e68c";
+  content: '\e68c';
 }
 
 .icongou:before {
-  content: "\e786";
+  content: '\e786';
 }
 
 .iconarrowBottom-fill:before {
-  content: "\e60e";
+  content: '\e60e';
 }
 </style>

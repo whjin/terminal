@@ -1,6 +1,8 @@
 export default {
   // 主页
   index: {
+    // 获取APP配置菜单
+    getAppModuleConf: "terminal/terAppModuleConf/getAppModuleConf",
     // 获取缓存信息
     getAllSetting: "terminal/terSetting/all",
     // 获取分机信息
@@ -33,10 +35,6 @@ export default {
     saveFingerState: "terminal/terLog/saveLog",
     // 获取在线点名人员信息
     getRollCallRyList: "terminal/pacRollCall/getRollCallRyList",
-    // 获取临时点名人员信息
-    getTempRollCallRyList: "terminal/pacRollCall/getTempRollCallRyList",
-    // 保存已签到人员信息
-    saveRollCallDetail: "terminal/pacRollCall/saveRollCallDetail",
     // 获取一周菜谱信息
     getWeekMenuInfo: "terminal/pacKitchenWeekMenu/getWeekMenuList",
     // 获取伙食供应标准信息
@@ -73,15 +71,11 @@ export default {
     // 在线购物结算
     saveCartOrderInfo: "terminal/financeShop/order",
     // 获取在线购物消费记录
-    getOrderHistoryInfo_old: "terminal/financeShop/listOrderHistory",
-    // 获取在线购物消费记录
     getOrderHistoryInfo: "terminal/financeShop/getConsumptionRecord",
     // 获取在线购物消费记录详情
     getOrderDetail: "terminal/odsFinanceOrderDetail/getOrderDetail",
     // 确认收货
     confirmGoods: "terminal/odsFinanceOrderDetail/confirmGoods",
-    // 一键确认收货
-    shortcutConfirm: "terminal/financeShop/updateOrderConfirmStatus",
     // 获取备注类型列表
     getConfirmTypeList: "terminal/common/getDictionaryType/CONFIR_RECEPTE_TYPE",
     // 获取应急报警信息
@@ -92,16 +86,22 @@ export default {
     updateTerminal: "terminal/common/updateAppVersion",
     // 获取监室消息通知
     getNotificationInfo: "terminal/terNotification/getNotificationInfo",
-    // 发起监室消息通知
-    saveNotification: "terminal/terNotification/saveNotification",
     // 获取视频信息
     getVideoList: "terminal/pacVideo/getLevelRoomVideoList",
     // 获取视频点播信息
     getByVideoPlayTime: "terminal/pacVideo/getByVideoPlayTime",
     // 新增视频点播动态信息
     setDynamicInfo: "terminal/terOperationInfo/save",
+    // 向终端推送消息
+    sendMsgToControl: "websocket/msgFilterSend",
     // 回传监听电教状态
     updateEduTaskStatus: "external/external/updateEduTaskStatus?devNo=",
+    // 获取智能谈话信息
+    getTalkInfo: "terminal/odsTalkQuestionnaire/getTalkInfo",
+    // 获取智能谈话题目
+    getAnswerDetails: "terminal/odsAnswerQuestion/getAnswerDetails?type=0&id=",
+    // 保存谈话答题信息
+    saveAnswerInfo: "terminal/odsAnswerQuestion/saveAnswerInfo",
     // 上传图片
     upload: "terminal/check/api/upload",
     // 保存按键报警拍照信息
@@ -114,7 +114,7 @@ export default {
     // 1:1人脸比对，用于点名
     faceRecognition11: "terminal/faceRecognition/prisonerImageOneToOne",
     // 物品报修
-    repairClaim: {
+    repair: {
       // 获取物品列表
       getList: "terminal/terRoomInfoManage/list",
       // 申领/报修
@@ -135,6 +135,8 @@ export default {
     call: {
       // 记录异常温度
       saveWarningTemperature: "terminal/pacRollCall/saveTemperature",
+      // 保存点名详情
+      updateRollCallRes: "terminal/pacRollCall/updateRollCallRes",
     },
     // 床位安排
     bed: {
@@ -147,35 +149,44 @@ export default {
       saveRollCall: "terminal/terTemperatureRecords/saveRollCall",
     },
     // 服药管理
-    medicationTips: {
+    medication: {
       // 服药计划列表
-      medicationPlanList: "terminal/terMedicineRecords/getMedicationPlan",
-      // 服药记录列表
-      medicationRecordList: "terminal/terMedicineRecords/getMedicineRecords",
-      // 开始录像
-      startRecord: "terminal/terMedicineRecords/startRecord",
-      // 结束录像
-      endRecord: "terminal/terMedicineRecords/endRecord",
+      getMedicationPlan: "terminal/terMedicineRecords/getMedicationPlan",
       // 保存服药记录
       saveMedicineRecord: "terminal/terMedicineRecords/saveMedicineRecord",
-      // 查询服药签名状态
-      findMedicineFinish: "terminal/terMedicineRecords/findMedicineFinish",
+      // 服药记录列表
+      getMedicineRecords: "terminal/terMedicineRecords/getMedicineRecords",
     },
     // 值班签到
-    dutyCall: {
-      // 保存签到记录
-      saveSignRecord: "terminal/pacDOndutyLayout/saveSignRecord",
+    rotation: {
+      // 获取值班信息
+      checkDutyPermissions: "terminal/pacRoomDutyData/checkDutyPermissions",
       // 获取值班计划详情
-      getDutyWeekPlan: "terminal/pacDOndutyLayout/getDutyWeekPlan",
+      getDutyWeekPlan: "terminal/pacRoomDutyData/getDutyWeekPlan",
+      // 保存签到记录
+      saveSignRecord: "terminal/pacRoomDutyData/saveSignRecord",
       // 提交值班登记
-      updateSituation: "terminal/pacDOndutyLayout/updateSituation",
+      updateSituation: "terminal/pacRoomDutyData/updateSituation",
       // 查询值班记录
-      findSignRecord: "terminal/pacDOndutyLayout/findSignRecord",
+      findSignRecord: "terminal/pacRoomDutyData/findSignRecord",
     },
+    // 保存投诉建议
+    saveSuggestion: "terminal/terComplain/save",
+    // 获取家属通信列表
+    getCommunication:
+      "terminal/pacFamilyCommunication/selectFamilyCommunication",
   },
   police: {
-    // 刷卡（卡号）获取民警信息
-    getUserByCardNum: "terminal/sysUser/getUserByCardNum?cardNum=",
+    // 获取民警指纹录入信息
+    getPoliceFingerInfo: "terminal/odsFinger/getPoliceFingerInfo",
+    // 获取民警可用指纹mKey
+    getPoliceFingerKey: "terminal/odsFinger/getPoliceFingerKey",
+    // 保存民警录入指纹信息
+    savePoliceFingerInfo: "terminal/odsFinger/savePolice",
+    // 人脸识别民警登录
+    policeFaceOneToMany: "terminal/faceRecognition/policeFaceOneToMany",
+    // 人脸识别指纹管理登录
+    policeFaceOneToManyForSupervisor: "terminal/faceRecognition/policeFaceOneToManyForSupervisor",
     // 获取面对面民警
     getRoomPoliceInfo: "terminal/pacRoomInfo/getRoomPoliceInfo/",
     // 获取面对面类型
@@ -184,6 +195,26 @@ export default {
     saveFaceRegister: "terminal/face/api/saveFaceRecord",
     // 查询面对面记录
     getFaceRecord: "terminal/face/api/getFaceRecord",
+    // 管教人员
+    getRoomPolices: "terminal/manager/getRoomPolices/",
+    // 获取人员列表
+    getPrisonerList: "terminal/pacPersonnelAccessRoom/getAccessPrisoner",
+    // 带出监室
+    takeOut: "terminal/pacPersonnelAccessRoom/takeOut",
+    // 带回监室
+    takeBack: "terminal/pacPersonnelAccessRoom/takeBack",
+    // 获取外出类型
+    getOutTypeList: "terminal/common/getDictionaryType/SYS_OUT_TYPE",
+    // 查询记录
+    searchRecord: "terminal/pacPersonnelAccessRoom/findPageByParams",
+    // 保存登记
+    saveCheck: "terminal/check/api/saveCheck",
+    // 获取检查记录
+    getCheckRecord: "terminal/check/api/getCheckRecord",
+    // 获取检查类型、内容
+    getCheckTypeAndContent: "terminal/check/api/getCheckTypeAndContent",
+    // 刷卡（卡号）获取民警信息
+    getUserByCardNum: "terminal/sysUser/getUserByCardNum?cardNum=",
   },
 
   /**
@@ -208,8 +239,8 @@ export default {
       if (endpoint == "permission/terminalCertification") {
         let [error, res] = await uni.request({
           url: fullUrl,
-          data: data,
-          method: method,
+          data,
+          method,
           dataType: "json",
           header: {
             client_id: "app",
@@ -225,8 +256,8 @@ export default {
       } else {
         let [error, res] = await uni.request({
           url: fullUrl,
-          data: data,
-          method: method,
+          data,
+          method,
           dataType: "json",
           header: {
             client_id: "app",

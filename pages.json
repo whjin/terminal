@@ -16,22 +16,15 @@
 							}
 						},
 						{
-							"id": "nodePlayer",
-							"path": "pages/home/index/subnvue/nodePlayer",
-							"style": {
-								"background": "transparent"
-							}
-						},
-						{
-							"id": "nodeMediaPlayer",
-							"path": "pages/home/index/subnvue/nodeMediaPlayer",
-							"style": {
-								"background": "transparent"
-							}
-						},
-						{
 							"id": "coverImage",
 							"path": "pages/home/index/subnvue/coverImage",
+							"style": {
+								"background": "transparent"
+							}
+						},
+						{
+							"id": "videoPlayer",
+							"path": "pages/home/index/subnvue/videoPlayer",
 							"style": {
 								"background": "transparent"
 							}
@@ -39,147 +32,12 @@
 					]
 				}
 			}
-		},
-		{
-			"path": "pages/home/life/life",
-			"style": {
-				"navigationBarTitleText": "一日生活",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/home/kitchen/kitchen",
-			"style": {
-				"navigationBarTitleText": "一周菜谱",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/home/notice/notice",
-			"style": {
-				"navigationBarTitleText": "监室公告",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/home/bed/bed",
-			"style": {
-				"navigationBarTitleText": "床位安排",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/home/message/message",
-			"style": {
-				"navigationBarTitleText": "消息通知",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/temperatureMonitor/temperatureMonitor",
-			"style": {
-				"navigationBarTitleText": "体温监测",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/call/call",
-			"style": {
-				"navigationBarTitleText": "在线点名",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/shopping/shopping",
-			"style": {
-				"navigationBarTitleText": "在线购物",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/illness/illness",
-			"style": {
-				"navigationBarTitleText": "预约就医",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/medicationTips/medicationTips",
-			"style": {
-				"navigationBarTitleText": "服药提醒",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/talk/talk",
-			"style": {
-				"navigationBarTitleText": "预约谈话",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/mood/mood",
-			"style": {
-				"navigationBarTitleText": "每日心情",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/repairClaim/repairClaim",
-			"style": {
-				"navigationBarTitleText": "物品报修",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/dutyCall/dutyCall",
-			"style": {
-				"navigationBarTitleText": "轮值签到",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
-		},
-		{
-			"path": "pages/prisoner/fingerprint/fingerprint",
-			"style": {
-				"navigationBarTitleText": "在押人员指纹录入",
-				"app-plus": {
-					"bounce": "none"
-				}
-			}
 		}
 	],
 	"globalStyle": {
 		"navigationStyle": "custom",
 		"pageOrientation": "landscape",
-		"rpxCalcBaseDeviceWidth": 1040
+		"rpxCalcBaseDeviceWidth": 980
 	},
 	"condition": {
 		"current": 0,

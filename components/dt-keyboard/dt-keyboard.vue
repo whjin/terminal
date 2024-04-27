@@ -70,15 +70,15 @@ export default {
     handleKey (e) {
       if (Number(e) >= 0 && this.password.length <= 6) {
         this.password += e.toString();
-        if (this.password.length === 6) {
+        if (this.password.length == 6) {
           this.$emit('getPassword', this.password);
         }
       }
-      if (e === 'clear') {
+      if (e == 'clear') {
         this.clear();
       }
-      if (e === 'backspace') {
-        if (this.password === '') return;
+      if (e == 'backspace') {
+        if (this.password == '') return;
         let arr = this.password.split('');
         arr.pop();
         this.password = arr.join('');
