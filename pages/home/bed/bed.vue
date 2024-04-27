@@ -1,5 +1,5 @@
 <template>
-	<view class="bed-container">
+	<view>
 		<view class="main-area">
 			<view class="uni-flex page-title">
 				<text>床位安排表</text>
@@ -39,7 +39,7 @@
 <script>
 import Api from '@/common/api.js';
 export default {
-	data () {
+	data() {
 		return {
 			gradientsStyle: {
 				'background-image': 'linear-gradient(0deg, #77FFFF, #007AFF)',
@@ -50,15 +50,15 @@ export default {
 			floorBedsList: [],
 		};
 	},
-	created () {
+	created() {
 		// 获取床位安排列表
 		this.getBedsList();
 		// 开启倒计时
 		this.$parent.countTimer();
 	},
 	methods: {
-		async getBedsList () {
-			let roomId = uni.getStorageSync("terminalInfo").roomId;
+		async getBedsList() {
+			let roomId = uni.getStorageSync('terminalInfo').roomId;
 			let params = {
 				roomId
 			};
@@ -88,11 +88,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.bed-container {
-	width: 100%;
-	height: 100%;
-	box-sizing: border-box;
-}
 .inner-glow-box {
 	background: rgba(42, 66, 115, 0.51);
 	box-sizing: border-box;
@@ -104,7 +99,8 @@ export default {
 	position: relative;
 	margin: 0 69.44upx;
 	padding: 13.89upx 13.89upx 13.89upx 0;
-	height: 500upx;
+	width: 1212.5upx;
+	height: 434upx;
 	display: flex;
 	border: 2px dashed #35fffa;
 	box-sizing: border-box;
@@ -165,6 +161,7 @@ export default {
 			display: flex;
 			justify-content: flex-start;
 			align-items: flex-start;
+
 			.bed-item {
 				height: 194.45upx;
 				display: flex;
@@ -174,15 +171,17 @@ export default {
 				box-sizing: border-box;
 				border: 1px solid #2491ff;
 				border-left: none;
+
 				.name {
 					writing-mode: vertical-lr;
-					font-size: 13.89upx;
+					font-size: 18.05upx;
 				}
 			}
 		}
 
 		.board-beds-list {
 			width: 100%;
+
 			.bed-item {
 				flex: 1;
 			}
@@ -190,8 +189,10 @@ export default {
 
 		.floor-beds-list {
 			margin-bottom: 0;
+
 			.bed-item {
 				width: 56.95upx;
+
 				&:first-child {
 					border-left: 1px solid #2491ff;
 				}

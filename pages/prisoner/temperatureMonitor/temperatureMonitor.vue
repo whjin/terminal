@@ -1,5 +1,5 @@
 <template>
-  <view class="temperature-monitor">
+  <view class="temperature-monitor" @touchstart.stop="initCountTimer">
     <view class="main-area">
       <view class="uni-flex page-title">
         <text>体温监测</text>
@@ -7,7 +7,11 @@
       <view class="content">
         <view class="left-box inner-glow-box">
           <view class="title">体温监测实时视频</view>
-          <view class="video-box"></view>
+          <view class="video-box">
+            <!-- <video :src="videoUrl" codec="software" autoplay muted :controls="false" style="width:100%; height:100%;" object-fit="fill">
+              <cover-image class="recognition-tips" :src="`${baseUrl}terminal/static/png/recognition-tips.png`"></cover-image>
+            </video> -->
+          </view>
         </view>
         <view class="right-box">
           <view class="temperature-tips inner-glow-box">
@@ -15,8 +19,12 @@
             <view class="measur-steps">
               <view class="title">测温步骤</view>
               <view class="details">
-                <view v-for="item in stepsDetails" :key="item.className" class="details-item"
-                  :class="{ 'next-steps': item.hasNextSteps }">
+                <view
+                  v-for="item in stepsDetails"
+                  :key="item.className"
+                  class="details-item"
+                  :class="{ 'next-steps': item.hasNextSteps }"
+                >
                   <view class="img sprite-sheet" :class="item.className"></view>
                   <view class="tips">{{ item.tips }}</view>
                 </view>
@@ -26,11 +34,16 @@
             <view class="parting-line"></view>
             <!-- 温度读取 -->
             <view class="cur-temperature">
-              <view class="title cur-title">温度读取</view>
+              <view class="title">温度读取</view>
               <view class="details">
-                <view class="details-item sprite-sheet">
+                <view class="details-item sprite-sheet inner-glow-box">
                   实时额头温度<text class="temperature-text">{{
                     foreheadTemperature + "℃"
+                  }}</text>
+                </view>
+                <view class="details-item sprite-sheet inner-glow-box">
+                  实时环境温度<text class="temperature-text">{{
+                    environmentTemperature + "℃"
                   }}</text>
                 </view>
               </view>
@@ -38,9 +51,19 @@
           </view>
           <!-- 功能按钮 -->
           <view class="btn-box">
-            <view v-if="debounceMeasure" class="btn measure-btn" @click="debounceMeasure">测温</view>
-            <view v-if="debounceApply" class="btn apply-btn" :class="{ disabled: !haveAFever }" @click="debounceApply">
-              报病申请</view>
+            <view
+              v-if="debounceMeasure"
+              class="btn measure-btn"
+              @click="debounceMeasure"
+              >测温</view
+            >
+            <view
+              v-if="debounceApply"
+              class="btn apply-btn"
+              :class="{ disabled: !haveAFever }"
+              @click="debounceApply"
+              >报病申请</view
+            >
           </view>
         </view>
       </view>
@@ -74,8 +97,9 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 import Api from "@/common/api.js";
+import Log from "@/common/utils/log.js";
 import { debounce } from "@/common/utils/util.js";
 export default {
   components: {},
@@ -103,23 +127,27 @@ export default {
       debounceApply: null, // 报病申请
       haveAFever: false, // 是否发烧
       savedTemperature: false, // 是否已经测温
-      foreheadTemperature: 0, // 实时额头温度
+      foreheadTemperature: 36.3, // 实时额头温度
       foreheadTemperatureList: [],
       environmentTemperature: 0, // 实时环境温度
       normalTemperature: uni.getStorageSync("normalTemperature"), // 发烧体温
       lowTemperature: uni.getStorageSync("lowTemperature"), // 最低温度
+      thermometryTimer: null, // 测温定时器
       showIllnessInit: false, // 报病结果弹框
       showSuccess: true, // 报病成功
       failInfo: "", // 报病错误信息
+      videoUrl: "", // 实时视频
     };
   },
   computed: {
     ...mapState({
       // 登录人员信息
       personInfo: (state) => state.app.personInfo,
+      // 播放组件显隐
+      showPlayer: (state) => state.app.showPlayer,
     }),
   },
-  mounted() {
+  created() {
     // 开启倒计时
     this.$parent.countTimer();
     if (!this.debounceMeasure) {
@@ -129,31 +157,58 @@ export default {
       this.debounceApply = debounce(this.handleApply);
     }
     this.showNodePlayer();
-    this.$parent.openThermometryModule();
+    let _this = this;
+    // #ifdef APP-PLUS
+    plus.globalEvent.removeEventListener("人体温度");
+    plus.globalEvent.addEventListener("人体温度", function (e) {
+      let temperature = e.人体温度.toFixed(1);
+      _this.foreheadTemperature = temperature < 36.0 ? 36.3 : temperature;
+      if (temperature > _this.lowTemperature) {
+        _this.foreheadTemperatureList.push(temperature);
+      }
+    });
+    plus.globalEvent.removeEventListener("环境温度");
+    plus.globalEvent.addEventListener("环境温度", function (e) {
+      _this.environmentTemperature = e.环境温度.toFixed(1);
+    });
+    // #endif
+    this.initTemperature();
   },
-  beforeDestroy() {
-    getApp().globalData.FloatUniModule.hideLocalPreView(true);
+  destroyed() {
     this.hideNodePlayer();
-    // 停止测温
-    this.$parent.closeThermometryModule();
+    // 清空体温定时器
+    this.clearThermometryTimer();
+    getApp().globalData.Temperature.stop();
   },
   methods: {
+    ...mapMutations({
+      // 设置监视监听显隐
+      setShowPlayer: "app/SET_SHOWPLAYER",
+      // 设置视频流地址
+      setPlayerUrl: "app/SET_PLAYERURL",
+    }),
+    // 重置倒计时
+    initCountTimer() {
+      // this.$parent.initCountTimeout();
+    },
     // 测温控件初始化
-    setTemperature(tem) {
-      this.foreheadTemperature = tem;
-      if (tem > this.lowTemperature) {
-        this.foreheadTemperatureList.push(tem);
+    initTemperature() {
+      let res = getApp().globalData.Temperature.init();
+      if (res == 0) {
+        this.setThermometryTimer();
+      } else {
+        Log.writeLog(`测量体温初始化失败，code：${res}`, false);
       }
     },
     // 点击测温
     handleMeasure() {
-      this.$parent.closeThermometryModule();
+      this.clearThermometryTimer();
       // 显示最后一次有效值
       let len = this.foreheadTemperatureList.length;
       if (len) {
         this.foreheadTemperature = this.foreheadTemperatureList[len - 1];
       } else {
-        this.foreheadTemperature = 0;
+        this.foreheadTemperature = 36.3;
       }
       // 发烧
       if (this.foreheadTemperature > this.normalTemperature) {
@@ -181,12 +236,13 @@ export default {
         params,
         true
       );
-      if (res.state.code == 200) {
+      if (res.state.code == "200") {
         this.savedTemperature = true;
-        this.$parent.handleShowToast("体温提交成功");
+        uni.showToast({
+          title: "体温提交成功",
+        });
       } else {
-        this.$parent.handleShowToast("体温提交失败");
-        this.$parent.openThermometryModule();
+        this.initTemperature();
       }
     },
     // 保存体温超出预警值的人员
@@ -209,7 +265,7 @@ export default {
         selfCondition: "体温：" + this.foreheadTemperature + "℃",
       };
       let res = await Api.apiCall("post", Api.index.saveIllnessInfo, params);
-      if (res.state.code == 200) {
+      if (res.state.code == "200") {
         this.foreheadTemperatureList = [];
       } else {
         this.failInfo = res.state.msg;
@@ -231,31 +287,48 @@ export default {
     },
     // 设置测温定时器
     setThermometryTimer() {
-      temperature.start(1);
+      getApp().globalData.Temperature.start(1);
       this.thermometryTimer = setInterval(() => {
-        temperature.start(1);
+        getApp().globalData.Temperature.start(1);
       }, 2000);
+    },
+    // 清除测温定时器
+    clearThermometryTimer() {
+      this.thermometryTimer && clearInterval(this.thermometryTimer);
+      this.thermometryTimer = null;
     },
     // 显示视频流预览
     showNodePlayer() {
-      getApp().globalData.FloatUniModule.initFrame();
-      getApp().globalData.FloatUniModule.setLocalVideoViewPosition(
-        68,
-        230,
-        572,
-        382
-      );
-      getApp().globalData.FloatUniModule.hideLocalPreView(false);
+      this.setShowPlayer(true);
+      uni.getSubNVueById("nodePlayer").show();
       uni.getSubNVueById("coverImage").show();
-      uni.getSubNVueById("coverImage").setStyle({
-        top: "342px",
-        left: "280px",
+      uni.getSubNVueById("nodePlayer").setStyle({
+        top: "400px",
+        left: "95px",
+        width: "810px",
+        height: "545px",
       });
+      uni.getSubNVueById("coverImage").setStyle({
+        top: "400px",
+        left: "95px",
+      });
+      this.videoUrl = `${uni.getStorageSync("rtspUrl")}@${
+        uni.getStorageSync("terminalInfo").embeddedIp
+      }/stream0`;
+      this.setPlayerUrl(this.videoUrl);
+      // 视频镜像
+      setTimeout(() => {
+        uni.$emit("node-player", "mirror");
+      }, 1000);
     },
     // 关闭视频流预览
     hideNodePlayer() {
-      getApp().globalData.FloatUniModule.hideLocalPreView(true);
-      uni.getSubNVueById("coverImage").hide();
+      if (this.showPlayer) {
+        this.setPlayerUrl("");
+        uni.$emit("node-player", "stop");
+        this.setShowPlayer(false);
+        uni.getSubNVueById("coverImage").hide();
+      }
     },
   },
 };
@@ -263,30 +336,25 @@ export default {
 
 <style lang="less" scoped>
 @import "../../../common/less/index.less";
-
 .temperature-monitor /deep/ .neil-modal__container {
   transform: translate(9%, -50%) !important;
 }
-
 .inner-glow-box {
   box-sizing: border-box;
   border: 1px solid #00c6ff;
   border-radius: 4px;
   box-shadow: inset 0upx 0upx 5upx 5upx rgba(25, 106, 190, 0.5);
 }
-
 .temperature-monitor {
   .sprite-sheet {
-    background-image: url("/static/images/temperatureMonitor/temperature_monitor.png");
+    background-image: url("../../../static/images/temperatureMonitor/temperature_monitor.png");
     background-repeat: no-repeat;
   }
-
   .content {
     margin: 0 48.61upx;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-
     .title {
       margin-bottom: 20.83upx;
       width: 100%;
@@ -294,18 +362,15 @@ export default {
       text-align: center;
       color: #35fffa;
     }
-
     .left-box {
       padding: 20.83upx;
       width: 625upx;
       box-sizing: border-box;
-
       .video-box {
         position: relative;
         width: 583.33upx;
         height: 388.89upx;
         background-color: #000;
-
         .recognition-tips {
           position: absolute;
           bottom: 0;
@@ -315,124 +380,104 @@ export default {
         }
       }
     }
-
     .right-box {
-      width: 568upx;
-
+      width: 583.33upx;
       .temperature-tips {
         margin-bottom: 15.83upx;
-        padding: 15.83upx 0;
+        padding: 15.83upx;
         box-sizing: border-box;
-
         .measur-steps {
           .details {
-            padding: 0 13.88upx 6.88upx;
+            padding: 0 20.83upx 10.83upx;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-
             .details-item {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              text-align: center;
-
               .img {
-                width: 136upx;
-                height: 158upx;
+                margin-bottom: 13.89upx;
+                width: 111.22upx;
+                height: 125upx;
+                border: 2px dashed #91b7f2;
               }
-
               .steps-one {
-                background-position: 0 -4upx;
+                background-position: -8.95upx -8.95upx;
               }
-
               .steps-two {
-                background-position: -199upx -4upx;
+                background-position: -195.5upx -8.95upx;
               }
-
               .steps-three {
-                background-position: -398upx -4upx;
+                background-position: -380.06upx -8.95upx;
               }
-
               .tips {
-                width: 106upx;
-                font-size: 16upx;
-                line-height: 24upx;
+                width: 111.11upx;
+                font-size: 16.67upx;
+                line-height: 25upx;
+                text-align: center;
               }
             }
-
             .next-steps {
               position: relative;
-
               &::after {
+                position: absolute;
+                bottom: 11.806upx;
+                right: -62.5upx;
                 content: " ";
                 display: inline-block;
-                width: 42upx;
+                width: 36.806upx;
                 height: 25upx;
-                background-image: url("/static/images/temperatureMonitor/temperature_monitor.png");
+                background-image: url("../../../static/images/temperatureMonitor/temperature_monitor.png");
                 background-repeat: no-repeat;
-                background-position: -8upx -172upx;
-                position: absolute;
-                bottom: 12upx;
-                left: 152upx;
+                background-position: -6.95upx -158.78upx;
               }
             }
           }
         }
-
         .parting-line {
-          margin: 6.88upx 0;
+          margin-bottom: 10.83upx;
           width: 100%;
-          height: 1upx;
-          background: linear-gradient(90deg,
-              rgba(0, 198, 255, 0),
-              #00c6ff,
-              rgba(0, 198, 255, 0));
+          height: 2px;
+          background: linear-gradient(
+            90deg,
+            rgba(0, 198, 255, 0),
+            #00c6ff,
+            rgba(0, 198, 255, 0)
+          );
         }
-
         .cur-temperature {
-          .cur-title {
-            margin: 13.88upx 0;
-          }
-
           .details {
             display: flex;
-            justify-content: center;
-
+            justify-content: space-between;
+            align-items: flex-start;
             .details-item {
               display: flex;
               justify-content: center;
               align-items: center;
-              width: 288upx;
-              height: 84upx;
-              font-size: 18upx;
-              background-position: -8upx -230upx;
-
+              width: 259.73upx;
+              height: 76.39upx;
+              background-position: -10.95upx -215.25upx;
+              font-size: 16.67upx;
               .temperature-text {
-                font-size: 32upx;
+                margin-left: 13.89upx;
+                font-size: 33.33upx;
                 font-weight: 400;
                 color: #35fffa;
-                padding-left: 10.88upx;
               }
             }
           }
         }
       }
-
       .btn-box {
         display: flex;
         justify-content: flex-end;
         align-items: flex-start;
-
         .btn {
-          margin-left: 14upx;
+          margin-left: 13.89upx;
           padding: 10upx 0;
-          width: 108upx;
+          width: 108.12upx;
           text-align: center;
-          font-size: 18upx;
+          font-size: 18.06upx;
           background: #007aff;
           border-radius: 4px;
-
           &.disabled {
             opacity: 0.5;
             pointer-events: none;

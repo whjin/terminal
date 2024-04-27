@@ -28,14 +28,6 @@
           @tap.stop=""
           :style="{ backgroundColor: bgColor }"
         >
-          <!-- <view class="select-bar bg-white">
-            <view class="action text-blue" @tap="cancelClick">{{
-              cancelText
-            }}</view>
-            <view class="action text-green" @tap="confirmClick">{{
-              confirmText
-            }}</view>
-          </view> -->
           <view class="select-content">
             <view
               class="select-item"
@@ -318,14 +310,14 @@ export default {
   left: 0;
   display: none;
   width: 100%;
-  z-index: 7;
+  z-index: 9999;
   outline: 0;
   text-align: left;
   transition: all 0.3s ease-in-out 0s;
 
   &::after {
     content: " ";
-    z-index: 7;
+    z-index: 9999;
     position: absolute;
     display: block;
     width: 0;
